@@ -2,4 +2,6 @@
 **/dist
 **/.angular
 **/data
+**/.env
+backend/src/generated
 .git

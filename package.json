@@ -1,0 +1,20 @@
+{
+  "name": "gestion-hogar",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Aplicación para gestionar el hogar (Angular + NestJS + Prisma)",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
+    "dev:api": "npm run build -w shared && npm run dev -w backend",
+    "dev:web": "npm start -w frontend",
+    "db:migrate": "npm run db:migrate -w backend --"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

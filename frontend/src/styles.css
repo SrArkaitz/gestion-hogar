@@ -1,4 +1,4 @@
-/* Tablero: cabecera compacta y 4 columnas que pasan a 2 y luego a 1 en móvil */
+/* Estructura: navegación lateral en escritorio y barra inferior en móvil; tablero de 3 columnas que pasa a 1 */
 :root {
   --bg: #eef0ec; --surface: #f8f9f6; --card: #ffffff; --fg: #1d2420; --muted: #5f6a63; --line: #d6dbd4;
   --accent: #2f6b5a; --accent-fg: #ffffff;
@@ -20,14 +20,39 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body {
-  background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45;
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+
+.shell { min-height: 100dvh; }
+.page {
+  width: 100%; max-width: 1200px; margin: 0 auto; min-width: 0;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(40px + env(safe-area-inset-bottom, 0px));
+  padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(88px + env(safe-area-inset-bottom, 0px));
 }
 
-.wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.nav { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line);
+  padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+.nav .brand { display: none; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-around; gap: 4px; }
+.nav li { flex: 1; }
+/* Cada página del router usa .view en su elemento raíz */
+.view { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.nav li a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 12px; }
+.nav li a.active { color: var(--accent); font-weight: 700; }
+.nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (min-width: 900px) {
+  .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); }
+  .nav { position: sticky; top: 0; height: 100dvh; border-top: 0; border-right: 1px solid var(--line); padding: 20px 12px; }
+  .nav .brand { display: block; font-family: var(--f-display); font-weight: 700; font-size: 22px; color: var(--fg); text-decoration: none; padding: 0 10px 18px; }
+  .nav ul { flex-direction: column; justify-content: flex-start; }
+  .nav li { flex: none; }
+  .nav li a { flex-direction: row; gap: 10px; padding: 9px 10px; font-size: 15px; }
+  .nav li a:hover { background: var(--bg); color: var(--fg); }
+  .nav li a.active { background: var(--bg); }
+  .page { padding-block: 28px 40px; }
+}
 header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
 h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(26px, 4vw, 36px); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
 .sub { color: var(--muted); margin: 2px 0 0; }
@@ -46,9 +71,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .status { font-size: 13px; color: var(--muted); min-height: 1.2em; }
 .status.err { color: var(--alta); }
 
-.board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
-@media (max-width: 980px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .board { grid-template-columns: minmax(0, 1fr); } }
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+@media (max-width: 720px) { .board { grid-template-columns: minmax(0, 1fr); } }
+.seg { align-self: flex-start; flex-wrap: wrap; }
 
 .col { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 140px; min-width: 0; }
 .col.cdk-drop-list-receiving, .col.cdk-drop-list-dragging { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }

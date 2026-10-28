@@ -1,0 +1,14 @@
+{
+  "name": "@hogar/shared",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Tipos y constantes comunes al frontend y al backend",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}

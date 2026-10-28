@@ -1,81 +1,19 @@
-<div class="wrap">
-  <header class="top">
-    <div>
-      <h1>Gestión del Hogar</h1>
-      <p class="sub">Tareas de casa, pendientes e ideas, ordenadas por prioridad.</p>
-    </div>
-    <div class="tools">
-      <div class="seg" role="group" aria-label="Filtrar por prioridad">
-        @for (f of filters; track f.id) {
-          <button type="button" [attr.aria-pressed]="filter() === f.id" (click)="filter.set(f.id)">{{ f.label }}</button>
-        }
-      </div>
-      <button type="button" class="btn" (click)="openNew('hacer')">Nueva tarjeta</button>
-    </div>
-  </header>
+<div class="shell">
+  <nav class="nav" aria-label="Módulos">
+    <a class="brand" routerLink="/">Hogar</a>
+    <ul>
+      @for (item of nav; track item.path) {
+        <li>
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon" /></svg>
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
 
-  <div class="status" [class.err]="!!store.error()">
-    @if (store.error()) {
-      {{ store.error() }}
-    } @else if (store.loading()) {
-      Cargando tablero…
-    }
-  </div>
-
-  <main class="board" cdkDropListGroup>
-    @for (col of columns; track col.id) {
-      <section class="col"
-               cdkDropList
-               [cdkDropListData]="col.id"
-               [cdkDropListSortingDisabled]="true"
-               (cdkDropListDropped)="onDrop($event)">
-        <div class="col-h">
-          <h2>{{ col.name }}</h2>
-          <span class="count">{{ byColumn()[col.id].length }}</span>
-        </div>
-        <p class="col-desc">{{ col.desc }}</p>
-
-        <div class="list">
-          @for (card of visible(col.id); track card.id) {
-            <article class="card"
-                     cdkDrag
-                     [cdkDragData]="card.id"
-                     [cdkDragStartDelay]="{ touch: 250, mouse: 0 }"
-                     [class.done]="col.id === 'hecho'"
-                     [attr.data-p]="card.priority"
-                     tabindex="0"
-                     [attr.aria-label]="card.title + ', prioridad ' + card.priority"
-                     (click)="openCard(card)"
-                     (keydown.enter)="openCard(card)">
-              <div class="t">{{ card.title }}</div>
-              @if (card.note) {
-                <div class="n">{{ card.note }}</div>
-              }
-              <div class="meta">
-                <span class="pill">{{ card.priority }}</span>
-                @if (dueInfo(card); as d) {
-                  <span class="due" [class.late]="d.late">{{ d.late ? 'Vencida · ' : '' }}{{ d.text }}</span>
-                }
-              </div>
-            </article>
-          } @empty {
-            <div class="empty">
-              {{ byColumn()[col.id].length ? 'Nada con esta prioridad.' : 'Arrastra aquí o añade una tarjeta.' }}
-            </div>
-          }
-        </div>
-
-        <button type="button" class="add" (click)="openNew(col.id)">+ Añadir tarjeta</button>
-      </section>
-    }
+  <main class="page">
+    <router-outlet />
   </main>
 </div>
-
-@if (editing() !== undefined) {
-  <app-card-dialog
-    [card]="editing() ?? null"
-    [defaultColumn]="newColumn()"
-    (save)="onSave($event)"
-    (delete)="onDelete()"
-    (cancel)="close()" />
-}

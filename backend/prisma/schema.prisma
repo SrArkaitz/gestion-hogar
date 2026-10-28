@@ -1,0 +1,114 @@
+// Esquema de la base de datos. Cada cambio se aplica con una migración:
+//   npm run db:migrate -- --name <descripcion>
+// Los valores fijos (estados, prioridades) se guardan como texto y se validan
+// con las constantes de @hogar/shared.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------- Usuarios y hogar ----------
+
+model Household {
+  id          String       @id @default(uuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  members     User[]
+  invitations Invitation[]
+  tasks       Task[]
+  ideas       Idea[]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  householdId  String
+  household    Household @relation(fields: [householdId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  sessions      Session[]
+  invitations   Invitation[] @relation("InvitationCreatedBy")
+  tasksCreated  Task[]       @relation("TaskCreatedBy")
+  tasksAssigned Task[]       @relation("TaskAssignee")
+  ideas         Idea[]
+}
+
+/// Sesión iniciada. La cookie lleva un token aleatorio; aquí se guarda su hash.
+model Session {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Invitación de un solo uso para unirse a un hogar.
+model Invitation {
+  id          String    @id @default(uuid())
+  tokenHash   String    @unique
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User      @relation("InvitationCreatedBy", fields: [createdById], references: [id])
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// ---------- Tareas ----------
+
+model Task {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  title       String
+  notes       String    @default("")
+  /// por_hacer | en_curso | hecho
+  status      String    @default("por_hacer")
+  /// alta | media | baja
+  priority    String    @default("media")
+  /// AAAA-MM-DD
+  due         String?
+  category    String?
+  assigneeId  String?
+  assignee    User?     @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdById String
+  createdBy   User      @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  idea        Idea?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId, status])
+}
+
+// ---------- Ideas ----------
+
+model Idea {
+  id           String    @id @default(uuid())
+  householdId  String
+  household    Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  title        String
+  description  String    @default("")
+  /// nueva | en_valoracion | aceptada | descartada
+  status       String    @default("nueva")
+  category     String?
+  proposedById String
+  proposedBy   User      @relation(fields: [proposedById], references: [id])
+  taskId       String?   @unique
+  task         Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([householdId, status])
+}

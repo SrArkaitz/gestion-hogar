@@ -9,3 +9,6 @@ backend/public/
 *.db-wal
 .env
 .DS_Store
+
+# Cliente de Prisma generado
+backend/src/generated/

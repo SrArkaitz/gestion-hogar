@@ -2,43 +2,58 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-La versión actual es el primer tablero de tareas, con prioridad **alta**, **media** o **baja**. Las tarjetas se arrastran entre columnas y se guardan en una base de datos SQLite.
+Ahora mismo está en marcha la **fase 1**. Ya está montada la estructura (navegación, base de datos con Prisma y tipos compartidos), pero las páginas de Tareas e Ideas todavía no guardan nada.
 
-- **Frontend:** Angular 20 (componentes standalone, signals, Angular CDK para arrastrar y soltar)
-- **Backend:** NestJS 11 + SQLite (`better-sqlite3`)
+- **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
+- **Backend:** NestJS 11 + Prisma 7 sobre SQLite
+- **Tipos comunes:** paquete `@hogar/shared`, usado por las dos partes
 - **Despliegue:** un único contenedor Docker que sirve la API en `/api` y la web compilada
 
 ```
 gestion-hogar/
-├── frontend/          Angular
-│   └── src/app/       app.ts (tablero), card-dialog.ts (formulario), cards.service.ts (API)
+├── shared/            @hogar/shared: tipos y constantes (estados, prioridades…)
 ├── backend/           NestJS
-│   └── src/cards/     controlador, servicio y base de datos
-├── Dockerfile         compila las dos partes y crea la imagen final
+│   ├── prisma/        schema.prisma y migraciones
+│   └── src/           un módulo Nest por cada módulo de la app
+├── frontend/          Angular
+│   └── src/app/       un módulo de rutas por cada módulo de la app (tasks/, ideas/…)
+├── docs/              documento de diseño
+├── Dockerfile
 └── docker-compose.yml
 ```
+
+El repositorio usa **npm workspaces**: todo se instala desde la raíz y hay un único `package-lock.json`.
 
 ## Desarrollo en local
 
 Necesitas Node.js 22 o superior.
 
 ```bash
-# Terminal 1: API en http://localhost:3000
-cd backend
+# Una sola vez
 npm install
-npm run dev
+cp backend/.env.example backend/.env
+npm run db:migrate              # crea backend/data/hogar.db con las tablas
+
+# Terminal 1: API en http://localhost:3000
+npm run dev:api
 
 # Terminal 2: web en http://localhost:4200
-cd frontend
-npm install
-npm start
+npm run dev:web
 ```
 
-El frontend redirige las llamadas a `/api` hacia el backend (ver `frontend/proxy.conf.json`). La base de datos se crea en `backend/data/hogar.db`. La primera vez se rellena con unas tarjetas de ejemplo que puedes borrar.
+El frontend redirige las llamadas a `/api` hacia el backend (ver `frontend/proxy.conf.json`). El frontend lee `shared/` directamente del código fuente. El backend usa la versión compilada (`shared/dist`), así que, si cambias algo en `shared/`, reinicia `npm run dev:api`.
 
-Tras el primer `npm install`, sube a git los `package-lock.json` que se generan. Así el Docker instala siempre las mismas versiones.
+### Cambios en la base de datos
+
+1. Edita `backend/prisma/schema.prisma`.
+2. Crea y aplica la migración: `npm run db:migrate -- --name descripcion-corta`.
+3. Sube a git la carpeta nueva de `backend/prisma/migrations/`.
+
+El cliente de Prisma se genera en `backend/src/generated/` al compilar o arrancar el backend. Esa carpeta no se sube a git.
 
 ## Despliegue en el servidor (Docker)
+
+El contenedor aplica las migraciones pendientes cada vez que arranca, así que basta con reconstruirlo para actualizar.
 
 ### Opción A: por terminal
 
@@ -64,12 +79,11 @@ docker compose up -d --build
 
 ### Acceso desde fuera
 
-- **Tailscale:** entra a `http://<nombre-tailscale-del-servidor>:8085` desde cualquier dispositivo de tu red Tailscale.
-- **Dominio con Cloudflare:** apunta un subdominio (por ejemplo `hogar.kaitzlab.com`) a `http://localhost:8085` desde tu túnel o proxy. La app **no tiene inicio de sesión**, así que si la expones a internet protégela con Cloudflare Access o similar.
+El plan es publicarla en `https://hogar.kaitzlab.com` con Cloudflare Tunnel (ver el documento de diseño). La app **todavía no tiene inicio de sesión**, así que no la expongas a internet hasta que esté hecho, o protégela antes con Cloudflare Access.
 
 ### Datos y copias de seguridad
 
-Las tarjetas viven en el volumen de Docker `gestion-hogar-data` (archivo `/app/data/hogar.db` dentro del contenedor). Para hacer una copia:
+La base de datos vive en el volumen de Docker `gestion-hogar-data` (archivo `/app/data/hogar.db` dentro del contenedor). Para hacer una copia:
 
 ```bash
 docker cp gestion-hogar:/app/data/hogar.db ./hogar-backup.db
@@ -79,25 +93,6 @@ El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
 
 ## API
 
-| Método | Ruta              | Qué hace                                  |
-|--------|-------------------|-------------------------------------------|
-| GET    | `/api/cards`      | Lista todas las tarjetas                  |
-| POST   | `/api/cards`      | Crea una tarjeta                          |
-| PATCH  | `/api/cards/:id`  | Cambia campos (también mover de columna)  |
-| DELETE | `/api/cards/:id`  | Borra una tarjeta                         |
-
-Cuerpo de una tarjeta:
-
-```json
-{
-  "title": "Purgar los radiadores",
-  "note": "Antes de que apriete el frío",
-  "column": "casa",
-  "priority": "alta",
-  "due": "2026-11-15"
-}
-```
-
-- `column`: `casa`, `hacer`, `ideas` o `hecho`
-- `priority`: `alta`, `media` o `baja`
-- `due`: fecha `AAAA-MM-DD` o vacío
+| Método | Ruta          | Qué hace                                      |
+|--------|---------------|-----------------------------------------------|
+| GET    | `/api/health` | Comprueba que la API y la base de datos responden |

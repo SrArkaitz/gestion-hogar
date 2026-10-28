@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { existsSync } from 'fs';
-import { join } from 'path';
-import { CardsModule } from './cards/cards.module';
+import { join, resolve } from 'path';
+import { HealthController } from './health/health.controller';
+import { PrismaModule } from './prisma/prisma.module';
 
 // Carpeta con el frontend compilado. En Docker se copia a backend/public.
-const publicDir = process.env.PUBLIC_DIR ?? join(__dirname, '..', 'public');
+const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'public'));
 
 @Module({
   imports: [
-    CardsModule,
+    PrismaModule,
     ...(existsSync(publicDir)
       ? [
           ServeStaticModule.forRoot({
@@ -19,5 +20,6 @@ const publicDir = process.env.PUBLIC_DIR ?? join(__dirname, '..', 'public');
         ]
       : []),
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

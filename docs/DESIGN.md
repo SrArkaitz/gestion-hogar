@@ -138,8 +138,10 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-- Existe una primera versión del tablero (Angular + NestJS + SQLite, sin login ni Prisma) que sirve de punto de partida para la fase 1.
-- Pendiente de compilar y probar por primera vez en local.
+**Fase 1 en curso.**
+
+- Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite y primera migración (hogar, usuarios, sesiones, invitaciones, tareas e ideas), y navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
+- Siguiente: login y hogar (argon2, sesión en cookie, invitaciones), después el tablero de Tareas, el módulo de Ideas y el despliegue en `hogar.kaitzlab.com`.
 
 ## 8. Decisiones tomadas
 
@@ -150,3 +152,6 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-28 | Ideas como módulo separado de Tareas; las ideas aceptadas pasan a tareas. |
 | 2026-10-28 | Recetas con tipo de plato, duración por tramos y minutos opcionales; menú semanal opcional. |
 | 2026-10-28 | El calendario incluye cumpleaños. |
+| 2026-10-29 | Repositorio con npm workspaces y un único `package-lock.json`. `shared/` es el paquete `@hogar/shared`. |
+| 2026-10-29 | Estados, prioridades y categorías se guardan como texto y se validan con las constantes de `@hogar/shared`. Las categorías son texto libre con sugerencias. |
+| 2026-10-29 | Se mantienen Angular 20 y NestJS 11 por ahora. La subida a Angular 22 y NestJS 12 se hará como paso aparte. |

@@ -1,25 +1,30 @@
 {
   "name": "gestion-hogar-backend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "API del tablero de gestión del hogar (NestJS + SQLite)",
+  "description": "API de la gestión del hogar (NestJS + Prisma + SQLite)",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
-    "dev": "nest start --watch"
+    "dev": "prisma generate && nest start --watch",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
   },
   "dependencies": {
+    "@hogar/shared": "*",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
     "@nestjs/serve-static": "^5.0.3",
-    "better-sqlite3": "^11.10.0",
+    "@prisma/adapter-better-sqlite3": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "dotenv": "^16.4.7",
+    "prisma": "7.10.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.3",
     "@types/node": "^22.18.0",
     "typescript": "~5.8.3"
