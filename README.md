@@ -1,6 +1,6 @@
 # gestion-hogar
 
-Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DISENO.md`](docs/DISENO.md).
+Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
 La versión actual es el primer tablero de tareas, con prioridad **alta**, **media** o **baja**. Las tarjetas se arrastran entre columnas y se guardan en una base de datos SQLite.
 
