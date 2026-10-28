@@ -1,6 +1,8 @@
 # gestion-hogar
 
-Tablero tipo Trello para gestionar el hogar: tareas de casa, pendientes e ideas, cada una con prioridad **alta**, **media** o **baja**. Las tarjetas se arrastran entre columnas y se guardan en una base de datos SQLite.
+Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DISENO.md`](docs/DISENO.md).
+
+La versión actual es el primer tablero de tareas, con prioridad **alta**, **media** o **baja**. Las tarjetas se arrastran entre columnas y se guardan en una base de datos SQLite.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, Angular CDK para arrastrar y soltar)
 - **Backend:** NestJS 11 + SQLite (`better-sqlite3`)
