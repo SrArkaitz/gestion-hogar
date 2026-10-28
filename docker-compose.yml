@@ -1,0 +1,15 @@
+services:
+  gestion-hogar:
+    build: .
+    image: gestion-hogar:latest
+    container_name: gestion-hogar
+    restart: unless-stopped
+    ports:
+      - "8085:3000"
+    environment:
+      - TZ=Europe/Madrid
+    volumes:
+      - gestion-hogar-data:/app/data
+
+volumes:
+  gestion-hogar-data:

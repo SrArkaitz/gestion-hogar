@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.angular/
+out-tsc/
+backend/data/
+backend/public/
+*.db
+*.db-shm
+*.db-wal
+.env
+.DS_Store
