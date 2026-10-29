@@ -1,12 +1,11 @@
-# Despliegue en hogar.kaitzlab.com
+# Despliegue
 
-Guía para publicar la app en el Beelink con Portainer y abrirla al exterior con Cloudflare Tunnel. Sigue los pasos en orden; cada uno termina con una comprobación.
+Guía para publicar la app en un servidor de casa con Portainer y abrirla al exterior con Cloudflare Tunnel. Sigue los pasos en orden; cada uno termina con una comprobación.
 
 **Necesitas:**
 
-- El Beelink con Docker y Portainer.
-- El dominio `kaitzlab.com` gestionado en Cloudflare.
-- Un *personal access token* de GitHub con permiso de lectura sobre este repositorio (es privado).
+- El servidor con Docker y Portainer.
+- Un dominio gestionado en Cloudflare. En esta guía, `tudominio.com`, con la app en `hogar.tudominio.com`.
 
 ## 1. Desplegar el contenedor en Portainer
 
@@ -15,32 +14,30 @@ Guía para publicar la app en el Beelink con Portainer y abrirla al exterior con
    - Repository URL: `https://github.com/SrArkaitz/gestion-hogar`
    - Repository reference: `refs/heads/main`
    - Compose path: `docker-compose.yml`
-   - Activa **Authentication**: tu usuario de GitHub y el token como contraseña.
+   - Si despliegas desde un repositorio privado (por ejemplo, tu fork), activa **Authentication** con tu usuario de GitHub y un *personal access token* de solo lectura como contraseña.
 3. **Deploy the stack**. La primera vez tarda unos minutos, porque compila el frontend y el backend dentro de la imagen.
 
-**Comprobación:** desde un navegador de casa abre `http://IP-DEL-BEELINK:8085/api/health`. Debe responder `{"ok":true}`. En los logs del contenedor (Portainer → Containers → `gestion-hogar` → Logs) tienen que aparecer, por este orden:
+**Comprobación:** desde un navegador de casa abre `http://IP-DEL-SERVIDOR:8085/api/health`. Debe responder `{"ok":true}`. En los logs del contenedor (Portainer → Containers → `gestion-hogar` → Logs) tienen que aparecer, por este orden:
 
 - "All migrations have been successfully applied".
 - "Copia de seguridad hecha".
 - "Gestión del hogar escuchando".
 
-> Si ya habías desplegado una versión anterior a la de cuentas y casas (commit `d6365f2`), borra antes el volumen `gestion-hogar-data` (Portainer → Volumes). El esquema de la base de datos cambió y aún no había datos que conservar.
+## 2. Publicar hogar.tudominio.com con Cloudflare Tunnel
 
-## 2. Publicar hogar.kaitzlab.com con Cloudflare Tunnel
+El túnel conecta el servidor con Cloudflare desde dentro, así que no hay que abrir puertos en el router. Cloudflare pone el HTTPS.
 
-El túnel conecta el Beelink con Cloudflare desde dentro, así que no hay que abrir puertos en el router. Cloudflare pone el HTTPS.
-
-### Si ya tienes un túnel funcionando en el Beelink
+### Si ya tienes un túnel funcionando en el servidor
 
 1. En el panel de Cloudflare: **Zero Trust → Networks → Tunnels** y entra en tu túnel.
 2. En **Public Hostname** (en algunas versiones del panel se llama *Published application routes*), añade uno:
-   - Subdomain: `hogar` · Domain: `kaitzlab.com`
-   - Service: `HTTP` · URL: `IP-DEL-BEELINK:8085`
-3. Guarda. Cloudflare crea solo el registro DNS de `hogar.kaitzlab.com`.
+   - Subdomain: `hogar` · Domain: `tudominio.com`
+   - Service: `HTTP` · URL: `IP-DEL-SERVIDOR:8085`
+3. Guarda. Cloudflare crea solo el registro DNS de `hogar.tudominio.com`.
 
 ### Si no tienes túnel
 
-1. **Zero Trust → Networks → Tunnels → Create a tunnel** → tipo **Cloudflared**. Nombre: por ejemplo `beelink`.
+1. **Zero Trust → Networks → Tunnels → Create a tunnel** → tipo **Cloudflared**. Nombre: por ejemplo `casa`.
 2. Elige **Docker** como entorno y copia el token que aparece en el comando (lo que va después de `--token`).
 3. En Portainer crea otro stack, `cloudflared`, con **Web editor** y este contenido, pegando tu token:
 
@@ -53,9 +50,9 @@ El túnel conecta el Beelink con Cloudflare desde dentro, así que no hay que ab
        command: tunnel --no-autoupdate run --token PEGA_AQUI_TU_TOKEN
    ```
 
-4. De vuelta en Cloudflare, el conector debe salir como *Healthy*. Sigue en **Public Hostname** con los mismos datos del apartado anterior (`hogar` · `kaitzlab.com` · `HTTP` · `IP-DEL-BEELINK:8085`).
+4. De vuelta en Cloudflare, el conector debe salir como *Healthy*. Sigue en **Public Hostname** con los mismos datos del apartado anterior (`hogar` · `tudominio.com` · `HTTP` · `IP-DEL-SERVIDOR:8085`).
 
-**Comprobación:** desde el móvil, con los datos móviles (no la wifi de casa), abre `https://hogar.kaitzlab.com/api/health`. Debe responder `{"ok":true}`.
+**Comprobación:** desde el móvil, con los datos móviles (no la wifi de casa), abre `https://hogar.tudominio.com/api/health`. Debe responder `{"ok":true}`.
 
 ## 3. Activar la cookie segura
 
@@ -63,14 +60,14 @@ Ahora que hay HTTPS, la cookie de sesión debe viajar solo cifrada.
 
 1. Portainer → Stacks → `gestion-hogar` → **Editor**. Debajo del editor, en **Environment variables**, añade:
    - `COOKIE_SECURE` = `true`
-   - `PUBLIC_URL` = `https://hogar.kaitzlab.com`
+   - `PUBLIC_URL` = `https://hogar.tudominio.com`
 2. **Update the stack**.
 
 Las variables del stack se conservan aunque hagas *Pull and redeploy*: el `docker-compose.yml` las lee con `${…}`.
 
-Desde este momento, entra siempre por `https://hogar.kaitzlab.com`, también desde casa. Por `http://IP:8085` la web se abre, pero no se puede iniciar sesión.
+Desde este momento, entra siempre por `https://hogar.tudominio.com`, también desde casa. Por `http://IP:8085` la web se abre, pero no se puede iniciar sesión.
 
-**Comprobación:** en `https://hogar.kaitzlab.com` crea tu cuenta y tu casa. Cierra el navegador, vuelve a abrir la web y comprueba que sigues dentro.
+**Comprobación:** en `https://hogar.tudominio.com` crea tu cuenta y tu casa. Cierra el navegador, vuelve a abrir la web y comprueba que sigues dentro.
 
 ## 4. Acceso con Google
 
@@ -86,7 +83,7 @@ Opcional. Sin este paso la app funciona igual, solo con correo y contraseña, y 
 3. En **Clientes → Crear cliente**:
    - Tipo de aplicación: **Aplicación web**. Nombre: `Hogar`.
    - **URIs de redirección autorizados**, añade las dos:
-     - `https://hogar.kaitzlab.com/api/auth/google/callback`
+     - `https://hogar.tudominio.com/api/auth/google/callback`
      - `http://localhost:4200/api/auth/google/callback` (para probar en local)
    - Crear. Copia el **ID de cliente** y el **secreto del cliente**.
 4. En **Público**, pulsa **Publicar aplicación** para pasarla a *En producción*. Mientras esté *En pruebas*, solo pueden entrar los correos que añadas como usuarios de prueba. La app solo pide nombre y correo, así que Google no exige ninguna verificación.
@@ -96,9 +93,9 @@ Opcional. Sin este paso la app funciona igual, solo con correo y contraseña, y 
 - `GOOGLE_CLIENT_ID` = el ID de cliente
 - `GOOGLE_CLIENT_SECRET` = el secreto del cliente
 
-y comprueba que `PUBLIC_URL` es `https://hogar.kaitzlab.com` (del paso 3). **Update the stack**.
+y comprueba que `PUBLIC_URL` es `https://hogar.tudominio.com` (del paso 3). **Update the stack**.
 
-**Comprobación:** `https://hogar.kaitzlab.com/api/auth/providers` debe responder `{"google":true}`, y en la pantalla de entrar aparece "Continuar con Google".
+**Comprobación:** `https://hogar.tudominio.com/api/auth/providers` debe responder `{"google":true}`, y en la pantalla de entrar aparece "Continuar con Google".
 
 **Cómo se comporta:**
 
@@ -110,7 +107,7 @@ y comprueba que `PUBLIC_URL` es `https://hogar.kaitzlab.com` (del paso 3). **Upd
 
 No hay nada que configurar: el servidor genera la primera vez las claves de los avisos (VAPID) y las guarda en la base de datos, así que se conservan en las actualizaciones y en las copias. Solo hace falta HTTPS, que ya da Cloudflare.
 
-En cada dispositivo, entra en `https://hogar.kaitzlab.com` → **Casa → Este dispositivo**:
+En cada dispositivo, entra en `https://hogar.tudominio.com` → **Casa → Este dispositivo**:
 
 - **Instalar la app:** en Android y en el PC, botón *Instalar en este dispositivo* (o *Instalar app* en el menú del navegador). En iPhone y iPad, desde Safari: Compartir → *Añadir a pantalla de inicio*.
 - **Avisos:** *Activar avisos* y aceptar el permiso. En iPhone y iPad hay que hacerlo desde la app instalada (iOS 16.4 o posterior); en Safari normal no se puede.
@@ -132,7 +129,7 @@ Las fotos de las recetas viven en `/app/data/photos` (mismo volumen) y en cada c
 
 **Recomendado:** guardar las copias en otro disco o en el NAS. Si el disco del volumen falla, así no se pierden también las copias.
 
-1. Crea la carpeta en el Beelink, por ejemplo `/mnt/backup/copias-hogar`.
+1. Crea la carpeta en el servidor, por ejemplo `/mnt/backup/copias-hogar`.
 2. En el `docker-compose.yml`, descomenta las dos líneas de `BACKUP_DIR` y del volumen `/backups`, y pon tu ruta.
 3. Redespliega. En los logs, la ruta de "Copia de seguridad hecha" debe empezar por `/backups/`.
 
@@ -158,10 +155,10 @@ Cuando haya cambios en `main`: Portainer → Stacks → `gestion-hogar` → **Pu
 
 ## 8. Opcional: Cloudflare Access
 
-El registro está abierto: cualquiera que llegue a `hogar.kaitzlab.com` puede crearse una cuenta, aunque solo vea sus propias casas. Si prefieres que la web ni siquiera se abra a desconocidos, pon delante Cloudflare Access:
+El registro está abierto: cualquiera que llegue a `hogar.tudominio.com` puede crearse una cuenta, aunque solo vea sus propias casas. Si prefieres que la web ni siquiera se abra a desconocidos, pon delante Cloudflare Access:
 
 1. **Zero Trust → Access → Applications → Add an application → Self-hosted**.
-2. Dominio: `hogar.kaitzlab.com`.
+2. Dominio: `hogar.tudominio.com`.
 3. Política **Allow** con **Emails**: tu correo y el de quien quieras dejar entrar. Cloudflare les mandará un código por correo la primera vez.
 
 Con Access activo, quien no esté en la lista no llega ni a la pantalla de entrar. El acceso con Google sigue funcionando por detrás: Access solo decide quién llega a la web.

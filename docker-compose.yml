@@ -14,7 +14,7 @@ services:
       # También fija la hora de la copia de seguridad diaria (03:30).
       - TZ=Europe/Madrid
       # La cookie de sesión solo viaja por HTTPS si es "true". Déjalo en "false" mientras
-      # entres por http://IP:8085; pon "true" cuando solo uses https://hogar.kaitzlab.com.
+      # entres por http://IP:8085; pon "true" cuando solo entres por HTTPS.
       - COOKIE_SECURE=${COOKIE_SECURE:-false}
       # Dirección pública de la app, sin barra final. La necesita el acceso con Google.
       - PUBLIC_URL=${PUBLIC_URL:-}
@@ -27,7 +27,7 @@ services:
       # - BACKUP_DIR=/backups
     volumes:
       - gestion-hogar-data:/app/data
-      # - /ruta/en/el/beelink/copias-hogar:/backups
+      # - /ruta/en/el/servidor/copias-hogar:/backups
 
 volumes:
   gestion-hogar-data:

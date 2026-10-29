@@ -6,9 +6,9 @@ Referencia del proyecto a largo plazo. Recoge qué es la aplicación, cómo est�
 
 Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, compra, comidas, gastos, fechas importantes y mantenimiento.
 
-- **Usuarios:** al principio Arkaitz y, más adelante, su pareja. Cada persona tiene su cuenta y puede estar en varias *casas* a la vez (por ejemplo, la suya y la de sus padres).
+- **Usuarios:** las personas que viven en una casa. Cada persona tiene su cuenta y puede estar en varias *casas* a la vez (por ejemplo, la suya y la de sus padres).
 - **Dispositivos:** PC y móvil. En el móvil se instala como app (PWA) y recibe notificaciones.
-- **Acceso:** desde casa y desde fuera, en `https://hogar.kaitzlab.com`.
+- **Acceso:** desde casa y desde fuera, en un subdominio propio (por ejemplo `https://hogar.tudominio.com`).
 
 ## 2. Módulos
 
@@ -125,7 +125,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Opcional por casa**, como las demás secciones (ver 3.0): útil en una casa donde no se llevan cuentas.
 - **Gasto:** concepto, importe, fecha, quién pagó, entre quiénes se reparte (por defecto, toda la casa), categoría con sugerencias (Supermercado, Casa, Facturas, Ocio…) y notas. Importes en céntimos.
 - **Reparto:** a partes iguales; los céntimos que sobran van a los primeros por orden de llegada a la casa (10 € entre 3 = 3,34 + 3,33 + 3,33). El reparto se guarda con el gasto, así que no cambia si luego entra o sale alguien.
-- **Saldos:** lo que pagó cada uno menos lo que le toca, contando los pagos entre personas. Debajo, los pagos mínimos para quedar en paz ("Laura → Arkaitz 12,30 €") con un botón *Saldar* que apunta el pago. Quien se va de la casa con saldo pendiente sigue saliendo.
+- **Saldos:** lo que pagó cada uno menos lo que le toca, contando los pagos entre personas. Debajo, los pagos mínimos para quedar en paz ("Ana → Luis 12,30 €") con un botón *Saldar* que apunta el pago. Quien se va de la casa con saldo pendiente sigue saliendo.
 - **Facturas fijas:** nombre, importe aproximado, cada cuántos meses y próximo vencimiento. *Pagar* crea su gasto (categoría Facturas) y la pasa a la siguiente fecha. Las que vencen en los próximos 3 días o ya vencieron entran en el aviso de las 9:00, a toda la casa.
 - **Resumen del mes:** total, por categoría y, por persona, lo que pagó y lo que le tocaba.
 
@@ -176,8 +176,8 @@ gestion-hogar/
 
 ## 5. Despliegue y seguridad
 
-- **Servidor:** Beelink de casa, con Docker y Portainer. Un único contenedor sirve la web y la API (`/api`).
-- **Acceso exterior:** **Cloudflare Tunnel** hacia `hogar.kaitzlab.com`. No se abren puertos en el router y el HTTPS es automático.
+- **Servidor:** un mini PC en casa, con Docker y Portainer. Un único contenedor sirve la web y la API (`/api`).
+- **Acceso exterior:** **Cloudflare Tunnel** hacia el subdominio de la app. No se abren puertos en el router y el HTTPS es automático.
 - **Login:** contraseñas cifradas (argon2), sesión de 30 días en cookie `HttpOnly` y `Secure` (en la base de datos solo se guarda el hash del token), límite de intentos fallidos por correo e IP y de registros por IP.
 - **Acceso a datos:** todas las rutas de un módulo cuelgan de `/api/households/:householdId/…` y un guard comprueba que el usuario es miembro de esa casa. A quien no lo es se le responde como si la casa no existiera.
 - **Capa extra opcional:** Cloudflare Access delante de la app.
@@ -189,7 +189,7 @@ Cada fase deja algo que ya se puede usar.
 
 | Fase | Contenido |
 |------|-----------|
-| 1 | **Base + Tareas + Ideas:** login, hogar, navegación, Prisma y migraciones, tablero de tareas con asignación, módulo de ideas con paso a tarea, despliegue en `hogar.kaitzlab.com`. |
+| 1 | **Base + Tareas + Ideas:** login, hogar, navegación, Prisma y migraciones, tablero de tareas con asignación, módulo de ideas con paso a tarea, despliegue en un dominio propio. |
 | 2 | **Tareas recurrentes y notificaciones:** frecuencias, proceso programado, PWA instalable y avisos push. |
 | 3 | **Lista de la compra.** |
 | 4 | **Recetas y menús**, conectados con la compra. |
@@ -199,7 +199,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fases 1 a 7 hechas: toda la hoja de ruta.** La app está publicada en `https://hogar.kaitzlab.com`.
+**Fases 1 a 7 hechas: toda la hoja de ruta.** La app está en uso en producción.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -207,7 +207,7 @@ Cada fase deja algo que ya se puede usar.
 - Hecho: módulo de Ideas (pestañas Abiertas, Aceptadas y Descartadas; valorar, aceptar con prioridad creando la tarea enlazada, descartar y recuperar).
 - Hecho: copia de seguridad diaria de la base de datos (VACUUM INTO a las 03:30, últimas 14) y guía de despliegue en [`DESPLIEGUE.md`](DESPLIEGUE.md).
 - Hecho: acceso con Google (OpenID Connect con PKCE), opcional según la configuración del servidor.
-- Hecho: publicada en `hogar.kaitzlab.com` (cierra la fase 1). El acceso con Google aún no está configurado en producción.
+- Hecho: publicada en producción (cierra la fase 1). El acceso con Google aún no está configurado en producción.
 - Hecho: colores por persona, varias personas por tarea, tema claro u oscuro y paleta inspirada en Trello.
 - Hecho (fase 2): tareas recurrentes, app instalable y avisos push (recordatorio diario y al asignar).
 - Hecho (fase 3): lista de la compra compartida, con secciones, habituales y sincronización entre móviles.
@@ -222,7 +222,7 @@ Cada fase deja algo que ya se puede usar.
 | Fecha | Decisión |
 |-------|----------|
 | 2026-10-28 | Frontend en Angular, backend en NestJS, base de datos SQLite con Prisma. |
-| 2026-10-28 | Acceso desde fuera por `hogar.kaitzlab.com` con Cloudflare. |
+| 2026-10-28 | Acceso desde fuera por un subdominio propio con Cloudflare. |
 | 2026-10-28 | Ideas como módulo separado de Tareas; las ideas aceptadas pasan a tareas. |
 | 2026-10-28 | Recetas con tipo de plato, duración por tramos y minutos opcionales; menú semanal opcional. |
 | 2026-10-28 | El calendario incluye cumpleaños. |

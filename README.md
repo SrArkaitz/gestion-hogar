@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el calendario con cumpleaños, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA) y los avisos push. Cada casa elige qué secciones usa.
+Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el calendario con cumpleaños, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA) y los avisos push. Cada casa elige qué secciones usa.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -53,14 +53,14 @@ El cliente de Prisma se genera en `backend/src/generated/` al compilar o arranca
 
 ## Despliegue en el servidor (Docker)
 
-La guía paso a paso para publicarla en `https://hogar.kaitzlab.com` está en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md): Portainer, Cloudflare Tunnel, cookie segura, acceso con Google, copias de seguridad y Cloudflare Access.
+La guía paso a paso para publicarla en un dominio propio (Portainer y Cloudflare Tunnel) está en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md): Portainer, Cloudflare Tunnel, cookie segura, acceso con Google, copias de seguridad y Cloudflare Access.
 
 En resumen:
 
 - El contenedor aplica las migraciones pendientes cada vez que arranca, así que basta con reconstruirlo para actualizar.
 - Hace una copia de la base de datos cada día a las 03:30 y guarda las últimas 14.
 - La configuración (`COOKIE_SECURE`, `PUBLIC_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`…) se pone en las *Environment variables* del stack de Portainer, no en el repositorio.
-- `COOKIE_SECURE` es `false` si no se define, para poder iniciar sesión por `http://IP:8085`. Ponlo a `true` cuando solo entres por `https://hogar.kaitzlab.com`.
+- `COOKIE_SECURE` es `false` si no se define, para poder iniciar sesión por `http://IP:8085`. Ponlo a `true` cuando solo entres por HTTPS.
 
 ### Por terminal
 

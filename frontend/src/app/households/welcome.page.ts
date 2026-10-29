@@ -17,7 +17,7 @@ import { SessionService } from '../core/session.service';
       <h1>Hola, {{ session.user()?.name }}</h1>
       <p class="lead">Crea tu casa para empezar. Después podrás invitar a quien viva contigo.</p>
       <label>Nombre de la casa
-        <input name="name" required [maxlength]="nameMax" placeholder="Por ejemplo: Casa de Arkaitz" [(ngModel)]="name" />
+        <input name="name" required [maxlength]="nameMax" placeholder="Por ejemplo: Piso de Bilbao" [(ngModel)]="name" />
       </label>
       @if (error()) {
         <p class="form-err" role="alert">{{ error() }}</p>
