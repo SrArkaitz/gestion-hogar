@@ -198,6 +198,38 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .idea-body:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
 .idea .meta .by { color: var(--muted); }
 .state { background: var(--media-bg); color: var(--media); font-weight: 700; border-radius: 999px; padding: 1px 8px; text-transform: uppercase; letter-spacing: .05em; font-size: 10.5px; }
+/* Lista de la compra */
+.add-item { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.add-item .grow { flex: 1 1 120px; min-width: 0; }
+.add-item .qty { flex: 0 1 120px; min-width: 0; width: 88px; }
+@media (max-width: 480px) { .add-item .qty { flex-basis: 88px; } .add-item .btn { padding-inline: 12px; } }
+.add-item input { font: inherit; font-size: 16px; width: 100%; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.add-item .target { flex-basis: 100%; margin: -2px 0 0; }
+.suggest { list-style: none; margin: -8px 0 0; padding: 4px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+.suggest li { display: flex; align-items: center; }
+.suggest .pick { flex: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; text-align: left; font: inherit; color: var(--fg); background: none; border: 0; border-radius: 8px; padding: 9px 10px; cursor: pointer; }
+.suggest .pick:hover { background: var(--bg); }
+.suggest .q, .shop-item .q { color: var(--muted); font-size: 13.5px; }
+.suggest .sec { margin-left: auto; font-size: 12px; color: var(--muted); }
+.suggest .forget { font-size: 18px; text-decoration: none; color: var(--muted); padding: 4px 10px; }
+.favs { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 13.5px; color: var(--fg); background: var(--surface); border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.chip:hover { background: var(--line); }
+.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 14px; align-items: start; }
+.shop-sec { background: var(--surface); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.shop-sec h2 { font-family: var(--f-display); font-weight: 500; font-size: 17px; margin: 0; display: flex; align-items: center; gap: 8px; }
+.shop-sec ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.shop-item { display: flex; align-items: center; gap: 4px; background: var(--card); border-radius: 10px; box-shadow: var(--shadow); min-height: 48px; }
+.shop-item .tick { flex: none; width: 48px; height: 48px; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
+.shop-item .tick::before { content: ""; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--muted); box-sizing: border-box; }
+.shop-item.done .tick::before { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 12 4 4 8-8' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat; border-color: var(--accent); }
+.shop-item .what { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; text-align: left; font: inherit; color: var(--fg); background: none; border: 0; padding: 10px 12px 10px 0; cursor: pointer; }
+.shop-item .what .t { overflow-wrap: anywhere; }
+.shop-item.done .t { text-decoration: line-through; color: var(--muted); }
+.cart { opacity: .85; }
+.cart-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.shop .empty { grid-column: 1 / -1; }
+
 /* Tareas recurrentes */
 .rec { position: relative; padding-left: 16px; }
 .rec::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 5px; border-radius: 0 3px 3px 0; background: var(--stripe, var(--line)); }

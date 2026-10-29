@@ -35,3 +35,12 @@ export function oneOf<T extends string>(value: unknown, options: readonly T[], l
   if (!options.includes(value as T)) throw new BadRequestException(`${label} no válido`);
   return value as T;
 }
+
+/** Texto opcional: recortado, null si viene vacío y con longitud máxima. */
+export function optionalText(value: unknown, label: string, max: number): string | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== 'string') throw new BadRequestException(`${label} no válido`);
+  const text = value.trim();
+  if (text.length > max) throw new BadRequestException(`${label} no puede pasar de ${max} caracteres`);
+  return text || null;
+}

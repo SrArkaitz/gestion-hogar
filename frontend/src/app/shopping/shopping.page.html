@@ -1,0 +1,104 @@
+<header class="top">
+  <div>
+    <h1>Compra</h1>
+    <p class="sub">
+      @if (pendingCount()) {
+        {{ pendingCount() === 1 ? '1 cosa' : pendingCount() + ' cosas' }} por comprar
+      } @else {
+        No falta nada
+      }
+    </p>
+  </div>
+</header>
+
+<form class="add-item" (ngSubmit)="add()" autocomplete="off">
+  <label class="grow">
+    <span class="sr-only">Qué hay que comprar</span>
+    <input #nameInput name="name" [maxlength]="nameMax" placeholder="Añadir… (leche, pan)" [(ngModel)]="name" />
+  </label>
+  <label class="qty">
+    <span class="sr-only">Cantidad</span>
+    <input name="quantity" [maxlength]="quantityMax" placeholder="Cantidad" [(ngModel)]="quantity" />
+  </label>
+  <button type="submit" class="btn" [disabled]="!name().trim()">Añadir</button>
+  @if (target(); as t) {
+    <p class="hint target">Irá a {{ t }}</p>
+  }
+</form>
+
+@if (suggestions().length) {
+  <ul class="suggest" aria-label="Sugerencias">
+    @for (p of suggestions(); track p.key) {
+      <li>
+        <button type="button" class="pick" (click)="addProduct(p)">
+          {{ p.name }}@if (p.quantity) { <span class="q">· {{ p.quantity }}</span> }
+          <span class="sec">{{ sectionLabels[p.section] }}</span>
+        </button>
+        <button type="button" class="link forget" [attr.aria-label]="'No sugerir más ' + p.name" title="No sugerir más" (click)="forget(p)">×</button>
+      </li>
+    }
+  </ul>
+} @else if (!name() && favourites().length) {
+  <div class="favs" role="group" aria-label="Habituales">
+    @for (p of favourites(); track p.key) {
+      <button type="button" class="chip" (click)="addProduct(p)">+ {{ p.name }}</button>
+    }
+  </div>
+}
+
+@if (store.error() || status()) {
+  <div class="status err" role="status">{{ store.error() ?? status() }}</div>
+} @else if (store.loading()) {
+  <div class="status" role="status">Cargando la lista…</div>
+}
+
+<div class="shop">
+  @for (g of groups(); track g.section) {
+    <section class="shop-sec">
+      <h2>{{ g.label }} <span class="count">{{ g.items.length }}</span></h2>
+      <ul>
+        @for (item of g.items; track item.id) {
+          <li class="shop-item">
+            <button type="button" class="tick" [attr.aria-label]="'Al carro: ' + item.name" (click)="toggle(item)"></button>
+            <button type="button" class="what" (click)="editing.set(item)" [attr.aria-label]="'Editar ' + item.name">
+              <span class="t">{{ item.name }}</span>
+              @if (item.quantity) {
+                <span class="q">{{ item.quantity }}</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  } @empty {
+    @if (!store.loading() && !store.error() && !inCart().length) {
+      <p class="empty">La lista está vacía. Escribe arriba lo que falte o toca uno de los habituales.</p>
+    }
+  }
+
+  @if (inCart().length) {
+    <section class="shop-sec cart">
+      <div class="cart-h">
+        <h2>En el carro <span class="count">{{ inCart().length }}</span></h2>
+        <button type="button" class="btn ghost sm" (click)="clearDone()">Quitar comprados</button>
+      </div>
+      <ul>
+        @for (item of inCart(); track item.id) {
+          <li class="shop-item done">
+            <button type="button" class="tick" [attr.aria-label]="'Devolver a la lista: ' + item.name" (click)="toggle(item)"></button>
+            <button type="button" class="what" (click)="editing.set(item)" [attr.aria-label]="'Editar ' + item.name">
+              <span class="t">{{ item.name }}</span>
+              @if (item.quantity) {
+                <span class="q">{{ item.quantity }}</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>
+
+@if (editing(); as item) {
+  <app-item-dialog [item]="item" (save)="onSave($event)" (delete)="onDelete()" (close)="editing.set(null)" />
+}

@@ -25,6 +25,8 @@ model Household {
   tasks       Task[]
   ideas       Idea[]
   recurring   RecurringTask[]
+  shopping    ShoppingItem[]
+  products    ShoppingProduct[]
 }
 
 model User {
@@ -47,6 +49,7 @@ model User {
   recurringCreated  RecurringTask[]         @relation("RecurringCreatedBy")
   recurringAssigned RecurringTaskAssignee[]
   pushSubscriptions PushSubscription[]
+  shoppingAdded     ShoppingItem[]
 }
 
 /// Pertenencia de una persona a una casa.
@@ -212,4 +215,41 @@ model Idea {
   updatedAt    DateTime  @updatedAt
 
   @@index([householdId, status])
+}
+
+/// Artículo de la lista de la compra de una casa (una sola lista por casa).
+model ShoppingItem {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  /// productKey(name): para no repetir el mismo producto en la lista
+  key         String
+  quantity    String?
+  /// Una de SHOPPING_SECTIONS (@hogar/shared)
+  section     String
+  /// Ya está en el carro
+  done        Boolean   @default(false)
+  addedById   String
+  addedBy     User      @relation(fields: [addedById], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId, key])
+}
+
+/// Producto que ya se ha comprado en la casa: recuerda su sección y sirve para los habituales.
+model ShoppingProduct {
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  /// productKey(name)
+  key         String
+  name        String
+  section     String
+  quantity    String?
+  /// Veces que se ha añadido a la lista
+  count       Int       @default(1)
+  lastUsedAt  DateTime  @default(now())
+
+  @@id([householdId, key])
 }

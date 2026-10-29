@@ -84,7 +84,11 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.3 Lista de la compra
 
-*Se detalla al llegar a su fase.* Idea inicial: artículos con cantidad, marcar como comprado, agrupar por sección del súper y una lista de productos habituales para añadir rápido.
+- **Una lista por casa**, compartida. Mientras está abierta se actualiza sola cada pocos segundos, para que dos personas puedan comprar a la vez cada una con su móvil.
+- **Artículo:** nombre, cantidad en texto libre ("2", "1 kg", "una caja grande") y sección. Añadir algo que ya está en la lista no lo repite: si estaba en el carro vuelve a pendiente y, si se indica cantidad, se cambia.
+- **Secciones fijas**, en el orden en que se muestran: Fruta y verdura, Carne y pescado, Lácteos y huevos, Panadería, Despensa, Congelados, Bebidas, Limpieza, Higiene y Otros. La primera vez se adivina por el nombre (leche → Lácteos y huevos); si se cambia a mano, se recuerda para la próxima.
+- **Comprado:** se marca con un toque y pasa, tachado, a *En el carro*. Se puede desmarcar. *Quitar comprados* los quita todos al terminar.
+- **Habituales:** cada producto añadido se guarda con su sección y su última cantidad. Los más comprados aparecen como botones para añadirlos con un toque y, al escribir, se sugieren los que coinciden (salvo los que ya están en la lista). Un producto mal escrito se puede olvidar desde las sugerencias.
 
 ### 3.4 Recetas y menús
 
@@ -168,7 +172,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fases 1 y 2 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
+**Fases 1, 2 y 3 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -179,7 +183,8 @@ Cada fase deja algo que ya se puede usar.
 - Hecho: publicada en `hogar.kaitzlab.com` (cierra la fase 1). El acceso con Google aún no está configurado en producción.
 - Hecho: colores por persona, varias personas por tarea, tema claro u oscuro y paleta inspirada en Trello.
 - Hecho (fase 2): tareas recurrentes, app instalable y avisos push (recordatorio diario y al asignar).
-- Siguiente: fase 3, lista de la compra. Las copias de las fotos llegarán con la primera fase que tenga fotos (recetas).
+- Hecho (fase 3): lista de la compra compartida, con secciones, habituales y sincronización entre móviles.
+- Siguiente: fase 4, recetas y menús, conectados con la compra. Las copias de las fotos llegarán con esa fase.
 
 ## 8. Decisiones tomadas
 
@@ -199,3 +204,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Tareas recurrentes: la tarea se crea el día que toca y vence ese día; si la anterior sigue sin hacer, no se duplica. |
 | 2026-10-29 | Avisos: recordatorio diario a las 9:00 y aviso al asignar. Claves VAPID generadas por el servidor y guardadas en la base de datos. |
 | 2026-10-29 | El service worker no usa caché: la app solo funciona con conexión. |
+| 2026-10-29 | Compra: una lista por casa, secciones fijas (adivinadas y luego recordadas por producto), lo comprado se queda en el carro hasta quitarlo y los habituales salen solos de lo ya comprado. Se sincroniza consultando al servidor cada pocos segundos. |

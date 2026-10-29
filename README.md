@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la app instalable (PWA) y los avisos push.
+Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la lista de la compra, la app instalable (PWA) y los avisos push.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -113,6 +113,13 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/recurring` | Crea una; si empieza hoy, crea ya su tarea |
 | PATCH  | `/api/households/:householdId/recurring/:id` | Edita, pausa (`{ "active": false }`) o reactiva |
 | DELETE | `/api/households/:householdId/recurring/:id` | Borra la plantilla; las tareas que creó se quedan |
+| GET    | `/api/households/:householdId/shopping/items` | Lista de la compra |
+| POST   | `/api/households/:householdId/shopping/items` | Añade (`name`, `quantity`, `section` opcionales); si ya está, no lo repite |
+| PATCH  | `/api/households/:householdId/shopping/items/:id` | Cambia nombre, cantidad, sección o `done` (en el carro) |
+| DELETE | `/api/households/:householdId/shopping/items/:id` | Quita un artículo |
+| POST   | `/api/households/:householdId/shopping/items/clear-done` | Quita todo lo que está en el carro |
+| GET    | `/api/households/:householdId/shopping/products` | Productos ya comprados, de los más habituales a los menos |
+| DELETE | `/api/households/:householdId/shopping/products/:key` | Olvida un producto para que no se sugiera |
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
