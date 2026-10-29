@@ -2,6 +2,8 @@ services:
   gestion-hogar:
     build: .
     image: gestion-hogar:latest
+    # Que Portainer reconstruya la imagen en cada "Pull and redeploy" en vez de reutilizar la anterior
+    pull_policy: build
     container_name: gestion-hogar
     restart: unless-stopped
     ports:
