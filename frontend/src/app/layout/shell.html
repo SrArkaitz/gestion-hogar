@@ -1,6 +1,12 @@
 <div class="shell">
+  <!-- Móvil: casa activa arriba. En escritorio va en la barra lateral. -->
+  <header class="mbar">
+    <app-household-switcher />
+  </header>
+
   <nav class="nav" aria-label="Módulos">
     <a class="brand" routerLink="/">Hogar</a>
+    <app-household-switcher />
     <ul>
       @for (item of nav; track item.path) {
         <li>
@@ -11,6 +17,10 @@
         </li>
       }
     </ul>
+    <div class="me">
+      <span>{{ session.user()?.name }}</span>
+      <button type="button" class="link" (click)="logout()">Cerrar sesión</button>
+    </div>
   </nav>
 
   <main class="page">

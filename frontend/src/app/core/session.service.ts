@@ -1,0 +1,97 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { HouseholdSummary, LoginInput, Me, RegisterInput } from '@hogar/shared';
+import { firstValueFrom } from 'rxjs';
+
+const STORAGE_KEY = 'hogar.casa';
+
+/** Quién ha iniciado sesión, sus casas y cuál está usando ahora. */
+@Injectable({ providedIn: 'root' })
+export class SessionService {
+  private readonly http = inject(HttpClient);
+  private loaded?: Promise<void>;
+  private readonly selectedId = signal<string | null>(readStored());
+
+  readonly me = signal<Me | null>(null);
+  readonly user = computed(() => this.me()?.user ?? null);
+  readonly households = computed(() => this.me()?.households ?? []);
+  /** Casa activa: la elegida si sigue existiendo y, si no, la primera. */
+  readonly household = computed<HouseholdSummary | null>(() => {
+    const list = this.households();
+    return list.find((h) => h.id === this.selectedId()) ?? list[0] ?? null;
+  });
+  readonly isAdmin = computed(() => this.household()?.role === 'admin');
+
+  /** Carga la sesión una sola vez (la usan los guards de las rutas). */
+  ensureLoaded(): Promise<void> {
+    return (this.loaded ??= this.refresh());
+  }
+
+  async refresh(): Promise<void> {
+    try {
+      this.me.set(await firstValueFrom(this.http.get<Me>('/api/auth/me')));
+    } catch {
+      this.me.set(null);
+    }
+  }
+
+  async login(input: LoginInput): Promise<void> {
+    this.setMe(await firstValueFrom(this.http.post<Me>('/api/auth/login', input)));
+  }
+
+  async register(input: RegisterInput): Promise<void> {
+    this.setMe(await firstValueFrom(this.http.post<Me>('/api/auth/register', input)));
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.post('/api/auth/logout', {}));
+    } finally {
+      this.clear();
+    }
+  }
+
+  /** Olvida la sesión en el navegador (al cerrar sesión o si caduca). */
+  clear(): void {
+    this.setMe(null);
+  }
+
+  select(id: string): void {
+    this.selectedId.set(id);
+    try {
+      localStorage.setItem(STORAGE_KEY, id);
+    } catch {
+      // Sin almacenamiento disponible: se recuerda solo mientras la página siga abierta.
+    }
+  }
+
+  /** Añade o actualiza una casa en la lista y la deja como activa. */
+  upsertHousehold(summary: HouseholdSummary): void {
+    this.me.update((me) => {
+      if (!me) return me;
+      const exists = me.households.some((h) => h.id === summary.id);
+      const households = exists
+        ? me.households.map((h) => (h.id === summary.id ? summary : h))
+        : [...me.households, summary];
+      return { ...me, households };
+    });
+    this.select(summary.id);
+  }
+
+  removeHousehold(id: string): void {
+    this.me.update((me) => (me ? { ...me, households: me.households.filter((h) => h.id !== id) } : me));
+  }
+
+  private setMe(me: Me | null): void {
+    this.me.set(me);
+    this.loaded = Promise.resolve();
+  }
+}
+
+function readStored(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}

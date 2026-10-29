@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Ahora mismo está en marcha la **fase 1**. Ya está montada la estructura (navegación, base de datos con Prisma y tipos compartidos), pero las páginas de Tareas e Ideas todavía no guardan nada.
+Ahora mismo está en marcha la **fase 1**. Ya funcionan las cuentas y las casas: registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa. Las páginas de Tareas e Ideas todavía no guardan nada.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -79,7 +79,14 @@ docker compose up -d --build
 
 ### Acceso desde fuera
 
-El plan es publicarla en `https://hogar.kaitzlab.com` con Cloudflare Tunnel (ver el documento de diseño). La app **todavía no tiene inicio de sesión**, así que no la expongas a internet hasta que esté hecho, o protégela antes con Cloudflare Access.
+El plan es publicarla en `https://hogar.kaitzlab.com` con Cloudflare Tunnel (ver el documento de diseño).
+
+**Cookie de sesión y HTTPS.** La variable `COOKIE_SECURE` del `docker-compose.yml` decide si la cookie de sesión solo viaja por HTTPS:
+
+- `false` (valor actual): permite iniciar sesión entrando por `http://IP-DEL-SERVIDOR:8085` o por Tailscale.
+- `true`: cámbialo cuando solo entres por `https://hogar.kaitzlab.com`. Con `true`, entrar por `http://` no funciona: el navegador no guarda la cookie y no se puede iniciar sesión.
+
+El registro está abierto: cualquiera que llegue a la web puede crearse una cuenta. Solo ve sus propias casas y las casas a las que le inviten.
 
 ### Datos y copias de seguridad
 
@@ -93,6 +100,22 @@ El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
 
 ## API
 
-| Método | Ruta          | Qué hace                                      |
-|--------|---------------|-----------------------------------------------|
-| GET    | `/api/health` | Comprueba que la API y la base de datos responden |
+Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va en la cookie `hogar_sesion`. Las rutas con `:householdId` solo responden a miembros de esa casa; las marcadas *admin*, solo a sus administradores.
+
+| Método | Ruta | Qué hace |
+|--------|------|----------|
+| GET    | `/api/health` | Comprueba que la API y la base de datos responden (pública) |
+| POST   | `/api/auth/register` | Crea una cuenta e inicia sesión (pública) |
+| POST   | `/api/auth/login` | Inicia sesión (pública) |
+| POST   | `/api/auth/logout` | Cierra la sesión (pública) |
+| GET    | `/api/auth/me` | Usuario actual y sus casas con su rol |
+| POST   | `/api/households` | Crea una casa; quien la crea es administrador |
+| GET    | `/api/households/:householdId` | Casa con sus miembros |
+| PATCH  | `/api/households/:householdId` | Cambia el nombre (admin) |
+| PATCH  | `/api/households/:householdId/members/:userId` | Cambia el rol de un miembro (admin) |
+| DELETE | `/api/households/:householdId/members/:userId` | Salir de la casa, o sacar a alguien (admin) |
+| GET    | `/api/households/:householdId/invitations` | Invitaciones pendientes (admin) |
+| POST   | `/api/households/:householdId/invitations` | Crea un enlace de invitación (admin) |
+| DELETE | `/api/households/:householdId/invitations/:id` | Anula una invitación (admin) |
+| GET    | `/api/invitations/:token` | A qué casa invita un enlace (pública) |
+| POST   | `/api/invitations/:token/accept` | Acepta la invitación |

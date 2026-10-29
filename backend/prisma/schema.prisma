@@ -15,30 +15,45 @@ datasource db {
 
 // ---------- Usuarios y hogar ----------
 
+/// Una casa. Cada persona puede estar en varias.
 model Household {
-  id          String       @id @default(uuid())
+  id          String            @id @default(uuid())
   name        String
-  createdAt   DateTime     @default(now())
-  members     User[]
+  createdAt   DateTime          @default(now())
+  members     HouseholdMember[]
   invitations Invitation[]
   tasks       Task[]
   ideas       Idea[]
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
+  id           String   @id @default(uuid())
+  /// Siempre en minúsculas
+  email        String   @unique
   name         String
   passwordHash String
-  householdId  String
-  household    Household @relation(fields: [householdId], references: [id])
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
 
+  memberships   HouseholdMember[]
   sessions      Session[]
   invitations   Invitation[] @relation("InvitationCreatedBy")
   tasksCreated  Task[]       @relation("TaskCreatedBy")
   tasksAssigned Task[]       @relation("TaskAssignee")
   ideas         Idea[]
+}
+
+/// Pertenencia de una persona a una casa.
+model HouseholdMember {
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// admin | miembro
+  role        String    @default("miembro")
+  joinedAt    DateTime  @default(now())
+
+  @@id([householdId, userId])
+  @@index([userId])
 }
 
 /// Sesión iniciada. La cookie lleva un token aleatorio; aquí se guarda su hash.
@@ -53,17 +68,19 @@ model Session {
   @@index([userId])
 }
 
-/// Invitación de un solo uso para unirse a un hogar.
+/// Enlace de invitación de un solo uso para unirse a una casa.
 model Invitation {
   id          String    @id @default(uuid())
   tokenHash   String    @unique
   householdId String
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   createdById String
-  createdBy   User      @relation("InvitationCreatedBy", fields: [createdById], references: [id])
+  createdBy   User      @relation("InvitationCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   expiresAt   DateTime
   usedAt      DateTime?
   createdAt   DateTime  @default(now())
+
+  @@index([householdId])
 }
 
 // ---------- Tareas ----------

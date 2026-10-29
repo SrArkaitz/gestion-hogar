@@ -6,7 +6,7 @@ Referencia del proyecto a largo plazo. Recoge qué es la aplicación, cómo est�
 
 Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, compra, comidas, gastos, fechas importantes y mantenimiento.
 
-- **Usuarios:** Arkaitz y, más adelante, su pareja. Comparten un mismo *hogar*.
+- **Usuarios:** al principio Arkaitz y, más adelante, su pareja. Cada persona tiene su cuenta y puede estar en varias *casas* a la vez (por ejemplo, la suya y la de sus padres).
 - **Dispositivos:** PC y móvil. En el móvil se instala como app (PWA) y recibe notificaciones.
 - **Acceso:** desde casa y desde fuera, en `https://hogar.kaitzlab.com`.
 
@@ -14,7 +14,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### Base común
 
-- **Usuarios y hogar:** login, perfil de cada persona y un hogar compartido con sus miembros. El registro está cerrado: los nuevos miembros entran por invitación.
+- **Usuarios y casas:** registro abierto y login. Quien crea una casa es su administrador. Los administradores invitan con un enlace, sacan a miembros y nombran a otros administradores. Una persona puede estar en varias casas y cambiar entre ellas; todo el contenido (tareas, ideas, compra…) pertenece a una casa. Detalle en 3.0.
 - **Notificaciones:** avisos push en móvil y PC para recordatorios, tareas que vencen, cumpleaños, etc.
 
 ### Módulos de la aplicación
@@ -39,6 +39,16 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - Mantenimiento y Tareas recurrentes → Notificaciones.
 
 ## 3. Detalle por módulo
+
+### 3.0 Usuarios y casas
+
+- **Cuenta:** nombre, correo y contraseña (mínimo 8 caracteres). El registro está abierto a cualquiera.
+- **Casas:** cualquiera puede crear las que quiera. Al registrarse sin invitación se pide crear la primera.
+- **Roles por casa:** *administrador* o *miembro*. Una misma persona puede ser administradora en una casa y miembro en otra.
+- **Administradores:** cambian el nombre de la casa, invitan, sacan a miembros y nombran o quitan administradores.
+- **Invitaciones:** enlace de un solo uso que caduca en 7 días y se puede anular. Quien lo abre sin cuenta puede registrarse y vuelve a la invitación para aceptarla.
+- **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, sus tareas de esa casa quedan sin asignar.
+- **Casa activa:** se elige en un selector (barra lateral en PC, barra superior en móvil) y se recuerda en el navegador.
 
 ### 3.1 Tareas
 
@@ -118,7 +128,8 @@ gestion-hogar/
 
 - **Servidor:** Beelink de casa, con Docker y Portainer. Un único contenedor sirve la web y la API (`/api`).
 - **Acceso exterior:** **Cloudflare Tunnel** hacia `hogar.kaitzlab.com`. No se abren puertos en el router y el HTTPS es automático.
-- **Login:** contraseñas cifradas (argon2), sesión en cookie `HttpOnly` y `Secure`, límite de intentos fallidos, registro cerrado con invitaciones.
+- **Login:** contraseñas cifradas (argon2), sesión de 30 días en cookie `HttpOnly` y `Secure` (en la base de datos solo se guarda el hash del token), límite de intentos fallidos por correo e IP y de registros por IP.
+- **Acceso a datos:** todas las rutas de un módulo cuelgan de `/api/households/:householdId/…` y un guard comprueba que el usuario es miembro de esa casa. A quien no lo es se le responde como si la casa no existiera.
 - **Capa extra opcional:** Cloudflare Access delante de la app.
 - **Copias de seguridad:** copia automática diaria de la base de datos y de las fotos, guardando varias versiones.
 
@@ -140,8 +151,9 @@ Cada fase deja algo que ya se puede usar.
 
 **Fase 1 en curso.**
 
-- Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite y primera migración (hogar, usuarios, sesiones, invitaciones, tareas e ideas), y navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
-- Siguiente: login y hogar (argon2, sesión en cookie, invitaciones), después el tablero de Tareas, el módulo de Ideas y el despliegue en `hogar.kaitzlab.com`.
+- Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
+- Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
+- Siguiente: el tablero de Tareas, el módulo de Ideas y el despliegue en `hogar.kaitzlab.com`.
 
 ## 8. Decisiones tomadas
 
@@ -152,6 +164,7 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-28 | Ideas como módulo separado de Tareas; las ideas aceptadas pasan a tareas. |
 | 2026-10-28 | Recetas con tipo de plato, duración por tramos y minutos opcionales; menú semanal opcional. |
 | 2026-10-28 | El calendario incluye cumpleaños. |
+| 2026-10-29 | Registro abierto. Cada persona puede estar en varias casas, con rol de administrador o miembro en cada una. Sustituye a la decisión inicial de registro cerrado y un único hogar. |
 | 2026-10-29 | Repositorio con npm workspaces y un único `package-lock.json`. `shared/` es el paquete `@hogar/shared`. |
 | 2026-10-29 | Estados, prioridades y categorías se guardan como texto y se validan con las constantes de `@hogar/shared`. Las categorías son texto libre con sugerencias. |
 | 2026-10-29 | Se mantienen Angular 20 y NestJS 11 por ahora. La subida a Angular 22 y NestJS 12 se hará como paso aparte. |

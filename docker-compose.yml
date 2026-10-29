@@ -8,6 +8,9 @@ services:
       - "8085:3000"
     environment:
       - TZ=Europe/Madrid
+      # La cookie de sesión solo viaja por HTTPS si es "true". Déjalo en "false" mientras
+      # entres por http://IP:8085; cámbialo a "true" cuando solo uses https://hogar.kaitzlab.com.
+      - COOKIE_SECURE=false
     volumes:
       - gestion-hogar-data:/app/data
 

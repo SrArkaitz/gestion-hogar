@@ -1,0 +1,110 @@
+<header class="top">
+  <div>
+    <h1>{{ household()?.name ?? session.household()?.name }}</h1>
+    <p class="sub">Eres {{ roleLabels[session.household()?.role ?? 'miembro'].toLowerCase() }} de esta casa.</p>
+  </div>
+</header>
+
+@if (error() || status()) {
+  <div class="status" [class.err]="!!error()" role="status">{{ error() || status() }}</div>
+}
+
+@if (household(); as h) {
+  <div class="panels">
+    @if (isAdmin()) {
+      <section class="panel">
+        <h2>Nombre</h2>
+        <form class="inline" (ngSubmit)="saveName()">
+          <label class="grow">
+            <span class="sr-only">Nombre de la casa</span>
+            <input name="name" required [maxlength]="nameMax" [(ngModel)]="newName" />
+          </label>
+          <button type="submit" class="btn ghost" [disabled]="newName().trim() === h.name">Guardar</button>
+        </form>
+      </section>
+    }
+
+    <section class="panel">
+      <h2>Miembros <span class="count">{{ h.members.length }}</span></h2>
+      <ul class="members">
+        @for (m of h.members; track m.id) {
+          <li>
+            <div class="who">
+              <span class="t">{{ m.name }}@if (m.id === me()) { <span class="you">(tú)</span> }</span>
+              <span class="n">{{ m.email }}</span>
+            </div>
+            <span class="role" [class.admin]="m.role === 'admin'">{{ roleLabels[m.role] }}</span>
+            @if (isAdmin() && m.id !== me()) {
+              <div class="acts-sm">
+                <button type="button" class="link" (click)="toggleAdmin(m)">
+                  {{ m.role === 'admin' ? 'Quitar admin' : 'Hacer admin' }}
+                </button>
+                <button type="button" class="link danger" (click)="removeMember(m)">Sacar</button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    @if (isAdmin()) {
+      <section class="panel">
+        <h2>Invitar</h2>
+        <p class="n">Crea un enlace y envíaselo a quien quieras invitar. Sirve para una sola persona y caduca en {{ invitationDays }} días.</p>
+        @if (newInvitation(); as inv) {
+          <div class="invite-link">
+            <input readonly [value]="inviteLink(inv.token)" aria-label="Enlace de invitación" (focus)="$any($event.target).select()" />
+            <button type="button" class="btn" (click)="copyInvitation()">{{ copied() ? 'Copiado' : 'Copiar' }}</button>
+          </div>
+          <p class="hint">Cópialo ahora: por seguridad no se puede volver a mostrar.</p>
+        } @else {
+          <button type="button" class="btn" (click)="createInvitation()">Crear enlace de invitación</button>
+        }
+        @if (invitations().length) {
+          <h3>Pendientes</h3>
+          <ul class="invites">
+            @for (inv of invitations(); track inv.id) {
+              <li>
+                <span class="n">Creada por {{ inv.createdBy }} el {{ formatDate(inv.createdAt) }} · caduca el {{ formatDate(inv.expiresAt) }}</span>
+                <button type="button" class="link danger" (click)="revoke(inv)">Anular</button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <section class="panel">
+      <h2>Tus casas</h2>
+      <ul class="houses">
+        @for (other of session.households(); track other.id) {
+          <li>
+            <span class="t">{{ other.name }}</span>
+            <span class="role" [class.admin]="other.role === 'admin'">{{ roleLabels[other.role] }}</span>
+            @if (other.id === h.id) {
+              <span class="n">Activa</span>
+            } @else {
+              <button type="button" class="link" (click)="session.select(other.id)">Cambiar a esta</button>
+            }
+          </li>
+        }
+      </ul>
+      <form class="inline" (ngSubmit)="createAnother()">
+        <label class="grow">
+          <span class="sr-only">Nombre de la casa nueva</span>
+          <input name="another" required [maxlength]="nameMax" placeholder="Nombre de otra casa" [(ngModel)]="anotherName" />
+        </label>
+        <button type="submit" class="btn ghost" [disabled]="!anotherName().trim()">Crear casa</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Cuenta</h2>
+      <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
+      <div class="acts">
+        <button type="button" class="btn ghost" (click)="logout()">Cerrar sesión</button>
+        <button type="button" class="btn danger" (click)="leave()">Salir de esta casa</button>
+      </div>
+    </section>
+  </div>
+}
