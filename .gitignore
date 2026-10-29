@@ -12,3 +12,9 @@ backend/public/
 
 # Cliente de Prisma generado
 backend/src/generated/
+
+# Skills de asistentes de IA instaladas en local
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
