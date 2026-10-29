@@ -1,6 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { ModuleKey } from '@hogar/shared';
 import { catchError, throwError } from 'rxjs';
 import { SessionService } from './session.service';
 
@@ -32,6 +33,26 @@ export const householdGuard: CanActivateFn = async (route, state) => {
   const url = router.parseUrl(state.url);
   delete url.queryParams['casa'];
   return url;
+};
+
+/** Para cada sección: si la casa activa la tiene oculta, a la primera que sí use. */
+export function sectionGuard(key: ModuleKey): CanActivateFn {
+  return () => {
+    const session = inject(SessionService);
+    const router = inject(Router);
+    return session.uses(key) || router.parseUrl(session.home());
+  };
+}
+
+/**
+ * La portada lleva a la primera sección que use la casa. Es un guard y no un redirectTo porque
+ * tiene que esperar a que se cargue la sesión para saber qué secciones usa.
+ */
+export const homeGuard: CanActivateFn = async () => {
+  const session = inject(SessionService);
+  const router = inject(Router);
+  await session.ensureLoaded();
+  return router.parseUrl(session.home());
 };
 
 /** Para entrar y registrarse: si ya hay sesión, a la app. */

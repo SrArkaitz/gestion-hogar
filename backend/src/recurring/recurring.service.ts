@@ -24,6 +24,7 @@ import { parseAssigneeIds } from '../common/assignees';
 import { TIME_ZONE, todayIso } from '../common/dates';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
+import { householdUses } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
 const CATEGORY_MAX = 40;
@@ -82,7 +83,11 @@ export class RecurringService implements OnApplicationBootstrap {
 
   /** Crea las tareas de todas las plantillas a las que ya les toca. @returns cuántas ha creado. */
   async generateDue(today: IsoDate): Promise<number> {
-    const due = await this.prisma.recurringTask.findMany({ where: { active: true, nextDate: { lte: today } }, include });
+    // Las casas que ocultan Tareas no reciben tareas nuevas (siguen al volver a mostrarlas).
+    const due = await this.prisma.recurringTask.findMany({
+      where: { active: true, nextDate: { lte: today }, household: householdUses('tareas') },
+      include,
+    });
     let created = 0;
     for (const row of due) if (await this.generate(row, today)) created++;
     return created;

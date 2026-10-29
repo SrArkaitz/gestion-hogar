@@ -40,6 +40,8 @@ interface Slot {
 export class MenuPage {
   protected readonly store = inject(RecipesStore);
   private readonly session = inject(SessionService);
+  /** Sin la sección de Compra no se ofrece pasar ingredientes a la lista. */
+  protected readonly usesShopping = computed(() => this.session.uses('compra'));
 
   protected readonly meals = MEALS;
   protected readonly mealLabels = MEAL_LABELS;

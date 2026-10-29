@@ -77,7 +77,7 @@ export function occurrenceOnOrAfter(r: Recurrence, from: IsoDate): IsoDate {
       // Desde el ciclo del mes de `from` (o el anterior) hacia delante.
       let k = Math.max(0, Math.floor(((fy - y) * 12 + (fm - m)) / r.interval) - 1);
       for (;;) {
-        const date = addMonthsClamped(r.startDate, k * r.interval);
+        const date = addMonths(r.startDate, k * r.interval);
         if (date >= from) return date;
         k++;
       }
@@ -131,7 +131,7 @@ function daysBetween(a: IsoDate, b: IsoDate): number {
 }
 
 /** Suma meses conservando el día; si el mes no lo tiene, usa su último día. */
-function addMonthsClamped(date: IsoDate, months: number): IsoDate {
+export function addMonths(date: IsoDate, months: number): IsoDate {
   const [y, m, d] = date.split('-').map(Number);
   const first = new Date(Date.UTC(y, m - 1 + months, 1));
   const lastDay = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();

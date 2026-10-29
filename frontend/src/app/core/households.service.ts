@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import {
   CreatedInvitation,
   Household,
+  HouseholdPatch,
   HouseholdSummary,
   Invitation,
   InvitationPreview,
@@ -25,8 +26,9 @@ export class HouseholdsService {
     return firstValueFrom(this.http.get<Household>(`${this.api}/${id}`));
   }
 
-  rename(id: string, name: string): Promise<Household> {
-    return firstValueFrom(this.http.patch<Household>(`${this.api}/${id}`, { name }));
+  /** Cambia el nombre o las secciones de la casa (solo administradores). */
+  update(id: string, patch: HouseholdPatch): Promise<Household> {
+    return firstValueFrom(this.http.patch<Household>(`${this.api}/${id}`, patch));
   }
 
   setRole(id: string, userId: string, role: Role): Promise<Household> {

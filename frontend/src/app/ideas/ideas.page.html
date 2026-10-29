@@ -19,7 +19,7 @@
 }
 @if (notice()) {
   <div class="notice" role="status">
-    {{ notice() }} <a routerLink="/tareas">Ir a tareas</a>
+    {{ notice() }} @if (usesTasks()) { <a routerLink="/tareas">Ir a tareas</a> }
     <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
   </div>
 }
@@ -47,15 +47,21 @@
           @case ('nueva') {
             <button type="button" class="link" (click)="setStatus(idea, 'en_valoracion')">A valorar</button>
             <button type="button" class="link danger" (click)="setStatus(idea, 'descartada')">Descartar</button>
-            <button type="button" class="btn sm" (click)="startAccept(idea)">Aceptar</button>
+            @if (usesTasks()) {
+              <button type="button" class="btn sm" (click)="startAccept(idea)">Aceptar</button>
+            }
           }
           @case ('en_valoracion') {
             <button type="button" class="link danger" (click)="setStatus(idea, 'descartada')">Descartar</button>
-            <button type="button" class="btn sm" (click)="startAccept(idea)">Aceptar</button>
+            @if (usesTasks()) {
+              <button type="button" class="btn sm" (click)="startAccept(idea)">Aceptar</button>
+            }
           }
           @case ('aceptada') {
             @if (idea.taskId) {
-              <a class="link" routerLink="/tareas">Ver en tareas</a>
+              @if (usesTasks()) {
+                <a class="link" routerLink="/tareas">Ver en tareas</a>
+              }
             } @else {
               <span class="n">Su tarea se ha borrado</span>
             }

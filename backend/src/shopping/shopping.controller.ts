@@ -2,10 +2,12 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards 
 import { ShoppingItem, ShoppingProduct, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
+import { Section, SectionGuard } from '../households/section.guard';
 import { ShoppingService } from './shopping.service';
 
 @Controller('households/:householdId/shopping')
-@UseGuards(HouseholdGuard)
+@UseGuards(HouseholdGuard, SectionGuard)
+@Section('compra')
 export class ShoppingController {
   constructor(private readonly shopping: ShoppingService) {}
 

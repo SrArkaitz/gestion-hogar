@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard, householdGuard } from './core/guards';
+import { authGuard, guestGuard, homeGuard, householdGuard, sectionGuard } from './core/guards';
 import { Shell } from './layout/shell';
 
 export const routes: Routes = [
@@ -17,11 +17,12 @@ export const routes: Routes = [
     component: Shell,
     canActivate: [authGuard, householdGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'tareas' },
-      { path: 'tareas', loadChildren: () => import('./tasks/tasks.routes').then((m) => m.TASKS_ROUTES) },
-      { path: 'ideas', loadChildren: () => import('./ideas/ideas.routes').then((m) => m.IDEAS_ROUTES) },
-      { path: 'recetas', loadChildren: () => import('./recipes/recipes.routes').then((m) => m.RECIPES_ROUTES) },
-      { path: 'compra', title: 'Compra · Hogar', loadComponent: () => import('./shopping/shopping.page').then((m) => m.ShoppingPage) },
+      { path: '', pathMatch: 'full', canActivate: [homeGuard], children: [] },
+      { path: 'tareas', canActivate: [sectionGuard('tareas')], loadChildren: () => import('./tasks/tasks.routes').then((m) => m.TASKS_ROUTES) },
+      { path: 'ideas', canActivate: [sectionGuard('ideas')], loadChildren: () => import('./ideas/ideas.routes').then((m) => m.IDEAS_ROUTES) },
+      { path: 'recetas', canActivate: [sectionGuard('recetas')], loadChildren: () => import('./recipes/recipes.routes').then((m) => m.RECIPES_ROUTES) },
+      { path: 'gastos', canActivate: [sectionGuard('gastos')], loadChildren: () => import('./expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES) },
+      { path: 'compra', canActivate: [sectionGuard('compra')], title: 'Compra · Hogar', loadComponent: () => import('./shopping/shopping.page').then((m) => m.ShoppingPage) },
       { path: 'casa', title: 'Casa · Hogar', loadComponent: () => import('./households/household.page').then((m) => m.HouseholdPage) },
     ],
   },

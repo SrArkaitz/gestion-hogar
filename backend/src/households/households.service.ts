@@ -3,6 +3,7 @@ import {
   Household,
   HouseholdSummary,
   MEMBER_COLORS,
+  MODULES,
   MemberColor,
   NAME_MAX_LENGTH,
   Role,
@@ -10,6 +11,7 @@ import {
 } from '@hogar/shared';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
+import { parseHidden } from './section.guard';
 
 @Injectable()
 export class HouseholdsService {
@@ -21,7 +23,7 @@ export class HouseholdsService {
     const household = await this.prisma.household.create({
       data: { name, members: { create: { userId, role: 'admin', color: MEMBER_COLORS[0] } } },
     });
-    return { id: household.id, name: household.name, role: 'admin' };
+    return { id: household.id, name: household.name, role: 'admin', hiddenModules: [] };
   }
 
   async get(householdId: string): Promise<Household> {
@@ -32,6 +34,7 @@ export class HouseholdsService {
     return {
       id: household.id,
       name: household.name,
+      hiddenModules: parseHidden(household.hiddenModules),
       members: household.members.map((m) => ({
         id: m.user.id,
         name: m.user.name,
@@ -43,9 +46,19 @@ export class HouseholdsService {
     };
   }
 
-  async rename(householdId: string, body: unknown): Promise<Household> {
-    const name = requiredText(asObject(body)['name'], 'El nombre de la casa', NAME_MAX_LENGTH);
-    await this.prisma.household.update({ where: { id: householdId }, data: { name } });
+  /** Cambia el nombre o las secciones que se ocultan (solo administradores). */
+  async update(householdId: string, body: unknown): Promise<Household> {
+    const b = asObject(body);
+    const data: { name?: string; hiddenModules?: string } = {};
+    if (b['name'] !== undefined) data.name = requiredText(b['name'], 'El nombre de la casa', NAME_MAX_LENGTH);
+    if (b['hiddenModules'] !== undefined) {
+      const list = b['hiddenModules'];
+      if (!Array.isArray(list) || !list.every((k) => (MODULES as readonly unknown[]).includes(k))) {
+        throw new BadRequestException(`hiddenModules tiene que ser una lista de secciones (${MODULES.join(', ')})`);
+      }
+      data.hiddenModules = MODULES.filter((k) => list.includes(k)).join(',');
+    }
+    await this.prisma.household.update({ where: { id: householdId }, data });
     return this.get(householdId);
   }
 

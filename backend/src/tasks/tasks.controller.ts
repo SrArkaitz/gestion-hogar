@@ -2,10 +2,12 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards 
 import { Task, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
+import { Section, SectionGuard } from '../households/section.guard';
 import { TasksService } from './tasks.service';
 
 @Controller('households/:householdId/tasks')
-@UseGuards(HouseholdGuard)
+@UseGuards(HouseholdGuard, SectionGuard)
+@Section('tareas')
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 

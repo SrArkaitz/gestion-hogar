@@ -3,11 +3,13 @@ import { MenuEntry, Recipe, User } from '@hogar/shared';
 import type { Response } from 'express';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
+import { Section, SectionGuard } from '../households/section.guard';
 import { MenuService } from './menu.service';
 import { RecipesService } from './recipes.service';
 
 @Controller('households/:householdId/recipes')
-@UseGuards(HouseholdGuard)
+@UseGuards(HouseholdGuard, SectionGuard)
+@Section('recetas')
 export class RecipesController {
   constructor(private readonly recipes: RecipesService) {}
 
@@ -57,7 +59,8 @@ export class RecipesController {
 }
 
 @Controller('households/:householdId/menu')
-@UseGuards(HouseholdGuard)
+@UseGuards(HouseholdGuard, SectionGuard)
+@Section('recetas')
 export class MenuController {
   constructor(private readonly menu: MenuService) {}
 

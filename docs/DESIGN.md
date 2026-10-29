@@ -50,6 +50,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Administradores:** cambian el nombre de la casa, invitan, sacan a miembros y nombran o quitan administradores.
 - **Invitaciones:** enlace de un solo uso que caduca en 7 días y se puede anular. Quien lo abre sin cuenta puede registrarse y vuelve a la invitación para aceptarla.
 - **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, deja de estar asignado a las tareas de esa casa.
+- **Secciones de cada casa:** en *Casa → Secciones* los administradores eligen qué usa la casa (Tareas, Ideas, Compra, Recetas, Gastos y facturas). Lo que se desmarca se oculta para todos: sale de la navegación, sus rutas de la API responden como si no existieran y se dejan de enviar sus avisos (y, en Tareas, de crear las recurrentes). No se borra nada, por si se vuelve a mostrar. *Casa* siempre se ve. Al entrar se va a la primera sección que use la casa. Para no dejar nada a medias, sin Tareas no se puede aceptar una idea y sin Compra las recetas no ofrecen "Añadir a la compra".
 - **Tema:** claro, oscuro o el del sistema, desde *Casa → Cuenta*. Se guarda en cada dispositivo (no en la cuenta), así el móvil y el PC pueden tener uno distinto.
 - **Casa activa:** se elige en un selector (barra lateral en PC, barra superior en móvil) y se recuerda en el navegador.
 
@@ -117,7 +118,12 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.5 Gastos y facturas
 
-*Se detalla al llegar a su fase.* Idea inicial: gasto con importe, categoría, quién paga y cómo se reparte; resumen de quién debe a quién; facturas fijas con fecha de vencimiento.
+- **Opcional por casa**, como las demás secciones (ver 3.0): útil en una casa donde no se llevan cuentas.
+- **Gasto:** concepto, importe, fecha, quién pagó, entre quiénes se reparte (por defecto, toda la casa), categoría con sugerencias (Supermercado, Casa, Facturas, Ocio…) y notas. Importes en céntimos.
+- **Reparto:** a partes iguales; los céntimos que sobran van a los primeros por orden de llegada a la casa (10 € entre 3 = 3,34 + 3,33 + 3,33). El reparto se guarda con el gasto, así que no cambia si luego entra o sale alguien.
+- **Saldos:** lo que pagó cada uno menos lo que le toca, contando los pagos entre personas. Debajo, los pagos mínimos para quedar en paz ("Laura → Arkaitz 12,30 €") con un botón *Saldar* que apunta el pago. Quien se va de la casa con saldo pendiente sigue saliendo.
+- **Facturas fijas:** nombre, importe aproximado, cada cuántos meses y próximo vencimiento. *Pagar* crea su gasto (categoría Facturas) y la pasa a la siguiente fecha. Las que vencen en los próximos 3 días o ya vencieron entran en el aviso de las 9:00, a toda la casa.
+- **Resumen del mes:** total, por categoría y, por persona, lo que pagó y lo que le tocaba.
 
 ### 3.6 Calendario
 
@@ -180,7 +186,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fases 1 a 4 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
+**Fases 1 a 5 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -193,7 +199,9 @@ Cada fase deja algo que ya se puede usar.
 - Hecho (fase 2): tareas recurrentes, app instalable y avisos push (recordatorio diario y al asignar).
 - Hecho (fase 3): lista de la compra compartida, con secciones, habituales y sincronización entre móviles.
 - Hecho (fase 4): recetario con fotos, raciones escalables y menú semanal, conectados con la compra. Las fotos entran en la copia diaria.
-- Siguiente: fase 5, gastos y facturas.
+- Hecho (fase 5): gastos repartidos, saldos y pagos para quedar en paz, facturas fijas con aviso y resumen del mes.
+- Hecho: cada casa elige qué secciones usa (los administradores, en *Casa → Secciones*).
+- Siguiente: fase 6, calendario con cumpleaños.
 
 ## 8. Decisiones tomadas
 
@@ -214,4 +222,6 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Avisos: recordatorio diario a las 9:00 y aviso al asignar. Claves VAPID generadas por el servidor y guardadas en la base de datos. |
 | 2026-10-29 | El service worker no usa caché: la app solo funciona con conexión. |
 | 2026-10-29 | Recetas: ingredientes y pasos se guardan como JSON dentro de la receta. Las fotos se reducen en el navegador y se suben tal cual (sin multipart). Antes de pasar ingredientes a la compra se pueden desmarcar. |
+| 2026-10-29 | Gastos: reparto a partes iguales guardado con cada gasto; saldos y pagos mínimos para quedar en paz; facturas fijas cada N meses. |
+| 2026-10-29 | Cada casa elige qué secciones usa. Se guarda la lista de las ocultas, así que una sección nueva aparece visible en todas las casas. Ocultar no borra datos. |
 | 2026-10-29 | Compra: una lista por casa, secciones fijas (adivinadas y luego recordadas por producto), lo comprado se queda en el carro hasta quitarlo y los habituales salen solos de lo ya comprado. Se sincroniza consultando al servidor cada pocos segundos. |

@@ -17,18 +17,24 @@ datasource db {
 
 /// Una casa. Cada persona puede estar en varias.
 model Household {
-  id          String            @id @default(uuid())
-  name        String
-  createdAt   DateTime          @default(now())
-  members     HouseholdMember[]
-  invitations Invitation[]
-  tasks       Task[]
-  ideas       Idea[]
-  recurring   RecurringTask[]
-  shopping    ShoppingItem[]
-  products    ShoppingProduct[]
-  recipes     Recipe[]
-  menu        MenuEntry[]
+  id            String            @id @default(uuid())
+  name          String
+  /// Secciones que la casa no usa, separadas por comas (claves de MODULES en @hogar/shared).
+  /// Se ocultan pero no se borra nada. Vacío: se ven todas.
+  hiddenModules String            @default("")
+  createdAt     DateTime          @default(now())
+  members       HouseholdMember[]
+  invitations   Invitation[]
+  tasks         Task[]
+  ideas         Idea[]
+  recurring     RecurringTask[]
+  shopping      ShoppingItem[]
+  products      ShoppingProduct[]
+  recipes       Recipe[]
+  menu          MenuEntry[]
+  expenses      Expense[]
+  settlements   Settlement[]
+  bills         Bill[]
 }
 
 model User {
@@ -53,6 +59,10 @@ model User {
   pushSubscriptions PushSubscription[]
   shoppingAdded     ShoppingItem[]
   recipesCreated    Recipe[]
+  expensesPaid      Expense[]               @relation("ExpensePaidBy")
+  expenseShares     ExpenseShare[]
+  settlementsSent   Settlement[]            @relation("SettlementFrom")
+  settlementsGot    Settlement[]            @relation("SettlementTo")
 }
 
 /// Pertenencia de una persona a una casa.
@@ -301,4 +311,79 @@ model MenuEntry {
   createdAt   DateTime  @default(now())
 
   @@index([householdId, date])
+}
+
+/// Gasto de la casa. Importes en céntimos. El reparto se guarda al crearlo (ExpenseShare), así que
+/// no cambia aunque luego entre o salga alguien de la casa.
+model Expense {
+  id          String         @id @default(uuid())
+  householdId String
+  household   Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  concept     String
+  amount      Int
+  /// AAAA-MM-DD
+  date        String
+  category    String?
+  notes       String         @default("")
+  paidById    String
+  paidBy      User           @relation("ExpensePaidBy", fields: [paidById], references: [id])
+  shares      ExpenseShare[]
+  /// Factura fija que se pagó con este gasto
+  billId      String?
+  bill        Bill?          @relation(fields: [billId], references: [id], onDelete: SetNull)
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([householdId, date])
+}
+
+/// Lo que le toca pagar a cada persona de un gasto (en céntimos; suma el importe del gasto).
+model ExpenseShare {
+  expenseId String
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  amount    Int
+
+  @@id([expenseId, userId])
+  @@index([userId])
+}
+
+/// Pago entre dos personas para quedar en paz.
+model Settlement {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  fromId      String
+  from        User      @relation("SettlementFrom", fields: [fromId], references: [id])
+  toId        String
+  to          User      @relation("SettlementTo", fields: [toId], references: [id])
+  amount      Int
+  /// AAAA-MM-DD
+  date        String
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId, date])
+}
+
+/// Factura fija (luz, agua, internet…) que llega cada N meses.
+model Bill {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  /// Importe aproximado en céntimos
+  amount      Int?
+  /// Cada cuántos meses
+  interval    Int       @default(1)
+  /// AAAA-MM-DD
+  nextDue     String
+  active      Boolean   @default(true)
+  notes       String    @default("")
+  expenses    Expense[]
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
 }

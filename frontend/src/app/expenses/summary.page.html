@@ -1,0 +1,59 @@
+<header class="top">
+  <div>
+    <h1>Gastos</h1>
+    <p class="sub">En qué se va el dinero de la casa cada mes.</p>
+  </div>
+</header>
+
+<app-expenses-tabs />
+
+<div class="month-nav">
+  <button type="button" class="btn ghost sm" aria-label="Mes anterior" (click)="moveMonth(-1)">‹</button>
+  <h2 aria-live="polite">{{ monthText() }}</h2>
+  <button type="button" class="btn ghost sm" aria-label="Mes siguiente" (click)="moveMonth(1)">›</button>
+  @if (!isThisMonth()) {
+    <button type="button" class="link" (click)="goThisMonth()">Este mes</button>
+  }
+</div>
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+} @else if (loading()) {
+  <div class="status" role="status">Cargando…</div>
+} @else if (!expenses().length) {
+  <p class="empty">No hay gastos este mes.</p>
+} @else {
+  <div class="money-cols">
+    <section class="panel">
+      <h2>Total del mes</h2>
+      <p class="big-total">{{ euros(total()) }}</p>
+      <h3>Por categoría</h3>
+      <ul class="bars">
+        @for (r of byCategory(); track r.label) {
+          <li>
+            <span class="label">{{ r.label }}</span>
+            <span class="amount">{{ euros(r.amount) }}</span>
+            <span class="bar" aria-hidden="true"><span [style.width.%]="r.ratio * 100"></span></span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Por persona</h2>
+      <p class="n">Lo que pagó cada uno y lo que le tocaba de los gastos de este mes.</p>
+      <ul class="people-sum">
+        @for (p of byPerson(); track p.id) {
+          <li>
+            <span class="avatar" [attr.data-c]="p.color" aria-hidden="true">{{ initials(p.name) }}</span>
+            <span class="t">{{ p.name }}</span>
+            <span class="cols">
+              <span><span class="n">pagó</span> {{ euros(p.paid) }}</span>
+              <span><span class="n">le tocaba</span> {{ euros(p.share) }}</span>
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+}

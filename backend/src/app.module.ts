@@ -5,6 +5,7 @@ import { existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { BackupModule } from './backup/backup.module';
+import { ExpensesModule } from './expenses/expenses.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
 import { IdeasModule } from './ideas/ideas.module';
@@ -30,6 +31,7 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
     RecurringModule,
     ShoppingModule,
     RecipesModule,
+    ExpensesModule,
     BackupModule,
     ...(existsSync(publicDir)
       ? [

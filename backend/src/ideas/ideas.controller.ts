@@ -2,10 +2,12 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req, UseGu
 import { AcceptIdeaResult, Idea, User } from '@hogar/shared';
 import { AppRequest, CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
+import { Section, SectionGuard } from '../households/section.guard';
 import { IdeasService } from './ideas.service';
 
 @Controller('households/:householdId/ideas')
-@UseGuards(HouseholdGuard)
+@UseGuards(HouseholdGuard, SectionGuard)
+@Section('ideas')
 export class IdeasController {
   constructor(private readonly ideas: IdeasService) {}
 
@@ -31,7 +33,9 @@ export class IdeasController {
   }
 
   /** Acepta la idea y crea su tarea. */
+  /** Aceptar crea una tarea: la casa tiene que usar también Tareas. */
   @Post(':id/accept')
+  @Section('tareas')
   accept(
     @Param('householdId') householdId: string,
     @Param('id') id: string,

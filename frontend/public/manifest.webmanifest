@@ -4,7 +4,7 @@
   "short_name": "Hogar",
   "description": "Tareas, ideas y todo lo de casa en un solo sitio.",
   "lang": "es",
-  "start_url": "/tareas",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f1f3ef",

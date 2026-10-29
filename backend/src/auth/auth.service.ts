@@ -3,6 +3,7 @@ import { LoginInput, Me, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, RegisterInput, Ro
 import * as argon2 from 'argon2';
 import { RateLimiter } from '../common/rate-limiter';
 import { asObject, emailField, requiredText } from '../common/validation';
+import { parseHidden } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { GoogleLoginError, GoogleProfile } from './google.service';
 
@@ -106,7 +107,12 @@ export class AuthService {
     });
     return {
       user: { id: user.id, name: user.name, email: user.email },
-      households: user.memberships.map((m) => ({ id: m.household.id, name: m.household.name, role: m.role as Role })),
+      households: user.memberships.map((m) => ({
+        id: m.household.id,
+        name: m.household.name,
+        role: m.role as Role,
+        hiddenModules: parseHidden(m.household.hiddenModules),
+      })),
       account: { password: !!user.passwordHash, google: !!user.googleId },
     };
   }

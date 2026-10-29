@@ -6,3 +6,5 @@ export * from './recurring';
 export * from './notifications';
 export * from './shopping';
 export * from './recipes';
+export * from './expenses';
+export * from './modules';

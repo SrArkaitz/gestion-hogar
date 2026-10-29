@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { IsoDate } from '@hogar/shared';
+import { addDays, BILL_NOTICE_DAYS, formatEuros, IsoDate } from '@hogar/shared';
 import { TIME_ZONE, todayIso } from '../common/dates';
+import { householdUses } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { PushService } from './push.service';
 
@@ -28,17 +29,50 @@ export class RemindersService {
   @Cron('0 0 9 * * *', { timeZone: TIME_ZONE })
   async daily(): Promise<void> {
     try {
-      const sent = await this.sendDueReminders(todayIso());
-      if (sent) this.logger.log(`Recordatorios de tareas enviados a ${sent} dispositivos`);
+      const today = todayIso();
+      const tasks = await this.sendDueReminders(today);
+      const bills = await this.sendBillReminders(today);
+      if (tasks || bills) this.logger.log(`Recordatorios enviados: ${tasks} de tareas y ${bills} de facturas`);
     } catch (err) {
       this.logger.error(`No se pudieron enviar los recordatorios: ${(err as Error).message}`);
     }
   }
 
+  /**
+   * Facturas que vencen en los próximos días o ya vencieron: un aviso por casa a todos sus
+   * miembros. Las casas que ocultan Gastos no reciben nada.
+   * @returns cuántos dispositivos han recibido algún aviso.
+   */
+  async sendBillReminders(today: IsoDate): Promise<number> {
+    const bills = await this.prisma.bill.findMany({
+      where: { active: true, nextDue: { lte: addDays(today, BILL_NOTICE_DAYS) }, household: householdUses('gastos') },
+      orderBy: { nextDue: 'asc' },
+      include: { household: { select: { id: true, name: true, members: { select: { userId: true } } } } },
+    });
+    const byHousehold = new Map<string, typeof bills>();
+    for (const bill of bills) byHousehold.set(bill.householdId, [...(byHousehold.get(bill.householdId) ?? []), bill]);
+
+    let sent = 0;
+    for (const [householdId, list] of byHousehold) {
+      const { name, members } = list[0].household;
+      const lines = list.map((b) => `${b.name} ${dueText(b.nextDue, today)}${b.amount ? ` (unos ${formatEuros(b.amount)})` : ''}`);
+      sent += await this.push.send(
+        members.map((m) => m.userId),
+        {
+          title: `${list.length === 1 ? 'Factura por pagar' : `${list.length} facturas por pagar`} · ${name}`,
+          body: lines.join('. ') + '.',
+          url: `/gastos/facturas?casa=${householdId}`,
+          tag: `facturas-${householdId}`,
+        },
+      );
+    }
+    return sent;
+  }
+
   /** @returns cuántos dispositivos han recibido algún aviso. */
   async sendDueReminders(today: IsoDate): Promise<number> {
     const tasks = await this.prisma.task.findMany({
-      where: { status: { not: 'hecho' }, due: { lte: today } },
+      where: { status: { not: 'hecho' }, due: { lte: today }, household: householdUses('tareas') },
       orderBy: [{ due: 'asc' }, { createdAt: 'asc' }],
       include: {
         assignees: { select: { userId: true } },
@@ -77,6 +111,14 @@ export class RemindersService {
     }
     return sent;
   }
+}
+
+/** "vence hoy", "vence mañana", "vence el 5 nov" o "venció el 2 nov". */
+function dueText(due: IsoDate, today: IsoDate): string {
+  if (due === today) return 'vence hoy';
+  if (due === addDays(today, 1)) return 'vence mañana';
+  const day = new Date(due + 'T00:00:00Z').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return due < today ? `venció el ${day}` : `vence el ${day}`;
 }
 
 /** "A, B y C", o "A, B, C y 2 más" si son muchas. */

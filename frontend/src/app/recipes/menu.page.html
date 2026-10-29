@@ -3,7 +3,9 @@
     <h1>Recetas</h1>
     <p class="sub">Qué se come cada día. Es opcional: el recetario funciona sin él.</p>
   </div>
-  <button type="button" class="btn" [disabled]="!entries().length" (click)="openPreview()">Añadir la semana a la compra</button>
+  @if (usesShopping()) {
+    <button type="button" class="btn" [disabled]="!entries().length" (click)="openPreview()">Añadir la semana a la compra</button>
+  }
 </header>
 
 <app-recipes-tabs />

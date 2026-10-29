@@ -1,3 +1,5 @@
+import { ModuleKey } from './modules';
+
 export const ROLES = ['admin', 'miembro'] as const;
 export type Role = (typeof ROLES)[number];
 
@@ -53,6 +55,8 @@ export interface HouseholdSummary {
   id: string;
   name: string;
   role: Role;
+  /** Secciones que la casa no usa (las eligen los administradores). */
+  hiddenModules: ModuleKey[];
 }
 
 /** Respuesta de /api/auth/me: quién soy y en qué casas estoy. */
@@ -95,7 +99,15 @@ export interface Member {
 export interface Household {
   id: string;
   name: string;
+  hiddenModules: ModuleKey[];
   members: Member[];
+}
+
+/** Lo que puede cambiar un administrador de la casa. */
+export interface HouseholdPatch {
+  name?: string;
+  /** Secciones ocultas (sustituye a la lista anterior). */
+  hiddenModules?: ModuleKey[];
 }
 
 export interface RegisterInput {

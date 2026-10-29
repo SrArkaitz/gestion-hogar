@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { AuthProviders, HouseholdSummary, LoginInput, Me, RegisterInput } from '@hogar/shared';
+import { AuthProviders, HouseholdSummary, LoginInput, Me, ModuleKey, MODULES, moduleVisible, RegisterInput } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
 import { PushClientService } from './push.service';
 
@@ -23,9 +23,16 @@ export class SessionService {
     return list.find((h) => h.id === this.selectedId()) ?? list[0] ?? null;
   });
   readonly isAdmin = computed(() => this.household()?.role === 'admin');
+  /** Primera sección que usa la casa activa (a donde se va al entrar), o los ajustes si no usa ninguna. */
+  readonly home = computed(() => '/' + (MODULES.find((m) => moduleVisible(this.household(), m)) ?? 'casa'));
   /** Formas de entrar que ofrece el servidor (null mientras se consulta). */
   readonly providers = signal<AuthProviders | null>(null);
   private providersLoaded = false;
+
+  /** Si la casa activa usa una sección (los administradores pueden ocultarlas). */
+  uses(key: ModuleKey): boolean {
+    return moduleVisible(this.household(), key);
+  }
 
   /** Carga la sesión una sola vez (la usan los guards de las rutas). */
   ensureLoaded(): Promise<void> {

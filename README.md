@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, la app instalable (PWA) y los avisos push.
+Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA) y los avisos push. Cada casa elige qué secciones usa.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -96,7 +96,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/auth/google` | Desconecta Google (solo si la cuenta tiene contraseña) |
 | POST   | `/api/households` | Crea una casa; quien la crea es administrador |
 | GET    | `/api/households/:householdId` | Casa con sus miembros |
-| PATCH  | `/api/households/:householdId` | Cambia el nombre (admin) |
+| PATCH  | `/api/households/:householdId` | Cambia el nombre (`name`) o las secciones ocultas (`hiddenModules`: `tareas`, `ideas`, `compra`, `recetas`, `gastos`) (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId` | Cambia el rol de un miembro (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId/color` | Cambia el color de un miembro (`{ "color": "verde" }`): el propio, o cualquiera si eres admin |
 | DELETE | `/api/households/:householdId/members/:userId` | Salir de la casa, o sacar a alguien (admin) |
@@ -133,6 +133,19 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/menu` | Pone un plato (`date`, `meal`: `comida` o `cena`, `recipeId`, `servings`) |
 | PATCH  | `/api/households/:householdId/menu/:id` | Cambia raciones, día o comida |
 | DELETE | `/api/households/:householdId/menu/:id` | Quita un plato |
+| GET    | `/api/households/:householdId/expenses?from=AAAA-MM-DD&to=AAAA-MM-DD` | Gastos entre dos fechas |
+| GET    | `/api/households/:householdId/expenses/balances` | Saldo de cada persona y pagos para quedar en paz |
+| POST   | `/api/households/:householdId/expenses` | Apunta un gasto |
+| PATCH  | `/api/households/:householdId/expenses/:id` | Edita un gasto (se envía entero; el reparto se recalcula) |
+| DELETE | `/api/households/:householdId/expenses/:id` | Borra un gasto |
+| GET    | `/api/households/:householdId/settlements?from=…&to=…` | Pagos entre personas entre dos fechas |
+| POST   | `/api/households/:householdId/settlements` | Apunta un pago (`fromId`, `toId`, `amount`, `date`) |
+| DELETE | `/api/households/:householdId/settlements/:id` | Borra un pago |
+| GET    | `/api/households/:householdId/bills` | Facturas fijas |
+| POST   | `/api/households/:householdId/bills` | Crea una (`name`, `amount` aproximado, `interval` en meses, `nextDue`) |
+| PATCH  | `/api/households/:householdId/bills/:id` | Edita o pausa (`active`) |
+| DELETE | `/api/households/:householdId/bills/:id` | Borra la factura; sus pagos se quedan |
+| POST   | `/api/households/:householdId/bills/:id/pay` | Apunta el pago como gasto y la pasa al siguiente vencimiento |
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
@@ -176,6 +189,24 @@ Cuerpo de una tarea recurrente:
   "startDate": "2026-11-02"
 }
 ```
+
+Las rutas de una sección (tareas y recurrentes, ideas, compra, recetas y menú, gastos y facturas) responden 404 si la casa la tiene oculta.
+
+Cuerpo de un gasto:
+
+```json
+{
+  "concept": "Compra del súper",
+  "amount": 9050,
+  "date": "2026-11-02",
+  "paidById": "<id de quien pagó>",
+  "participantIds": ["<id>", "<id>"],
+  "category": "Supermercado",
+  "notes": ""
+}
+```
+
+- `amount` en céntimos (9050 = 90,50 €); se reparte a partes iguales entre `participantIds`
 
 Cuerpo de una receta:
 

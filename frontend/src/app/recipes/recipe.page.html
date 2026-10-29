@@ -46,7 +46,9 @@
               </li>
             }
           </ul>
-          <button type="button" class="btn" (click)="openPreview()">Añadir a la compra</button>
+          @if (usesShopping()) {
+            <button type="button" class="btn" (click)="openPreview()">Añadir a la compra</button>
+          }
         } @else {
           <p class="n">Sin ingredientes apuntados.</p>
         }

@@ -19,3 +19,28 @@ export function whenText(date: IsoDate): string {
     ...(otherYear && { year: 'numeric' }),
   });
 }
+
+/** Mes de una fecha: "2026-10". */
+export function monthOf(date: IsoDate): string {
+  return date.slice(0, 7);
+}
+
+/** Primer y último día de un mes ("2026-10"). */
+export function monthRange(month: string): { from: IsoDate; to: IsoDate } {
+  const [y, m] = month.split('-').map(Number);
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return { from: `${month}-01`, to: `${month}-${String(last).padStart(2, '0')}` };
+}
+
+/** Mes anterior o siguiente: shiftMonth("2026-01", -1) = "2025-12". */
+export function shiftMonth(month: string, delta: number): string {
+  const [y, m] = month.split('-').map(Number);
+  const d = new Date(Date.UTC(y, m - 1 + delta, 1));
+  return d.toISOString().slice(0, 7);
+}
+
+/** "Octubre de 2026". */
+export function monthLabel(month: string): string {
+  const text = new Date(month + '-01T00:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}

@@ -10,6 +10,10 @@ import {
   MEMBER_COLOR_LABELS,
   MEMBER_COLORS,
   MemberColor,
+  MODULE_DESCRIPTIONS,
+  MODULE_LABELS,
+  ModuleKey,
+  MODULES,
   NAME_MAX_LENGTH,
   ROLE_LABELS,
 } from '@hogar/shared';
@@ -36,6 +40,9 @@ export class HouseholdPage {
   protected readonly googleError = computed(() => googleErrorMessage(this.error_()));
 
   protected readonly roleLabels = ROLE_LABELS;
+  protected readonly modules = MODULES;
+  protected readonly moduleLabels = MODULE_LABELS;
+  protected readonly moduleDescriptions = MODULE_DESCRIPTIONS;
   protected readonly nameMax = NAME_MAX_LENGTH;
   protected readonly invitationDays = INVITATION_DAYS;
   protected readonly colors = MEMBER_COLORS;
@@ -72,11 +79,25 @@ export class HouseholdPage {
 
   protected async saveName() {
     await this.run('Nombre guardado.', async (id) => {
-      const household = await this.api.rename(id, this.newName());
-      this.household.set(household);
-      const role = this.session.household()!.role;
-      this.session.upsertHousehold({ id, name: household.name, role });
+      this.applyUpdate(await this.api.update(id, { name: this.newName() }));
     });
+  }
+
+  protected async setVisible(key: ModuleKey, visible: boolean) {
+    const h = this.household();
+    if (!h) return;
+    const hidden = visible ? h.hiddenModules.filter((k) => k !== key) : [...h.hiddenModules, key];
+    const done = visible
+      ? `${MODULE_LABELS[key]}: visible.`
+      : `${MODULE_LABELS[key]}: oculto para todos. No se borra nada, por si lo volvéis a mostrar.`;
+    await this.run(done, async (id) => this.applyUpdate(await this.api.update(id, { hiddenModules: hidden })));
+  }
+
+  /** Guarda la casa actualizada y lo refleja en el selector y la navegación. */
+  private applyUpdate(household: Household) {
+    this.household.set(household);
+    const role = this.session.household()!.role;
+    this.session.upsertHousehold({ id: household.id, name: household.name, role, hiddenModules: household.hiddenModules });
   }
 
   protected async toggleAdmin(member: Member) {

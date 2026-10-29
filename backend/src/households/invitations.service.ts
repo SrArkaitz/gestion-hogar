@@ -10,6 +10,7 @@ import {
 } from '@hogar/shared';
 import { hashToken, newToken } from '../auth/sessions.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { parseHidden } from './section.guard';
 
 const INVALID = 'La invitación no existe, ya se ha usado o ha caducado';
 
@@ -62,7 +63,8 @@ export class InvitationsService {
     const existing = await this.prisma.householdMember.findUnique({
       where: { householdId_userId: { householdId: inv.householdId, userId } },
     });
-    if (existing) return { id: inv.household.id, name: inv.household.name, role: existing.role as Role };
+    const summary = { id: inv.household.id, name: inv.household.name, hiddenModules: parseHidden(inv.household.hiddenModules) };
+    if (existing) return { ...summary, role: existing.role as Role };
 
     await this.prisma.$transaction(async (tx) => {
       // Se marca como usada solo si nadie la ha usado entre medias.
@@ -72,7 +74,7 @@ export class InvitationsService {
       const color = nextMemberColor(members.map((m) => m.color));
       await tx.householdMember.create({ data: { householdId: inv.householdId, userId, role: 'miembro', color } });
     });
-    return { id: inv.household.id, name: inv.household.name, role: 'miembro' };
+    return { ...summary, role: 'miembro' };
   }
 
   private async findValid(token: string) {

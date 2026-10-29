@@ -1,0 +1,111 @@
+<header class="top">
+  <div>
+    <h1>Gastos</h1>
+    <p class="sub">Lo que se paga entre todos y cómo quedan las cuentas.</p>
+  </div>
+  <button type="button" class="btn" [disabled]="!store.members().length" (click)="editing.set(null)">Nuevo gasto</button>
+</header>
+
+<app-expenses-tabs />
+
+@if (store.error()) {
+  <div class="status err" role="status">{{ store.error() }}</div>
+}
+@if (status()) {
+  <div class="notice" role="status">
+    {{ status() }}
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="status.set('')">×</button>
+  </div>
+}
+
+<div class="money-cols">
+  <section class="panel balances">
+    <h2>Saldos</h2>
+    @if (store.balances(); as b) {
+      <ul>
+        @for (x of b.balances; track x.userId) {
+          <li>
+            <span class="avatar" [attr.data-c]="color(x.userId)" aria-hidden="true">{{ initials(x.name) }}</span>
+            <span class="who">
+              <span class="t">{{ x.name }}@if (x.userId === me()) { <span class="you">(tú)</span> }</span>
+              @if (!x.member) {
+                <span class="n">Ya no está en la casa</span>
+              }
+            </span>
+            <span class="money" [class.pos]="x.balance > 0" [class.neg]="x.balance < 0">
+              @if (x.balance > 0) {
+                le deben {{ euros(x.balance) }}
+              } @else if (x.balance < 0) {
+                debe {{ euros(-x.balance) }}
+              } @else {
+                en paz
+              }
+            </span>
+          </li>
+        }
+      </ul>
+      @if (b.transfers.length) {
+        <h3>Para quedar en paz</h3>
+        <ul class="transfers">
+          @for (t of b.transfers; track t.fromId + t.toId) {
+            <li>
+              <span class="t">{{ name(t.fromId) }} → {{ name(t.toId) }}</span>
+              <span class="amount">{{ euros(t.amount) }}</span>
+              <button type="button" class="btn ghost sm" (click)="settle(t)">Saldar</button>
+            </li>
+          }
+        </ul>
+      } @else if (b.balances.length > 1) {
+        <p class="n">Estáis en paz.</p>
+      }
+    } @else {
+      <p class="n">Cargando…</p>
+    }
+  </section>
+
+  <section class="panel movements">
+    <div class="month-nav">
+      <button type="button" class="btn ghost sm" aria-label="Mes anterior" (click)="moveMonth(-1)">‹</button>
+      <h2 aria-live="polite">{{ monthText() }}</h2>
+      <button type="button" class="btn ghost sm" aria-label="Mes siguiente" (click)="moveMonth(1)">›</button>
+      @if (!isThisMonth()) {
+        <button type="button" class="link" (click)="goThisMonth()">Este mes</button>
+      }
+      <span class="total">{{ euros(monthTotal()) }}</span>
+    </div>
+    @if (loading()) {
+      <p class="n">Cargando…</p>
+    } @else {
+      <ul>
+        @for (m of movements(); track m.item.id) {
+          @if (m.kind === 'gasto') {
+            <li>
+              <button type="button" class="mov" (click)="editing.set(m.item)">
+                <span class="when">{{ shortDate(m.date) }}</span>
+                <span class="what">
+                  <span class="t">{{ m.item.concept }}</span>
+                  <span class="n">Pagó {{ name(m.item.paidById) }}@if (m.item.category) { · {{ m.item.category }}}@if (m.item.shares.length < store.members().length) { · entre {{ m.item.shares.length }}}</span>
+                </span>
+                <span class="amount">{{ euros(m.item.amount) }}</span>
+              </button>
+            </li>
+          } @else {
+            <li class="pay">
+              <span class="when">{{ shortDate(m.date) }}</span>
+              <span class="what"><span class="t">{{ name(m.item.fromId) }} pagó a {{ name(m.item.toId) }}</span></span>
+              <span class="amount">{{ euros(m.item.amount) }}</span>
+              <button type="button" class="icon danger" [attr.aria-label]="'Borrar el pago de ' + name(m.item.fromId)" (click)="removeSettlement(m.item)">×</button>
+            </li>
+          }
+        } @empty {
+          <li class="empty">No hay gastos este mes.</li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+@if (editing() !== undefined) {
+  <app-expense-dialog [expense]="editing() ?? null" [members]="store.members()" [me]="me()" [usedCategories]="categories()"
+                      (save)="onSave($event)" (delete)="onDelete()" (close)="editing.set(undefined)" />
+}

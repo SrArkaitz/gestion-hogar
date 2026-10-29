@@ -28,6 +28,8 @@ import { ShoppingPreview } from './shopping-preview';
 export class RecipePage {
   protected readonly store = inject(RecipesStore);
   private readonly session = inject(SessionService);
+  /** Sin la sección de Compra no se ofrece pasar ingredientes a la lista. */
+  protected readonly usesShopping = computed(() => this.session.uses('compra'));
 
   /** :id de la ruta. */
   readonly id = input.required<string>();

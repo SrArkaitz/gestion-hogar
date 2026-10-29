@@ -8,7 +8,7 @@
     <a class="brand" routerLink="/">Hogar</a>
     <app-household-switcher />
     <ul>
-      @for (item of nav; track item.path) {
+      @for (item of nav(); track item.path) {
         <li>
           <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon" /></svg>

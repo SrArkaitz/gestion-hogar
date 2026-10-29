@@ -1,0 +1,90 @@
+<header class="top">
+  <div>
+    <h1>Gastos</h1>
+    <p class="sub">Facturas que llegan cada cierto tiempo. Al pagarlas, se apuntan como gasto.</p>
+  </div>
+  <button type="button" class="btn" (click)="open(null)">Nueva factura</button>
+</header>
+
+<app-expenses-tabs />
+
+@if (store.error()) {
+  <div class="status err" role="status">{{ store.error() }}</div>
+}
+@if (status()) {
+  <div class="notice" role="status">
+    {{ status() }}
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="status.set('')">×</button>
+  </div>
+}
+
+<div class="ideas">
+  @for (b of store.bills(); track b.id) {
+    <article class="idea bill" [class.paused]="!b.active" [class.soon]="soon(b)">
+      <button type="button" class="idea-body" (click)="open(b)" [attr.aria-label]="'Editar ' + b.name">
+        <span class="t">{{ b.name }}</span>
+        <span class="n">{{ everyText(b) }}@if (b.amount) { · unos {{ euros(b.amount) }}}</span>
+      </button>
+      <div class="meta">
+        @if (b.active) {
+          <span class="due" [class.late]="b.nextDue < today">{{ dueText(b) }}</span>
+        } @else {
+          <span class="state">En pausa</span>
+        }
+      </div>
+      @if (b.active) {
+        <div class="idea-acts">
+          <button type="button" class="btn sm" [disabled]="!store.members().length" (click)="paying.set(b)">Pagar</button>
+        </div>
+      }
+    </article>
+  } @empty {
+    <p class="empty">Ninguna factura fija. Apunta la luz, el agua, internet… y te avisaremos cuando vayan a vencer.</p>
+  }
+</div>
+
+@if (paying(); as b) {
+  <app-expense-dialog [members]="store.members()" [me]="me()" [fixedConcept]="b.name" [suggestedAmount]="b.amount"
+                      (save)="pay($event)" (close)="paying.set(null)" />
+}
+
+@if (editing() !== undefined) {
+  <div class="veil" (click)="editing.set(undefined)">
+    <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar factura' : 'Nueva factura'"
+          (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="saveBill()" autocomplete="off">
+      <h3>{{ editing() ? 'Editar factura' : 'Nueva factura' }}</h3>
+      <label>Nombre
+        <input name="billName" required [maxlength]="nameMax" placeholder="Luz" [(ngModel)]="name" />
+      </label>
+      <div class="row two">
+        <label>Importe aproximado (€)
+          <input name="billAmount" inputmode="decimal" placeholder="Opcional" [(ngModel)]="amountText" />
+        </label>
+        <label>Cada cuántos meses
+          <input type="number" name="billInterval" min="1" [max]="intervalMax" inputmode="numeric" [(ngModel)]="interval" />
+        </label>
+      </div>
+      <label>Próximo vencimiento
+        <input type="date" name="billDue" required [(ngModel)]="nextDue" />
+      </label>
+      @if (editing()) {
+        <label class="check">
+          <input type="checkbox" name="billActive" [(ngModel)]="active" />
+          Activa (si la desmarcas, no avisa ni sale para pagar)
+        </label>
+      }
+      @if (formError()) {
+        <p class="form-err" role="alert">{{ formError() }}</p>
+      }
+      <div class="acts">
+        @if (editing()) {
+          <button type="button" class="btn danger" (click)="removeBill()">Borrar</button>
+        }
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="editing.set(undefined)">Cancelar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

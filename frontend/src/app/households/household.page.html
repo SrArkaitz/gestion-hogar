@@ -22,6 +22,20 @@
           <button type="submit" class="btn ghost" [disabled]="newName().trim() === h.name">Guardar</button>
         </form>
       </section>
+
+      <section class="panel">
+        <h2>Secciones</h2>
+        <p class="n">Elige qué usa esta casa. Lo que desmarques se oculta para todos; no se borra nada.</p>
+        @for (m of modules; track m) {
+          <label class="switch-row">
+            <input type="checkbox" [checked]="!h.hiddenModules.includes(m)" (change)="setVisible(m, $any($event.target).checked)" />
+            <span>
+              <span class="t">{{ moduleLabels[m] }}</span>
+              <span class="n">{{ moduleDescriptions[m] }}</span>
+            </span>
+          </label>
+        }
+      </section>
     }
 
     <section class="panel">

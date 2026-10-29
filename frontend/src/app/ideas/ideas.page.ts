@@ -23,6 +23,8 @@ const TAB_STATUSES: Record<Tab, IdeaStatus[]> = {
 export class IdeasPage {
   protected readonly store = inject(IdeasStore);
   private readonly session = inject(SessionService);
+  /** Aceptar una idea crea una tarea: sin la sección de Tareas no se ofrece. */
+  protected readonly usesTasks = computed(() => this.session.uses('tareas'));
 
   protected readonly statusLabels = IDEA_STATUS_LABELS;
   protected readonly priorities = PRIORITIES;

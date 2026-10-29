@@ -2,10 +2,12 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards 
 import { RecurringTask, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
+import { Section, SectionGuard } from '../households/section.guard';
 import { RecurringService } from './recurring.service';
 
 @Controller('households/:householdId/recurring')
-@UseGuards(HouseholdGuard)
+@UseGuards(HouseholdGuard, SectionGuard)
+@Section('tareas')
 export class RecurringController {
   constructor(private readonly recurring: RecurringService) {}
 

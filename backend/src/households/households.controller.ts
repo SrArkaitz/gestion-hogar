@@ -26,8 +26,8 @@ export class HouseholdsController {
   @Patch(':householdId')
   @UseGuards(HouseholdGuard)
   @AdminOnly()
-  rename(@Param('householdId') id: string, @Body() body: unknown): Promise<Household> {
-    return this.households.rename(id, body);
+  update(@Param('householdId') id: string, @Body() body: unknown): Promise<Household> {
+    return this.households.update(id, body);
   }
 
   @Patch(':householdId/members/:userId')
