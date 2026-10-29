@@ -1,5 +1,7 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ISO_DATE_RE, PRIORITIES, Priority, Task, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
+import { BadRequestException, Injectable, Logger, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import { ISO_DATE_RE, PRIORITIES, Priority, Task, TASK_ARCHIVE_DAYS, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
+import { TIME_ZONE } from '../common/dates';
 import { parseAssigneeIds } from '../common/assignees';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
@@ -25,6 +27,8 @@ const toTask = (r: Row): Task => ({
   createdById: r.createdById,
   ideaId: r.idea?.id ?? null,
   recurringId: r.recurringId,
+  doneAt: r.doneAt?.toISOString() ?? null,
+  archivedAt: r.archivedAt?.toISOString() ?? null,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
 });
@@ -32,9 +36,15 @@ const toTask = (r: Row): Task => ({
 /** Las del hogar y las personales de esa persona: las de los demás no se ven. */
 const visibleTo = (userId: string): Prisma.TaskWhereInput => ({ OR: [{ personal: false }, { createdById: userId }] });
 
-/** Tareas de una casa. El HouseholdGuard ya ha comprobado que el usuario es miembro. */
+/** Cuántas archivadas se devuelven como mucho (las más recientes). */
+const ARCHIVED_MAX = 200;
+
+/**
+ * Tareas de una casa. El HouseholdGuard ya ha comprobado que el usuario es miembro.
+ * Las hechas se archivan solas a los TASK_ARCHIVE_DAYS días (cada noche y al arrancar).
+ */
 @Injectable()
-export class TasksService {
+export class TasksService implements OnApplicationBootstrap {
   private readonly logger = new Logger(TasksService.name);
 
   constructor(
@@ -42,9 +52,61 @@ export class TasksService {
     private readonly push: PushService,
   ) {}
 
-  async list(householdId: string, userId: string): Promise<Task[]> {
-    const rows = await this.prisma.task.findMany({ where: { householdId, ...visibleTo(userId) }, include, orderBy: { createdAt: 'asc' } });
+  async onApplicationBootstrap() {
+    await this.nightly();
+  }
+
+  @Cron('0 5 0 * * *', { timeZone: TIME_ZONE })
+  async nightly(): Promise<void> {
+    try {
+      const archived = await this.archiveOld(new Date());
+      if (archived) this.logger.log(`Tareas hechas archivadas: ${archived}`);
+    } catch (err) {
+      this.logger.error(`No se pudieron archivar las tareas hechas: ${(err as Error).message}`);
+    }
+  }
+
+  /** Archiva las que llevan TASK_ARCHIVE_DAYS días o más en Hecho. */
+  async archiveOld(now: Date): Promise<number> {
+    const limit = new Date(now.getTime() - TASK_ARCHIVE_DAYS * 86_400_000);
+    const { count } = await this.prisma.task.updateMany({
+      where: { status: 'hecho', archivedAt: null, doneAt: { lte: limit } },
+      data: { archivedAt: now },
+    });
+    return count;
+  }
+
+  async list(householdId: string, userId: string, archived = false): Promise<Task[]> {
+    const rows = await this.prisma.task.findMany({
+      where: { householdId, ...visibleTo(userId), archivedAt: archived ? { not: null } : null },
+      include,
+      orderBy: archived ? { archivedAt: 'desc' } : { createdAt: 'asc' },
+      ...(archived && { take: ARCHIVED_MAX }),
+    });
     return rows.map(toTask);
+  }
+
+  async archive(householdId: string, id: string, userId: string): Promise<Task> {
+    const task = await this.find(householdId, id, userId);
+    if (task.status !== 'hecho') throw new BadRequestException('Solo se archivan las tareas hechas');
+    const row = await this.prisma.task.update({ where: { id }, data: { archivedAt: task.archivedAt ?? new Date() }, include });
+    return toTask(row);
+  }
+
+  async unarchive(householdId: string, id: string, userId: string): Promise<Task> {
+    await this.find(householdId, id, userId);
+    const row = await this.prisma.task.update({ where: { id }, data: { archivedAt: null, status: 'hecho', doneAt: new Date() }, include });
+    return toTask(row);
+  }
+
+  /** Archiva las hechas de un tablero: el del hogar o tus personales. */
+  async archiveDone(householdId: string, userId: string, body: unknown): Promise<{ archived: number }> {
+    const personal = asObject(body ?? {})['personal'] === true;
+    const { count } = await this.prisma.task.updateMany({
+      where: { householdId, status: 'hecho', archivedAt: null, personal, ...(personal && { createdById: userId }) },
+      data: { archivedAt: new Date() },
+    });
+    return { archived: count };
   }
 
   /** @param db cliente de Prisma o una transacción en curso (al aceptar una idea). */
@@ -68,6 +130,7 @@ export class TasksService {
         due: input.due ?? null,
         category: input.category ?? null,
         personal: !!personal,
+        doneAt: input.status === 'hecho' ? new Date() : null,
         assignees: { create: people.map((userId) => ({ userId })) },
       },
       include,
@@ -84,9 +147,16 @@ export class TasksService {
     // En las personales no se cambia ni la persona ni el tipo.
     const { assigneeIds: requested, personal: _personal, ...patch } = await this.validate(householdId, body, true);
     const assigneeIds = current.personal ? undefined : requested;
+    // Al pasar a Hecho empieza a contar la semana; al salir de Hecho deja de estar hecha (y archivada).
+    const done =
+      patch.status === undefined || (patch.status === 'hecho') === (current.status === 'hecho')
+        ? {}
+        : patch.status === 'hecho'
+          ? { doneAt: new Date() }
+          : { doneAt: null, archivedAt: null };
     const before = assigneeIds ? await this.prisma.taskAssignee.findMany({ where: { taskId: id } }) : [];
     const assignees = assigneeIds && { deleteMany: {}, create: assigneeIds.map((userId) => ({ userId })) };
-    const row = await this.prisma.task.update({ where: { id }, data: { ...patch, assignees }, include });
+    const row = await this.prisma.task.update({ where: { id }, data: { ...patch, ...done, assignees }, include });
     const task = toTask(row);
     if (assigneeIds) void this.notifyAssigned(householdId, task, before.map((a) => a.userId), actorId);
     return task;

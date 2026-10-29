@@ -443,6 +443,17 @@ label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; wi
 .bday .left { font-size: 13px; color: var(--muted); white-space: nowrap; }
 .bday.soon .left { color: var(--c-rosa); font-weight: 700; }
 
+/* Archivar tareas */
+.col-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 4px 4px 0; font-size: 13px; }
+.col-foot .hint { color: var(--muted); }
+.col-foot-acts { display: flex; gap: 12px; }
+.archived { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; }
+.archived li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.archived li:last-child { border-bottom: 0; }
+.archived .what { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.archived .t { font-weight: 700; overflow-wrap: anywhere; }
+.archived .n { color: var(--muted); font-size: 12.5px; }
+
 /* Inventario y mantenimiento */
 .low { border-left: 4px solid var(--alta); }
 .low .n { margin: 0; }

@@ -148,6 +148,10 @@ model Task {
   /// Plantilla que la creó, si es una tarea recurrente
   recurringId String?
   recurring   RecurringTask? @relation(fields: [recurringId], references: [id], onDelete: SetNull)
+  /// Cuándo pasó a Hecho (null si no está hecha)
+  doneAt      DateTime?
+  /// Archivada: ya no sale en el tablero. Pasa sola a los 7 días de hecha, o a mano.
+  archivedAt  DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 

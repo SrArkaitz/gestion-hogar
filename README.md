@@ -105,10 +105,13 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/households/:householdId/invitations/:id` | Anula una invitación (admin) |
 | GET    | `/api/invitations/:token` | A qué casa invita un enlace (pública) |
 | POST   | `/api/invitations/:token/accept` | Acepta la invitación |
-| GET    | `/api/households/:householdId/tasks` | Tareas del hogar y tus tareas personales (`personal: true`) |
+| GET    | `/api/households/:householdId/tasks` | Tareas del hogar y tus tareas personales (`personal: true`), sin las archivadas. Con `?archived=1`, solo las archivadas |
 | POST   | `/api/households/:householdId/tasks` | Crea una tarea (`personal: true` para que solo la veas tú) |
 | PATCH  | `/api/households/:householdId/tasks/:id` | Cambia campos de una tarea (también moverla de columna) |
 | DELETE | `/api/households/:householdId/tasks/:id` | Borra una tarea |
+| POST   | `/api/households/:householdId/tasks/:id/archive` | Archiva una tarea hecha (las hechas se archivan solas a los 7 días) |
+| POST   | `/api/households/:householdId/tasks/:id/unarchive` | La devuelve al tablero, en Hecho |
+| POST   | `/api/households/:householdId/tasks/archive-done` | Archiva todas las hechas de un tablero (`{ "personal": true }` para el de personales) |
 | GET    | `/api/households/:householdId/recurring` | Tareas recurrentes de la casa |
 | POST   | `/api/households/:householdId/recurring` | Crea una; si empieza hoy, crea ya su tarea |
 | PATCH  | `/api/households/:householdId/recurring/:id` | Edita, pausa (`{ "active": false }`) o reactiva |

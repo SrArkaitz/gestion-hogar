@@ -49,6 +49,13 @@
   }
 </div>
 
+@if (notice()) {
+  <div class="notice" role="status">
+    {{ notice() }}
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
+  </div>
+}
+
 @if (store.error() || store.loading()) {
   <div class="status" [class.err]="!!store.error()" role="status">
     {{ store.error() ?? 'Cargando tareas…' }}
@@ -110,6 +117,16 @@
       </div>
       @if (status !== 'hecho') {
         <button type="button" class="add" (click)="openNew(status)">+ Añadir tarea</button>
+      } @else {
+        <div class="col-foot">
+          <span class="hint">Se archivan solas a los {{ archiveDays }} días.</span>
+          <span class="col-foot-acts">
+            @if (byStatus().hecho.length) {
+              <button type="button" class="link" (click)="archiveAll()">Archivar todas</button>
+            }
+            <button type="button" class="link" (click)="openArchived()">Ver archivadas</button>
+          </span>
+        </div>
       }
     </section>
   }
@@ -124,5 +141,33 @@
     [personal]="personal()"
     (save)="onSave($event)"
     (delete)="onDelete()"
+    (archive)="onArchive()"
     (close)="close()" />
+}
+
+@if (archivedList(); as list) {
+  <div class="veil" (click)="archivedList.set(null)">
+    <div class="dlg" role="dialog" aria-modal="true" aria-label="Tareas archivadas" (click)="$event.stopPropagation()" (keydown.escape)="archivedList.set(null)">
+      <h3>Archivadas</h3>
+      <ul class="archived">
+        @for (t of list; track t.id) {
+          <li>
+            <span class="what">
+              <span class="t">{{ t.title }}</span>
+              <span class="n">@if (t.doneAt) {Hecha el {{ dayText(t.doneAt) }} · }archivada el {{ dayText(t.archivedAt) }}</span>
+            </span>
+            <button type="button" class="btn ghost sm" (click)="unarchive(t)">Recuperar</button>
+            <button type="button" class="icon danger" [attr.aria-label]="'Borrar ' + t.title" (click)="removeArchived(t)">×</button>
+          </li>
+        } @empty {
+          <li class="empty">No hay tareas archivadas.</li>
+        }
+      </ul>
+      <div class="acts">
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="archivedList.set(null)">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 }

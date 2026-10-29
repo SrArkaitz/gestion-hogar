@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Task, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
@@ -12,8 +12,26 @@ export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 
   @Get()
-  list(@Param('householdId') householdId: string, @CurrentUser() user: User): Promise<Task[]> {
-    return this.tasks.list(householdId, user.id);
+  /** Las del tablero; con ?archived=1, las archivadas (de la más reciente a la más antigua). */
+  list(@Param('householdId') householdId: string, @CurrentUser() user: User, @Query('archived') archived?: string): Promise<Task[]> {
+    return this.tasks.list(householdId, user.id, archived === '1' || archived === 'true');
+  }
+
+  /** Archiva todas las hechas de un tablero ({ "personal": true } para el de tareas personales). */
+  @Post('archive-done')
+  archiveDone(@Param('householdId') householdId: string, @CurrentUser() user: User, @Body() body: unknown): Promise<{ archived: number }> {
+    return this.tasks.archiveDone(householdId, user.id, body);
+  }
+
+  @Post(':id/archive')
+  archive(@Param('householdId') householdId: string, @Param('id') id: string, @CurrentUser() user: User): Promise<Task> {
+    return this.tasks.archive(householdId, id, user.id);
+  }
+
+  /** La devuelve al tablero, en Hecho (y vuelve a contar la semana). */
+  @Post(':id/unarchive')
+  unarchive(@Param('householdId') householdId: string, @Param('id') id: string, @CurrentUser() user: User): Promise<Task> {
+    return this.tasks.unarchive(householdId, id, user.id);
   }
 
   @Post()

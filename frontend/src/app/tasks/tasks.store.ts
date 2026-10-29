@@ -68,4 +68,33 @@ export class TasksStore {
     await firstValueFrom(this.http.delete(`${this.api}/${id}`));
     this.tasks.update((list) => list.filter((t) => t.id !== id));
   }
+
+  /** La quita del tablero (solo las hechas). */
+  async archive(id: string): Promise<void> {
+    await firstValueFrom(this.http.post<Task>(`${this.api}/${id}/archive`, {}));
+    this.tasks.update((list) => list.filter((t) => t.id !== id));
+  }
+
+  /** Archiva todas las hechas de un tablero. Devuelve cuántas. */
+  async archiveDone(personal: boolean): Promise<number> {
+    const { archived } = await firstValueFrom(this.http.post<{ archived: number }>(`${this.api}/archive-done`, { personal }));
+    this.tasks.update((list) => list.filter((t) => !(t.status === 'hecho' && t.personal === personal)));
+    return archived;
+  }
+
+  /** Las archivadas de un tablero, de la más reciente a la más antigua. */
+  async archived(personal: boolean): Promise<Task[]> {
+    const list = await firstValueFrom(this.http.get<Task[]>(this.api, { params: { archived: '1' } }));
+    return list.filter((t) => t.personal === personal);
+  }
+
+  /** La devuelve al tablero, en Hecho. */
+  async unarchive(id: string): Promise<void> {
+    const task = await firstValueFrom(this.http.post<Task>(`${this.api}/${id}/unarchive`, {}));
+    this.tasks.update((list) => [...list, task]);
+  }
+
+  async removeArchived(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete(`${this.api}/${id}`));
+  }
 }

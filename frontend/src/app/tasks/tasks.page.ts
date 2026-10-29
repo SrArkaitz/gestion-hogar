@@ -8,6 +8,7 @@ import {
   PRIORITY_LABELS,
   PRIORITY_ORDER,
   Task,
+  TASK_ARCHIVE_DAYS,
   TASK_STATUSES,
   TASK_STATUS_LABELS,
   TaskInput,
@@ -41,6 +42,11 @@ export class TasksPage {
   protected readonly statusLabels = TASK_STATUS_LABELS;
   protected readonly priorities = PRIORITIES;
   protected readonly priorityLabels = PRIORITY_LABELS;
+  protected readonly archiveDays = TASK_ARCHIVE_DAYS;
+
+  /** Lista de archivadas abierta (null = cerrada). */
+  protected readonly archivedList = signal<Task[] | null>(null);
+  protected readonly notice = signal('');
 
   protected readonly person = signal<PersonFilter>('todas');
   protected readonly category = signal<string>('');
@@ -174,6 +180,64 @@ export class TasksPage {
     } catch (err) {
       this.dialog()?.showError(errorMessage(err, 'No se pudo guardar. Revisa la conexión y vuelve a intentarlo.'));
     }
+  }
+
+  protected async onArchive() {
+    const task = this.editing();
+    if (!task) return;
+    try {
+      await this.store.archive(task.id);
+      this.close();
+      this.notice.set(`«${task.title}» archivada.`);
+    } catch (err) {
+      this.dialog()?.showError(errorMessage(err, 'No se pudo archivar. Vuelve a intentarlo.'));
+    }
+  }
+
+  protected async archiveAll() {
+    const count = this.boardTasks().filter((t) => t.status === 'hecho').length;
+    if (!count || !confirm(count === 1 ? '¿Archivar la tarea hecha?' : `¿Archivar las ${count} tareas hechas?`)) return;
+    try {
+      const n = await this.store.archiveDone(this.personal());
+      this.notice.set(n === 1 ? '1 tarea archivada.' : `${n} tareas archivadas.`);
+    } catch (err) {
+      this.store.error.set(errorMessage(err, 'No se pudieron archivar. Vuelve a intentarlo.'));
+    }
+  }
+
+  protected async openArchived() {
+    try {
+      this.archivedList.set(await this.store.archived(this.personal()));
+    } catch (err) {
+      this.store.error.set(errorMessage(err, 'No se pudieron cargar las archivadas.'));
+    }
+  }
+
+  protected async unarchive(task: Task) {
+    try {
+      await this.store.unarchive(task.id);
+      this.archivedList.update((list) => list?.filter((t) => t.id !== task.id) ?? null);
+    } catch (err) {
+      this.store.error.set(errorMessage(err, 'No se pudo recuperar. Vuelve a intentarlo.'));
+    }
+  }
+
+  protected async removeArchived(task: Task) {
+    if (!confirm(`¿Borrar «${task.title}»? No se puede deshacer.`)) return;
+    try {
+      await this.store.removeArchived(task.id);
+      this.archivedList.update((list) => list?.filter((t) => t.id !== task.id) ?? null);
+    } catch (err) {
+      this.store.error.set(errorMessage(err, 'No se pudo borrar. Vuelve a intentarlo.'));
+    }
+  }
+
+  /** "5 nov", o "5 nov 2025" si no es de este año. */
+  protected dayText(iso: string | null): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const otherYear = d.getFullYear() !== new Date().getFullYear();
+    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', ...(otherYear && { year: 'numeric' }) });
   }
 
   protected async onDelete() {

@@ -9,6 +9,9 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   hecho: 'Hecho',
 };
 
+/** Días que una tarea se queda en Hecho antes de archivarse sola. */
+export const TASK_ARCHIVE_DAYS = 7;
+
 /** Categorías que se ofrecen al crear una tarea. Se puede escribir otra. */
 export const TASK_CATEGORIES = ['Casa', 'Recados', 'Papeleo'] as const;
 
@@ -29,6 +32,10 @@ export interface Task {
   ideaId: string | null;
   /** Tarea recurrente que la creó, si la hay. */
   recurringId: string | null;
+  /** Cuándo pasó a Hecho. */
+  doneAt: string | null;
+  /** Si está archivada (no sale en el tablero), cuándo se archivó. */
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

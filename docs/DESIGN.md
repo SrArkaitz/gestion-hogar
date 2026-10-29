@@ -62,6 +62,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Campos:** título, notas, prioridad, fecha límite (opcional), personas asignadas (ninguna, una o varias) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
 - **Tarjetas:** el lateral lleva el color de la persona asignada; si hay varias, se reparte a partes iguales entre sus colores (con dos, mitad y mitad). Sin nadie asignado, el lateral es gris. La prioridad se ve en su etiqueta.
 - **Orden:** dentro de cada columna, primero por prioridad y luego por antigüedad. Las tareas vencidas se marcan.
+- **Archivar:** al pasar a Hecho se apunta cuándo. A los 7 días en Hecho se archivan solas (cada noche a las 00:05 y al arrancar el servidor), para que el tablero no se llene. Se pueden archivar antes a mano: una desde su diálogo o todas las hechas del tablero con *Archivar todas*. En *Ver archivadas* (al pie de Hecho) se recuperan, y vuelven a Hecho con la semana de nuevo, o se borran. Sacar una tarea de Hecho la deja sin fecha de hecha.
 - **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Recurrentes*.
   - **Fecha de inicio:** en semanas y meses marca el ritmo (el mismo día de la semana o del mes; si el mes no tiene ese día, el último).
   - **Cuándo se crean:** cada noche a las 00:01 (y al arrancar el servidor) se crean las que tocan ese día, con ese día como fecha límite. Si se crea una que empieza hoy, su tarea aparece ya.
@@ -245,3 +246,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Mantenimiento: intervalo en meses; al marcarla hecha, la próxima fecha se cuenta desde el día en que se hizo. |
 | 2026-10-29 | Recetas públicas por defecto: todas las casas ven las que no están marcadas como privadas, sin poder cambiarlas. Para usarlas en el menú se copian a la casa. |
 | 2026-10-29 | Tareas personales: viven en la misma casa y el mismo tablero, en su propia pestaña, pero solo las ve quien las crea. |
+| 2026-10-30 | Las tareas hechas se archivan solas a los 7 días (o antes, a mano) y se pueden recuperar. |

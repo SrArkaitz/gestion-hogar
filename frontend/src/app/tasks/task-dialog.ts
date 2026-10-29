@@ -87,6 +87,9 @@ import {
         <div class="acts">
           @if (task()) {
             <button type="button" class="btn danger" [disabled]="busy()" (click)="askDelete()">Borrar</button>
+            @if (task()!.status === 'hecho') {
+              <button type="button" class="btn ghost" [disabled]="busy()" (click)="archive.emit()">Archivar</button>
+            }
           }
           <div class="r">
             <button type="button" class="btn ghost" (click)="close.emit()">Cancelar</button>
@@ -109,6 +112,8 @@ export class TaskDialog implements OnInit {
 
   readonly save = output<TaskInput>();
   readonly delete = output<void>();
+  /** Quitarla del tablero (solo si ya está hecha). */
+  readonly archive = output<void>();
   readonly close = output<void>();
 
   protected readonly priorities = PRIORITIES;
