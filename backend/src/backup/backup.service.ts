@@ -1,8 +1,9 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { databaseFile, PrismaService } from '../prisma/prisma.service';
+import { photosDir } from '../recipes/photos';
 
 const FILE_RE = /^hogar-\d{4}-\d{2}-\d{2}\.db$/;
 
@@ -12,6 +13,10 @@ const FILE_RE = /^hogar-\d{4}-\d{2}-\d{2}\.db$/;
  *
  * BACKUP_DIR: carpeta de las copias (por defecto, data/backups junto a la base de datos).
  * BACKUP_KEEP: cuántas copias diarias se guardan (por defecto 14).
+ *
+ * Las fotos de las recetas se copian a BACKUP_DIR/fotos. Cada foto tiene un nombre único y no
+ * cambia, así que basta con copiar las nuevas; las viejas se dejan porque las copias anteriores
+ * de la base de datos pueden seguir apuntando a ellas.
  */
 @Injectable()
 export class BackupService implements OnApplicationBootstrap {
@@ -35,10 +40,27 @@ export class BackupService implements OnApplicationBootstrap {
       if (existsSync(target)) unlinkSync(target);
       await this.prisma.$executeRawUnsafe(`VACUUM INTO '${target.replace(/'/g, "''")}'`);
       this.prune();
-      this.logger.log(`Copia de seguridad hecha: ${target}`);
+      const photos = this.copyPhotos();
+      this.logger.log(`Copia de seguridad hecha: ${target}${photos ? ` y ${photos} fotos nuevas` : ''}`);
     } catch (err) {
       this.logger.error(`No se pudo hacer la copia de seguridad: ${(err as Error).message}`);
     }
+  }
+
+  /** Copia las fotos que aún no estén en la copia. @returns cuántas ha copiado. */
+  private copyPhotos(): number {
+    const source = photosDir();
+    if (!existsSync(source)) return 0;
+    const target = join(this.dir, 'fotos');
+    mkdirSync(target, { recursive: true });
+    const copied = new Set(readdirSync(target));
+    let count = 0;
+    for (const file of readdirSync(source)) {
+      if (copied.has(file)) continue;
+      copyFileSync(join(source, file), join(target, file));
+      count++;
+    }
+    return count;
   }
 
   /** Borra las copias más antiguas y deja las BACKUP_KEEP más recientes. */

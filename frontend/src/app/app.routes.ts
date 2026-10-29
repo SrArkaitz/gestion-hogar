@@ -20,6 +20,7 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'tareas' },
       { path: 'tareas', loadChildren: () => import('./tasks/tasks.routes').then((m) => m.TASKS_ROUTES) },
       { path: 'ideas', loadChildren: () => import('./ideas/ideas.routes').then((m) => m.IDEAS_ROUTES) },
+      { path: 'recetas', loadChildren: () => import('./recipes/recipes.routes').then((m) => m.RECIPES_ROUTES) },
       { path: 'compra', title: 'Compra · Hogar', loadComponent: () => import('./shopping/shopping.page').then((m) => m.ShoppingPage) },
       { path: 'casa', title: 'Casa · Hogar', loadComponent: () => import('./households/household.page').then((m) => m.HouseholdPage) },
     ],

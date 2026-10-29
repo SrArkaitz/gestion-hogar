@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la lista de la compra, la app instalable (PWA) y los avisos push.
+Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, la app instalable (PWA) y los avisos push.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -77,7 +77,7 @@ git pull
 docker compose up -d --build
 ```
 
-La base de datos vive en el volumen de Docker `gestion-hogar-data` (`/app/data/hogar.db` dentro del contenedor) y las copias diarias en `/app/data/backups`. El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
+La base de datos vive en el volumen de Docker `gestion-hogar-data` (`/app/data/hogar.db` dentro del contenedor), las fotos de las recetas en `/app/data/photos` y las copias diarias (base de datos y fotos) en `/app/data/backups`. El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
 
 ## API
 
@@ -120,6 +120,19 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/shopping/items/clear-done` | Quita todo lo que está en el carro |
 | GET    | `/api/households/:householdId/shopping/products` | Productos ya comprados, de los más habituales a los menos |
 | DELETE | `/api/households/:householdId/shopping/products/:key` | Olvida un producto para que no se sugiera |
+| POST   | `/api/households/:householdId/shopping/items/bulk` | Añade varios (`{ "items": [{ "name", "quantity" }] }`); suma cantidades con lo que ya hubiera |
+| GET    | `/api/households/:householdId/recipes` | Recetario de la casa |
+| GET    | `/api/households/:householdId/recipes/:id` | Una receta |
+| POST   | `/api/households/:householdId/recipes` | Crea una receta |
+| PATCH  | `/api/households/:householdId/recipes/:id` | Edita; ingredientes y pasos se sustituyen enteros |
+| DELETE | `/api/households/:householdId/recipes/:id` | Borra la receta, su foto y sus platos del menú |
+| PUT    | `/api/households/:householdId/recipes/:id/photo` | Sube la foto: el cuerpo es la imagen (`image/jpeg`, `image/png` o `image/webp`, hasta 8 MB) |
+| GET    | `/api/households/:householdId/recipes/:id/photo` | Descarga la foto |
+| DELETE | `/api/households/:householdId/recipes/:id/photo` | Quita la foto |
+| GET    | `/api/households/:householdId/menu?from=AAAA-MM-DD&to=AAAA-MM-DD` | Platos del menú entre dos fechas |
+| POST   | `/api/households/:householdId/menu` | Pone un plato (`date`, `meal`: `comida` o `cena`, `recipeId`, `servings`) |
+| PATCH  | `/api/households/:householdId/menu/:id` | Cambia raciones, día o comida |
+| DELETE | `/api/households/:householdId/menu/:id` | Quita un plato |
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
@@ -163,6 +176,30 @@ Cuerpo de una tarea recurrente:
   "startDate": "2026-11-02"
 }
 ```
+
+Cuerpo de una receta:
+
+```json
+{
+  "name": "Tortilla de patatas",
+  "kind": "unico",
+  "duration": "medio",
+  "minutes": 40,
+  "servings": 4,
+  "ingredients": [
+    { "name": "Patatas", "amount": 1, "unit": "kg" },
+    { "name": "Huevos", "amount": 6, "unit": "ud" },
+    { "name": "Sal", "text": "al gusto" }
+  ],
+  "steps": ["Pelar y cortar las patatas", "Freír a fuego lento", "Batir los huevos y cuajar"],
+  "notes": ""
+}
+```
+
+- `kind`: `primero`, `segundo`, `unico` o `postre`; `duration`: `rapido`, `medio` o `largo`
+- `unit`: `g`, `kg`, `ml`, `l`, `ud` o `null` (número sin unidad); sin `amount`, `text` es lo que se muestra
+
+Tareas recurrentes:
 
 - `frequency`: `dias`, `semanas` o `meses` (con `interval`, cada cuántos) o `dias_semana` (con `weekdays`, de 1 = lunes a 7 = domingo)
 - En `semanas` y `meses`, `startDate` marca el día de la semana o del mes; en `meses`, si el mes no tiene ese día se usa el último

@@ -107,6 +107,14 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - No es obligatorio usarlo: el recetario funciona por sí solo.
 - Botón "Añadir a la compra": suma los ingredientes de los platos de la semana (una sola línea por ingrediente repetido) y los pasa a la lista.
 
+**Cómo funciona**
+
+- **Varios platos por comida:** cada hueco (día y comida o cena) admite varios platos, cada uno con sus raciones.
+- **Cantidades:** número con unidad (g, kg, ml, l, ud.) o un texto ("al gusto"). Al cambiar las raciones se multiplican; en la ficha se ven con decimales (1,5 ud.) y en la compra las unidades se redondean hacia arriba.
+- **Añadir a la compra** (desde una receta o desde la semana): se ve antes la lista de ingredientes para desmarcar lo que ya hay en casa; los que no llevan cantidad ("sal al gusto") salen desmarcados. Las cantidades de la misma magnitud se suman (500 g + 1 kg = 1,5 kg), también con lo que ya estuviera pendiente en la lista; si no se pueden sumar, se juntan ("6 bricks + 1 l").
+- **Fotos:** el navegador las reduce a 1600 px de lado antes de subirlas. Se guardan como archivos en `PHOTOS_DIR` (por defecto, junto a la base de datos) y entran en la copia diaria.
+- Borrar una receta la quita también del menú.
+
 ### 3.5 Gastos y facturas
 
 *Se detalla al llegar a su fase.* Idea inicial: gasto con importe, categoría, quién paga y cómo se reparte; resumen de quién debe a quién; facturas fijas con fecha de vencimiento.
@@ -172,7 +180,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fases 1, 2 y 3 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
+**Fases 1 a 4 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -184,7 +192,8 @@ Cada fase deja algo que ya se puede usar.
 - Hecho: colores por persona, varias personas por tarea, tema claro u oscuro y paleta inspirada en Trello.
 - Hecho (fase 2): tareas recurrentes, app instalable y avisos push (recordatorio diario y al asignar).
 - Hecho (fase 3): lista de la compra compartida, con secciones, habituales y sincronización entre móviles.
-- Siguiente: fase 4, recetas y menús, conectados con la compra. Las copias de las fotos llegarán con esa fase.
+- Hecho (fase 4): recetario con fotos, raciones escalables y menú semanal, conectados con la compra. Las fotos entran en la copia diaria.
+- Siguiente: fase 5, gastos y facturas.
 
 ## 8. Decisiones tomadas
 
@@ -204,4 +213,5 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Tareas recurrentes: la tarea se crea el día que toca y vence ese día; si la anterior sigue sin hacer, no se duplica. |
 | 2026-10-29 | Avisos: recordatorio diario a las 9:00 y aviso al asignar. Claves VAPID generadas por el servidor y guardadas en la base de datos. |
 | 2026-10-29 | El service worker no usa caché: la app solo funciona con conexión. |
+| 2026-10-29 | Recetas: ingredientes y pasos se guardan como JSON dentro de la receta. Las fotos se reducen en el navegador y se suben tal cual (sin multipart). Antes de pasar ingredientes a la compra se pueden desmarcar. |
 | 2026-10-29 | Compra: una lista por casa, secciones fijas (adivinadas y luego recordadas por producto), lo comprado se queda en el carro hasta quitarlo y los habituales salen solos de lo ya comprado. Se sincroniza consultando al servidor cada pocos segundos. |

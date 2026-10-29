@@ -5,3 +5,4 @@ export * from './ideas';
 export * from './recurring';
 export * from './notifications';
 export * from './shopping';
+export * from './recipes';

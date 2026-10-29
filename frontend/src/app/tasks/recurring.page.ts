@@ -1,9 +1,9 @@
 import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { describeRecurrence, Member, PRIORITY_LABELS, RecurringTask, RecurringTaskInput } from '@hogar/shared';
+import { whenText } from '../core/dates';
 import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
-import { whenText } from './dates';
 import { assigneesLabel, assigneesOf, initials, stripeFor } from './people';
 import { RecurringDialog } from './recurring-dialog';
 import { RecurringStore } from './recurring.store';

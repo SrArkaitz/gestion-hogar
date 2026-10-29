@@ -19,6 +19,11 @@ export class ShoppingController {
     return this.shopping.add(householdId, user.id, body);
   }
 
+  @Post('items/bulk')
+  addMany(@Param('householdId') householdId: string, @CurrentUser() user: User, @Body() body: unknown): Promise<ShoppingItem[]> {
+    return this.shopping.addMany(householdId, user.id, body);
+  }
+
   @Post('items/clear-done')
   async clearDone(@Param('householdId') householdId: string): Promise<{ removed: number }> {
     return { removed: await this.shopping.clearDone(householdId) };

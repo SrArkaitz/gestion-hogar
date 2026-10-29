@@ -1,0 +1,118 @@
+<header class="top">
+  <div>
+    <h1>Recetas</h1>
+    <p class="sub">Qué se come cada día. Es opcional: el recetario funciona sin él.</p>
+  </div>
+  <button type="button" class="btn" [disabled]="!entries().length" (click)="openPreview()">Añadir la semana a la compra</button>
+</header>
+
+<app-recipes-tabs />
+
+<div class="week-nav">
+  <button type="button" class="btn ghost sm" aria-label="Semana anterior" (click)="moveWeek(-1)">‹</button>
+  <span class="week-label" aria-live="polite">{{ weekLabel() }}</span>
+  <button type="button" class="btn ghost sm" aria-label="Semana siguiente" (click)="moveWeek(1)">›</button>
+  @if (!isThisWeek()) {
+    <button type="button" class="link" (click)="goToday()">Esta semana</button>
+  }
+</div>
+
+@if (notice()) {
+  <div class="notice" role="status">
+    {{ notice() }} <a routerLink="/compra">Ver la lista</a>
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
+  </div>
+}
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+} @else if (loading()) {
+  <div class="status" role="status">Cargando el menú…</div>
+}
+
+@if (!store.loading() && !store.recipes().length) {
+  <p class="empty">Para hacer el menú, primero <a routerLink="/recetas/nueva">apunta alguna receta</a>.</p>
+}
+
+<div class="week">
+  @for (day of days(); track day) {
+    <section class="day" [class.today]="day === today" [attr.aria-label]="dayText(day)">
+      <h2>{{ dayText(day) }}@if (day === today) { <span class="role">Hoy</span> }</h2>
+      @for (meal of meals; track meal) {
+        <div class="meal">
+          <h3>{{ mealLabels[meal] }}</h3>
+          <ul>
+            @for (e of entriesFor(day, meal); track e.id) {
+              @if (recipesById().get(e.recipeId); as r) {
+                <li>
+                  <button type="button" class="dish" (click)="editing.set(e)">
+                    <span class="t">{{ r.name }}</span>
+                    <span class="q">{{ e.servings }} rac.</span>
+                  </button>
+                </li>
+              }
+            }
+          </ul>
+          <button type="button" class="add" [disabled]="!store.recipes().length" (click)="openPicker({ date: day, meal })">+ Añadir</button>
+        </div>
+      }
+    </section>
+  }
+</div>
+
+@if (picking(); as slot) {
+  <div class="veil" (click)="picking.set(null)">
+    <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pick-title" (click)="$event.stopPropagation()" (keydown.escape)="picking.set(null)">
+      <h3 id="pick-title">{{ mealLabels[slot.meal] }} del {{ dayText(slot.date).toLowerCase() }}</h3>
+      <input type="search" name="pick-search" placeholder="Buscar receta" [(ngModel)]="search" aria-label="Buscar receta" />
+      <div class="seg" role="group" aria-label="Tipo de plato">
+        <button type="button" [attr.aria-pressed]="kind() === ''" (click)="kind.set('')">Todos</button>
+        @for (k of kinds; track k) {
+          <button type="button" [attr.aria-pressed]="kind() === k" (click)="kind.set(k)">{{ kindLabels[k] }}</button>
+        }
+      </div>
+      <ul class="pick-list">
+        @for (r of candidates(); track r.id) {
+          <li>
+            <button type="button" class="pick" (click)="pick(r)">
+              <span class="t">{{ r.name }}</span>
+              <span class="sec">{{ kindLabels[r.kind] }} · {{ r.servings }} rac.</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="empty">Ninguna receta encontrada.</li>
+        }
+      </ul>
+      <div class="acts">
+        <div class="r"><button type="button" class="btn ghost" (click)="picking.set(null)">Cerrar</button></div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (editing(); as e) {
+  @if (recipesById().get(e.recipeId); as r) {
+    <div class="veil" (click)="editing.set(null)">
+      <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dish-title" (click)="$event.stopPropagation()" (keydown.escape)="editing.set(null)">
+        <h3 id="dish-title">{{ r.name }}</h3>
+        <p class="n">{{ mealLabels[e.meal] }} del {{ dayText(e.date).toLowerCase() }}</p>
+        <div class="stepper" role="group" aria-label="Raciones">
+          <button type="button" aria-label="Una ración menos" [disabled]="e.servings <= 1" (click)="changeServings(e, -1)">−</button>
+          <span aria-live="polite">{{ e.servings }} {{ e.servings === 1 ? 'ración' : 'raciones' }}</span>
+          <button type="button" aria-label="Una ración más" [disabled]="e.servings >= servingsMax" (click)="changeServings(e, 1)">+</button>
+        </div>
+        <div class="acts">
+          <button type="button" class="btn danger" (click)="removeEntry(e)">Quitar del menú</button>
+          <div class="r">
+            <a class="btn ghost" [routerLink]="['/recetas', r.id]">Ver receta</a>
+            <button type="button" class="btn" (click)="editing.set(null)">Listo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+}
+
+@if (preview(); as lines) {
+  <app-shopping-preview [lines]="lines" [heading]="'Ingredientes de la semana del ' + weekLabel()"
+                        (confirm)="addToShopping($event)" (close)="preview.set(null)" />
+}

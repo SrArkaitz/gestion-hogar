@@ -27,7 +27,7 @@ export const SHOPPING_SECTION_LABELS: Record<ShoppingSection, string> = {
 };
 
 export const SHOPPING_NAME_MAX = 80;
-export const SHOPPING_QUANTITY_MAX = 30;
+export const SHOPPING_QUANTITY_MAX = 60;
 
 export interface ShoppingItem {
   id: string;

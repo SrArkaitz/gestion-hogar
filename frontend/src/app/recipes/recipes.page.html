@@ -1,0 +1,61 @@
+<header class="top">
+  <div>
+    <h1>Recetas</h1>
+    <p class="sub">Vuestros platos, con lo que lleva cada uno y cómo se hace.</p>
+  </div>
+  <a class="btn" routerLink="/recetas/nueva">Nueva receta</a>
+</header>
+
+<app-recipes-tabs />
+
+@if (store.recipes().length) {
+  <div class="filters" role="group" aria-label="Filtros">
+    <label class="search">
+      <span class="sr-only">Buscar</span>
+      <input type="search" name="search" placeholder="Buscar plato o ingrediente" [(ngModel)]="search" />
+    </label>
+    <div class="seg" role="group" aria-label="Tipo de plato">
+      <button type="button" [attr.aria-pressed]="kind() === ''" (click)="kind.set('')">Todos</button>
+      @for (k of kinds; track k) {
+        <button type="button" [attr.aria-pressed]="kind() === k" (click)="kind.set(k)">{{ kindLabels[k] }}</button>
+      }
+    </div>
+    <div class="seg" role="group" aria-label="Duración">
+      <button type="button" [attr.aria-pressed]="duration() === ''" (click)="duration.set('')">Cualquier duración</button>
+      @for (d of durations; track d) {
+        <button type="button" [attr.aria-pressed]="duration() === d" (click)="duration.set(d)">{{ durationLabels[d] }}</button>
+      }
+    </div>
+  </div>
+}
+
+@if (store.error() || store.loading()) {
+  <div class="status" [class.err]="!!store.error()" role="status">{{ store.error() ?? 'Cargando recetas…' }}</div>
+}
+
+<div class="recipes">
+  @for (r of filtered(); track r.id) {
+    <a class="recipe-card" [routerLink]="['/recetas', r.id]">
+      @if (store.photoUrl(r); as url) {
+        <img [src]="url" alt="" loading="lazy" />
+      } @else {
+        <span class="no-photo" aria-hidden="true">{{ r.name.charAt(0) }}</span>
+      }
+      <span class="body">
+        <span class="t">{{ r.name }}</span>
+        <span class="meta">
+          <span class="tag">{{ kindLabels[r.kind] }}</span>
+          <span class="dur" [attr.data-d]="r.duration">{{ durationLabels[r.duration] }}@if (r.minutes) { · {{ r.minutes }} min}</span>
+        </span>
+      </span>
+    </a>
+  } @empty {
+    @if (!store.loading() && !store.error()) {
+      @if (filtering()) {
+        <p class="empty">Ninguna receta con estos filtros. <button type="button" class="link" (click)="clearFilters()">Quitar filtros</button></p>
+      } @else {
+        <p class="empty">Aún no hay recetas. Apunta la primera: lo que lleva, para cuántos y cómo se hace.</p>
+      }
+    }
+  }
+</div>

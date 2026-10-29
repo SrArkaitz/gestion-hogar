@@ -27,6 +27,8 @@ model Household {
   recurring   RecurringTask[]
   shopping    ShoppingItem[]
   products    ShoppingProduct[]
+  recipes     Recipe[]
+  menu        MenuEntry[]
 }
 
 model User {
@@ -50,6 +52,7 @@ model User {
   recurringAssigned RecurringTaskAssignee[]
   pushSubscriptions PushSubscription[]
   shoppingAdded     ShoppingItem[]
+  recipesCreated    Recipe[]
 }
 
 /// Pertenencia de una persona a una casa.
@@ -252,4 +255,50 @@ model ShoppingProduct {
   lastUsedAt  DateTime  @default(now())
 
   @@id([householdId, key])
+}
+
+/// Receta del recetario de una casa.
+model Recipe {
+  id          String      @id @default(uuid())
+  householdId String
+  household   Household   @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  /// primero | segundo | unico | postre
+  kind        String
+  /// rapido | medio | largo
+  duration    String
+  minutes     Int?
+  /// Raciones para las que están pensadas las cantidades
+  servings    Int
+  /// JSON: Ingredient[] (@hogar/shared). Siempre se leen y se guardan juntos.
+  ingredients String      @default("[]")
+  /// JSON: string[] con los pasos en orden
+  steps       String      @default("[]")
+  notes       String      @default("")
+  /// Archivo de la foto en PHOTOS_DIR, o null
+  photo       String?
+  menu        MenuEntry[]
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([householdId])
+}
+
+/// Plato del menú semanal: un día, comida o cena, y para cuántas raciones.
+model MenuEntry {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  /// AAAA-MM-DD
+  date        String
+  /// comida | cena
+  meal        String
+  recipeId    String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  servings    Int
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId, date])
 }

@@ -17,7 +17,7 @@ import {
   WEEKDAY_NAMES,
   WEEKDAYS,
 } from '@hogar/shared';
-import { todayIso, whenText } from './dates';
+import { todayIso, whenText } from '../core/dates';
 
 const UNITS: Record<Exclude<RecurrenceFrequency, 'dias_semana'>, [string, string]> = {
   dias: ['día', 'días'],
