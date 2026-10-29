@@ -156,7 +156,8 @@ Cada fase deja algo que ya se puede usar.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
 - Hecho: tablero de Tareas (columnas con arrastrar y soltar, prioridad, fecha límite con marca de vencida, asignación a miembros, categoría con sugerencias, filtros por persona, categoría y prioridad).
 - Hecho: módulo de Ideas (pestañas Abiertas, Aceptadas y Descartadas; valorar, aceptar con prioridad creando la tarea enlazada, descartar y recuperar).
-- Siguiente: despliegue en `hogar.kaitzlab.com` con Cloudflare Tunnel, que cierra la fase 1.
+- Hecho: copia de seguridad diaria de la base de datos (VACUUM INTO a las 03:30, últimas 14) y guía de despliegue en [`DESPLIEGUE.md`](DESPLIEGUE.md).
+- Siguiente: publicar en `hogar.kaitzlab.com` siguiendo la guía, que cierra la fase 1. Las copias de las fotos llegarán con la primera fase que tenga fotos (recetas).
 
 ## 8. Decisiones tomadas
 

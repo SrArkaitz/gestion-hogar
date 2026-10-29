@@ -53,9 +53,15 @@ El cliente de Prisma se genera en `backend/src/generated/` al compilar o arranca
 
 ## Despliegue en el servidor (Docker)
 
-El contenedor aplica las migraciones pendientes cada vez que arranca, así que basta con reconstruirlo para actualizar.
+La guía paso a paso para publicarla en `https://hogar.kaitzlab.com` está en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md): Portainer, Cloudflare Tunnel, cookie segura, copias de seguridad y Cloudflare Access.
 
-### Opción A: por terminal
+En resumen:
+
+- El contenedor aplica las migraciones pendientes cada vez que arranca, así que basta con reconstruirlo para actualizar.
+- Hace una copia de la base de datos cada día a las 03:30 y guarda las últimas 14.
+- `COOKIE_SECURE=false` (valor actual) permite iniciar sesión por `http://IP:8085`. Cámbialo a `true` cuando solo entres por `https://hogar.kaitzlab.com`.
+
+### Por terminal
 
 ```bash
 git clone https://github.com/SrArkaitz/gestion-hogar.git
@@ -70,33 +76,7 @@ git pull
 docker compose up -d --build
 ```
 
-### Opción B: desde Portainer
-
-1. **Stacks → Add stack → Repository**.
-2. Repository URL: `https://github.com/SrArkaitz/gestion-hogar`, reference `refs/heads/main`, compose path `docker-compose.yml`.
-3. Como el repositorio es privado, activa **Authentication** y usa tu usuario de GitHub con un *personal access token* (GitHub → Settings → Developer settings → Fine-grained tokens, con permiso de lectura de contenidos sobre este repositorio).
-4. **Deploy the stack**. Para actualizar después, entra en el stack y pulsa **Pull and redeploy**.
-
-### Acceso desde fuera
-
-El plan es publicarla en `https://hogar.kaitzlab.com` con Cloudflare Tunnel (ver el documento de diseño).
-
-**Cookie de sesión y HTTPS.** La variable `COOKIE_SECURE` del `docker-compose.yml` decide si la cookie de sesión solo viaja por HTTPS:
-
-- `false` (valor actual): permite iniciar sesión entrando por `http://IP-DEL-SERVIDOR:8085` o por Tailscale.
-- `true`: cámbialo cuando solo entres por `https://hogar.kaitzlab.com`. Con `true`, entrar por `http://` no funciona: el navegador no guarda la cookie y no se puede iniciar sesión.
-
-El registro está abierto: cualquiera que llegue a la web puede crearse una cuenta. Solo ve sus propias casas y las casas a las que le inviten.
-
-### Datos y copias de seguridad
-
-La base de datos vive en el volumen de Docker `gestion-hogar-data` (archivo `/app/data/hogar.db` dentro del contenedor). Para hacer una copia:
-
-```bash
-docker cp gestion-hogar:/app/data/hogar.db ./hogar-backup.db
-```
-
-El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
+La base de datos vive en el volumen de Docker `gestion-hogar-data` (`/app/data/hogar.db` dentro del contenedor) y las copias diarias en `/app/data/backups`. El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
 
 ## API
 

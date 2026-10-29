@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { existsSync } from 'fs';
 import { join, resolve } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { BackupModule } from './backup/backup.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
 import { IdeasModule } from './ideas/ideas.module';
@@ -14,11 +16,13 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     HouseholdsModule,
     TasksModule,
     IdeasModule,
+    BackupModule,
     ...(existsSync(publicDir)
       ? [
           ServeStaticModule.forRoot({

@@ -4,12 +4,16 @@ import { mkdirSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { PrismaClient } from '../generated/prisma/client';
 
+/** Ruta absoluta del archivo SQLite, sacada de DATABASE_URL. */
+export function databaseFile(): string {
+  return resolve((process.env.DATABASE_URL ?? 'file:./data/hogar.db').replace(/^file:/, ''));
+}
+
 /** Cliente de Prisma compartido por todos los módulos. */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleDestroy {
   constructor() {
-    const url = process.env.DATABASE_URL ?? 'file:./data/hogar.db';
-    const file = resolve(url.replace(/^file:/, ''));
+    const file = databaseFile();
     mkdirSync(dirname(file), { recursive: true });
     super({ adapter: new PrismaBetterSqlite3({ url: file }) });
     new Logger(PrismaService.name).log(`Base de datos en ${file}`);

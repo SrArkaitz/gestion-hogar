@@ -7,12 +7,18 @@ services:
     ports:
       - "8085:3000"
     environment:
+      # También fija la hora de la copia de seguridad diaria (03:30).
       - TZ=Europe/Madrid
       # La cookie de sesión solo viaja por HTTPS si es "true". Déjalo en "false" mientras
       # entres por http://IP:8085; cámbialo a "true" cuando solo uses https://hogar.kaitzlab.com.
       - COOKIE_SECURE=false
+      # Copias diarias que se guardan.
+      - BACKUP_KEEP=14
+      # Para guardar las copias en otro disco, descomenta esta línea y la del volumen de abajo.
+      # - BACKUP_DIR=/backups
     volumes:
       - gestion-hogar-data:/app/data
+      # - /ruta/en/el/beelink/copias-hogar:/backups
 
 volumes:
   gestion-hogar-data:
