@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Ahora mismo está en marcha la **fase 1**. Ya funcionan las cuentas y las casas: registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa. Las páginas de Tareas e Ideas todavía no guardan nada.
+Ahora mismo está en marcha la **fase 1**. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa) y el tablero de Tareas. La página de Ideas todavía no guarda nada.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -119,3 +119,25 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/households/:householdId/invitations/:id` | Anula una invitación (admin) |
 | GET    | `/api/invitations/:token` | A qué casa invita un enlace (pública) |
 | POST   | `/api/invitations/:token/accept` | Acepta la invitación |
+| GET    | `/api/households/:householdId/tasks` | Tareas de la casa |
+| POST   | `/api/households/:householdId/tasks` | Crea una tarea |
+| PATCH  | `/api/households/:householdId/tasks/:id` | Cambia campos de una tarea (también moverla de columna) |
+| DELETE | `/api/households/:householdId/tasks/:id` | Borra una tarea |
+
+Cuerpo de una tarea (solo `title` y `priority` son obligatorios al crearla):
+
+```json
+{
+  "title": "Purgar los radiadores",
+  "notes": "Antes de que apriete el frío",
+  "status": "por_hacer",
+  "priority": "alta",
+  "due": "2026-11-15",
+  "category": "Casa",
+  "assigneeId": "<id de un miembro de la casa>"
+}
+```
+
+- `status`: `por_hacer`, `en_curso` o `hecho`
+- `priority`: `alta`, `media` o `baja`
+- `due`, `category` y `assigneeId` admiten `null` para quitarlos

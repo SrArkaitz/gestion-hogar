@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { TasksModule } from './tasks/tasks.module';
 
 // Carpeta con el frontend compilado. En Docker se copia a backend/public.
 const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'public'));
@@ -15,6 +16,7 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
     PrismaModule,
     AuthModule,
     HouseholdsModule,
+    TasksModule,
     ...(existsSync(publicDir)
       ? [
           ServeStaticModule.forRoot({

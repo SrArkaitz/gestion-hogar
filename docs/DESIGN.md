@@ -153,7 +153,8 @@ Cada fase deja algo que ya se puede usar.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
-- Siguiente: el tablero de Tareas, el módulo de Ideas y el despliegue en `hogar.kaitzlab.com`.
+- Hecho: tablero de Tareas (columnas con arrastrar y soltar, prioridad, fecha límite con marca de vencida, asignación a miembros, categoría con sugerencias, filtros por persona, categoría y prioridad).
+- Siguiente: el módulo de Ideas con paso a tarea y el despliegue en `hogar.kaitzlab.com`.
 
 ## 8. Decisiones tomadas
 

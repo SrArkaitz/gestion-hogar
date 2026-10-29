@@ -1,0 +1,111 @@
+<header class="top">
+  <div>
+    <h1>Tareas</h1>
+    <p class="sub">Lo que hay que hacer en casa, por prioridad.</p>
+  </div>
+  <button type="button" class="btn" (click)="openNew()">Nueva tarea</button>
+</header>
+
+<div class="filters" role="group" aria-label="Filtros">
+  <label>
+    <span class="sr-only">Persona</span>
+    <select [value]="person()" (change)="person.set(value($event))">
+      <option value="todas">Todas las personas</option>
+      <option value="mias">Mis tareas</option>
+      <option value="nadie">Sin asignar</option>
+      @for (m of store.members(); track m.id) {
+        <option [value]="m.id">{{ m.name }}</option>
+      }
+    </select>
+  </label>
+  @if (categories().length) {
+    <label>
+      <span class="sr-only">Categoría</span>
+      <select [value]="category()" (change)="category.set(value($event))">
+        <option value="">Todas las categorías</option>
+        @for (c of categories(); track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </label>
+  }
+  <div class="seg" role="group" aria-label="Prioridad">
+    <button type="button" [attr.aria-pressed]="priority() === ''" (click)="priority.set('')">Todas</button>
+    @for (p of priorities; track p) {
+      <button type="button" [attr.aria-pressed]="priority() === p" (click)="priority.set(p)">{{ priorityLabels[p] }}</button>
+    }
+  </div>
+  @if (filtering()) {
+    <button type="button" class="link" (click)="clearFilters()">Quitar filtros</button>
+  }
+</div>
+
+@if (store.error() || store.loading()) {
+  <div class="status" [class.err]="!!store.error()" role="status">
+    {{ store.error() ?? 'Cargando tareas…' }}
+  </div>
+}
+
+<div class="board" cdkDropListGroup>
+  @for (status of statuses; track status) {
+    <section class="col"
+             cdkDropList
+             [cdkDropListData]="status"
+             [cdkDropListSortingDisabled]="true"
+             (cdkDropListDropped)="onDrop($event)">
+      <div class="col-h">
+        <h2>{{ statusLabels[status] }}</h2>
+        <span class="count">{{ byStatus()[status].length }}</span>
+      </div>
+
+      <div class="list">
+        @for (task of byStatus()[status]; track task.id) {
+          <article class="card"
+                   cdkDrag
+                   [cdkDragData]="task.id"
+                   [cdkDragStartDelay]="{ touch: 250, mouse: 0 }"
+                   [class.done]="status === 'hecho'"
+                   [attr.data-p]="task.priority"
+                   tabindex="0"
+                   [attr.aria-label]="task.title + ', prioridad ' + priorityLabels[task.priority]"
+                   (click)="open(task)"
+                   (keydown.enter)="open(task)">
+            <div class="t">{{ task.title }}</div>
+            @if (task.notes) {
+              <div class="n clamp">{{ task.notes }}</div>
+            }
+            <div class="meta">
+              <span class="pill">{{ priorityLabels[task.priority] }}</span>
+              @if (task.due) {
+                <span class="due" [class.late]="isLate(task)">{{ isLate(task) ? 'Vencida · ' : '' }}{{ dueText(task) }}</span>
+              }
+              @if (task.category) {
+                <span class="tag">{{ task.category }}</span>
+              }
+              @if (task.assigneeId) {
+                <span class="avatar" [title]="memberNames().get(task.assigneeId) ?? ''"
+                      [attr.aria-label]="'Asignada a ' + (memberNames().get(task.assigneeId) ?? '')">{{ initials(task.assigneeId) }}</span>
+              }
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">{{ filtering() ? 'Nada con estos filtros.' : 'Sin tareas.' }}</p>
+        }
+      </div>
+      @if (status !== 'hecho') {
+        <button type="button" class="add" (click)="openNew(status)">+ Añadir tarea</button>
+      }
+    </section>
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <app-task-dialog
+    [task]="editing() ?? null"
+    [members]="store.members()"
+    [usedCategories]="categories()"
+    [initialStatus]="newStatus()"
+    (save)="onSave($event)"
+    (delete)="onDelete()"
+    (close)="close()" />
+}
