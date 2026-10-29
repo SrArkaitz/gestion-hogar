@@ -64,6 +64,8 @@ export class HouseholdPage {
   protected readonly me = computed(() => this.session.user()?.id);
   protected readonly isAdmin = this.session.isAdmin;
   private readonly activeId = computed(() => this.session.household()?.id);
+  /** Secciones que usa la casa (para el resumen del desplegable). */
+  protected readonly visibleCount = computed(() => MODULES.length - (this.household()?.hiddenModules.length ?? 0));
 
   constructor() {
     // Recarga al cambiar de casa en el selector o de rol (no al renombrarla).
@@ -78,8 +80,16 @@ export class HouseholdPage {
   }
 
   protected async saveName() {
+    const current = this.household()?.name ?? '';
+    const name = this.newName().trim();
+    if (!name || name === current) return;
+    // Cambia el nombre para todos los miembros: mejor confirmarlo.
+    if (!confirm(`¿Cambiar el nombre de la casa de «${current}» a «${name}»? Lo verán así todos los miembros.`)) {
+      this.newName.set(current);
+      return;
+    }
     await this.run('Nombre guardado.', async (id) => {
-      this.applyUpdate(await this.api.update(id, { name: this.newName() }));
+      this.applyUpdate(await this.api.update(id, { name }));
     });
   }
 

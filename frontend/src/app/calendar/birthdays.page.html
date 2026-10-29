@@ -1,0 +1,82 @@
+<header class="top">
+  <div>
+    <h1>Calendario</h1>
+    <p class="sub">Cumpleaños de la familia y los amigos. Os avisamos unos días antes.</p>
+  </div>
+  <button type="button" class="btn" (click)="open(null)">Nuevo cumpleaños</button>
+</header>
+
+<app-calendar-tabs />
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+}
+
+<ul class="bdays">
+  @for (r of rows(); track r.b.id) {
+    <li>
+      <button type="button" class="bday" [class.soon]="r.daysLeft <= r.b.notifyDays" (click)="open(r.b)">
+        <span class="who">
+          <span class="t">{{ r.b.name }}</span>
+          <span class="n">{{ dateText(r.b) }}@if (r.age !== null) { · cumple {{ r.age }}}</span>
+        </span>
+        <span class="left">{{ leftText(r.daysLeft) }}</span>
+      </button>
+    </li>
+  } @empty {
+    @if (!loading()) {
+      <li class="empty">Aún no hay cumpleaños. Apunta los de la familia y os avisaremos antes de que lleguen.</li>
+    }
+  }
+</ul>
+
+@if (editing() !== undefined) {
+  <div class="veil" (click)="editing.set(undefined)">
+    <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar cumpleaños' : 'Nuevo cumpleaños'"
+          (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
+      <h3>{{ editing() ? 'Editar cumpleaños' : 'Nuevo cumpleaños' }}</h3>
+      <label>De quién
+        <input name="name" required [maxlength]="nameMax" placeholder="Amaia" [(ngModel)]="name" />
+      </label>
+      <div class="row">
+        <label>Día
+          <select name="day" [(ngModel)]="day">
+            @for (d of dayOptions(); track d) {
+              <option [ngValue]="d">{{ d }}</option>
+            }
+          </select>
+        </label>
+        <label>Mes
+          <select name="month" [ngModel]="month()" (ngModelChange)="setMonth($event)">
+            @for (m of months; track $index) {
+              <option [ngValue]="$index + 1">{{ m }}</option>
+            }
+          </select>
+        </label>
+        <label>Año <span class="hint">(opcional)</span>
+          <input type="number" name="year" min="1900" [max]="thisYear" inputmode="numeric" placeholder="1990" [(ngModel)]="year" />
+        </label>
+      </div>
+      <label>Avisar
+        <select name="notify" [(ngModel)]="notifyDays">
+          @for (n of noticeOptions; track n) {
+            <option [ngValue]="n">{{ noticeText(n) }}</option>
+          }
+        </select>
+      </label>
+      <p class="hint">El aviso llega a toda la casa a las 9:00, ese día y el mismo día del cumpleaños.</p>
+      @if (formError()) {
+        <p class="form-err" role="alert">{{ formError() }}</p>
+      }
+      <div class="acts">
+        @if (editing()) {
+          <button type="button" class="btn danger" (click)="remove()">Borrar</button>
+        }
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="editing.set(undefined)">Cancelar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

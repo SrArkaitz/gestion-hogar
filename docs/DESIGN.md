@@ -127,9 +127,11 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.6 Calendario
 
-- Vista mensual y semanal con lo que llega de los demás módulos.
-- **Cumpleaños:** persona, fecha (con o sin año de nacimiento) y aviso unos días antes. Se repiten cada año.
-- Eventos sueltos propios del calendario.
+- **Vista de mes y de semana** con lo que tiene fecha en las secciones que use la casa: tareas con fecha límite, las próximas veces de las tareas recurrentes, platos del menú y vencimientos de facturas (también los de los meses siguientes). Cada cosa lleva a su sección. En el mes, al tocar un día se ve su lista; en el móvil, cada día enseña puntos de colores por tipo.
+- **Cumpleaños:** nombre, día y mes, año si se sabe (para decir cuántos cumple) y con cuántos días de antelación avisar (por defecto 3). Se repiten cada año; el 29 de febrero, los años no bisiestos, cae el 28. Pestaña propia, del más cercano al más lejano.
+- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, y notas.
+- **Avisos** a las 9:00, a toda la casa: los eventos que empiezan ese día y los cumpleaños de ese día o de dentro de sus días de aviso.
+- Es una sección más: se puede ocultar en *Casa → Secciones*.
 
 ### 3.7 Inventario
 
@@ -186,7 +188,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fases 1 a 5 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
+**Fases 1 a 6 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -201,7 +203,8 @@ Cada fase deja algo que ya se puede usar.
 - Hecho (fase 4): recetario con fotos, raciones escalables y menú semanal, conectados con la compra. Las fotos entran en la copia diaria.
 - Hecho (fase 5): gastos repartidos, saldos y pagos para quedar en paz, facturas fijas con aviso y resumen del mes.
 - Hecho: cada casa elige qué secciones usa (los administradores, en *Casa → Secciones*).
-- Siguiente: fase 6, calendario con cumpleaños.
+- Hecho (fase 6): calendario de mes y semana con lo de las demás secciones, cumpleaños y eventos, con avisos.
+- Siguiente: fase 7, inventario y mantenimiento.
 
 ## 8. Decisiones tomadas
 
@@ -223,5 +226,6 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | El service worker no usa caché: la app solo funciona con conexión. |
 | 2026-10-29 | Recetas: ingredientes y pasos se guardan como JSON dentro de la receta. Las fotos se reducen en el navegador y se suben tal cual (sin multipart). Antes de pasar ingredientes a la compra se pueden desmarcar. |
 | 2026-10-29 | Gastos: reparto a partes iguales guardado con cada gasto; saldos y pagos mínimos para quedar en paz; facturas fijas cada N meses. |
+| 2026-10-29 | Calendario: no copia datos de las otras secciones, los junta al pedirlos (una sola ruta de la API). Eventos y cumpleaños son suyos. |
 | 2026-10-29 | Cada casa elige qué secciones usa. Se guarda la lista de las ocultas, así que una sección nueva aparece visible en todas las casas. Ocultar no borra datos. |
 | 2026-10-29 | Compra: una lista por casa, secciones fijas (adivinadas y luego recordadas por producto), lo comprado se queda en el carro hasta quitarlo y los habituales salen solos de lo ya comprado. Se sincroniza consultando al servidor cada pocos segundos. |

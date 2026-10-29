@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { addDays, BILL_NOTICE_DAYS, formatEuros, IsoDate } from '@hogar/shared';
+import { addDays, ageOn, BILL_NOTICE_DAYS, formatEuros, IsoDate, nextBirthday } from '@hogar/shared';
 import { TIME_ZONE, todayIso } from '../common/dates';
 import { householdUses } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
@@ -32,7 +32,10 @@ export class RemindersService {
       const today = todayIso();
       const tasks = await this.sendDueReminders(today);
       const bills = await this.sendBillReminders(today);
-      if (tasks || bills) this.logger.log(`Recordatorios enviados: ${tasks} de tareas y ${bills} de facturas`);
+      const calendar = await this.sendCalendarReminders(today);
+      if (tasks || bills || calendar) {
+        this.logger.log(`Recordatorios enviados: ${tasks} de tareas, ${bills} de facturas y ${calendar} del calendario`);
+      }
     } catch (err) {
       this.logger.error(`No se pudieron enviar los recordatorios: ${(err as Error).message}`);
     }
@@ -64,6 +67,43 @@ export class RemindersService {
           url: `/gastos/facturas?casa=${householdId}`,
           tag: `facturas-${householdId}`,
         },
+      );
+    }
+    return sent;
+  }
+
+  /**
+   * Calendario: los eventos que empiezan hoy y los cumpleaños de hoy o de dentro de los días de
+   * aviso de cada uno. Un aviso por casa a todos sus miembros (si la casa usa el calendario).
+   * @returns cuántos dispositivos han recibido algún aviso.
+   */
+  async sendCalendarReminders(today: IsoDate): Promise<number> {
+    const households = await this.prisma.household.findMany({
+      where: householdUses('calendario'),
+      select: {
+        id: true,
+        name: true,
+        members: { select: { userId: true } },
+        events: { where: { date: today }, orderBy: [{ time: 'asc' }, { title: 'asc' }] },
+        birthdays: true,
+      },
+    });
+    let sent = 0;
+    for (const h of households) {
+      const parts: string[] = [];
+      if (h.events.length) parts.push(`Hoy: ${h.events.map((e) => (e.time ? `${e.title} (${e.time})` : e.title)).join(', ')}.`);
+      for (const b of h.birthdays) {
+        const next = nextBirthday(b, today);
+        const days = Math.round((Date.parse(next) - Date.parse(today)) / 86_400_000);
+        const age = ageOn(b, next);
+        const turns = age !== null ? `, cumple ${age}` : '';
+        if (days === 0) parts.push(`¡Hoy es el cumpleaños de ${b.name}${turns}!`);
+        else if (days === b.notifyDays) parts.push(`Cumpleaños de ${b.name} ${days === 1 ? 'mañana' : `en ${days} días`}${turns}.`);
+      }
+      if (!parts.length) continue;
+      sent += await this.push.send(
+        h.members.map((m) => m.userId),
+        { title: `Hoy en el calendario · ${h.name}`, body: parts.join(' '), url: `/calendario?casa=${h.id}`, tag: `calendario-${h.id}` },
       );
     }
     return sent;

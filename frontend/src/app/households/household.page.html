@@ -10,148 +10,158 @@
 }
 
 @if (household(); as h) {
-  <div class="panels">
-    @if (isAdmin()) {
+  <!-- Dos columnas independientes: cada tarjeta va pegada a la de arriba, sin huecos por la de al lado. -->
+  <div class="house-cols">
+    <div class="house-col">
+      @if (isAdmin()) {
+        <section class="panel">
+          <h2>Nombre</h2>
+          <form class="inline" (ngSubmit)="saveName()">
+            <label class="grow">
+              <span class="sr-only">Nombre de la casa</span>
+              <input name="name" required [maxlength]="nameMax" [(ngModel)]="newName" />
+            </label>
+            <button type="submit" class="btn ghost" [disabled]="!newName().trim() || newName().trim() === h.name">Guardar</button>
+          </form>
+        </section>
+      }
+
       <section class="panel">
-        <h2>Nombre</h2>
-        <form class="inline" (ngSubmit)="saveName()">
+        <h2>Miembros <span class="count">{{ h.members.length }}</span></h2>
+        <ul class="members">
+          @for (m of h.members; track m.id) {
+            <li>
+              @if (m.id === me() || isAdmin()) {
+                <button type="button" class="swatch" [attr.data-c]="m.color"
+                        [attr.aria-expanded]="pickingColor() === m.id"
+                        [attr.aria-label]="'Color de ' + m.name + ': ' + colorLabels[m.color] + '. Cambiar'"
+                        (click)="pickingColor.set(pickingColor() === m.id ? null : m.id)"></button>
+              } @else {
+                <span class="swatch" [attr.data-c]="m.color" [title]="colorLabels[m.color]"></span>
+              }
+              <div class="who">
+                <span class="t">{{ m.name }}@if (m.id === me()) { <span class="you">(tú)</span> }</span>
+                <span class="n">{{ m.email }}</span>
+              </div>
+              <span class="role" [class.admin]="m.role === 'admin'">{{ roleLabels[m.role] }}</span>
+              @if (isAdmin() && m.id !== me()) {
+                <div class="acts-sm">
+                  <button type="button" class="link" (click)="toggleAdmin(m)">
+                    {{ m.role === 'admin' ? 'Quitar admin' : 'Hacer admin' }}
+                  </button>
+                  <button type="button" class="link danger" (click)="removeMember(m)">Sacar</button>
+                </div>
+              }
+              @if (pickingColor() === m.id) {
+                <div class="palette" role="group" [attr.aria-label]="'Color de ' + m.name">
+                  @for (c of colors; track c) {
+                    <button type="button" class="swatch" [attr.data-c]="c" [attr.aria-pressed]="m.color === c"
+                            [attr.aria-label]="colorLabels[c]" [title]="colorLabels[c]" (click)="setColor(m, c)"></button>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+
+      @if (isAdmin()) {
+        <section class="panel">
+          <h2>Invitar</h2>
+          <p class="n">Crea un enlace y envíaselo a quien quieras invitar. Sirve para una sola persona y caduca en {{ invitationDays }} días.</p>
+          @if (newInvitation(); as inv) {
+            <div class="invite-link">
+              <input readonly [value]="inviteLink(inv.token)" aria-label="Enlace de invitación" (focus)="$any($event.target).select()" />
+              <button type="button" class="btn" (click)="copyInvitation()">{{ copied() ? 'Copiado' : 'Copiar' }}</button>
+            </div>
+            <p class="hint">Cópialo ahora: por seguridad no se puede volver a mostrar.</p>
+          } @else {
+            <button type="button" class="btn" (click)="createInvitation()">Crear enlace de invitación</button>
+          }
+          @if (invitations().length) {
+            <h3>Pendientes</h3>
+            <ul class="invites">
+              @for (inv of invitations(); track inv.id) {
+                <li>
+                  <span class="n">Creada por {{ inv.createdBy }} el {{ formatDate(inv.createdAt) }} · caduca el {{ formatDate(inv.expiresAt) }}</span>
+                  <button type="button" class="link danger" (click)="revoke(inv)">Anular</button>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      <section appDevicePanel></section>
+    </div>
+
+    <div class="house-col">
+      @if (isAdmin()) {
+        <details class="panel fold">
+          <summary>
+            <h2>Secciones</h2>
+            <span class="n">{{ visibleCount() }} de {{ modules.length }} visibles</span>
+          </summary>
+          <p class="n">Elige qué usa esta casa. Lo que desmarques se oculta para todos; no se borra nada.</p>
+          @for (m of modules; track m) {
+            <label class="switch-row">
+              <input type="checkbox" [checked]="!h.hiddenModules.includes(m)" (change)="setVisible(m, $any($event.target).checked)" />
+              <span>
+                <span class="t">{{ moduleLabels[m] }}</span>
+                <span class="n">{{ moduleDescriptions[m] }}</span>
+              </span>
+            </label>
+          }
+        </details>
+      }
+
+      <section class="panel">
+        <h2>Tus casas</h2>
+        <ul class="houses">
+          @for (other of session.households(); track other.id) {
+            <li>
+              <span class="t">{{ other.name }}</span>
+              <span class="role" [class.admin]="other.role === 'admin'">{{ roleLabels[other.role] }}</span>
+              @if (other.id === h.id) {
+                <span class="n">Activa</span>
+              } @else {
+                <button type="button" class="link" (click)="session.select(other.id)">Cambiar a esta</button>
+              }
+            </li>
+          }
+        </ul>
+        <form class="inline" (ngSubmit)="createAnother()">
           <label class="grow">
-            <span class="sr-only">Nombre de la casa</span>
-            <input name="name" required [maxlength]="nameMax" [(ngModel)]="newName" />
+            <span class="sr-only">Nombre de la casa nueva</span>
+            <input name="another" required [maxlength]="nameMax" placeholder="Nombre de otra casa" [(ngModel)]="anotherName" />
           </label>
-          <button type="submit" class="btn ghost" [disabled]="newName().trim() === h.name">Guardar</button>
+          <button type="submit" class="btn ghost" [disabled]="!anotherName().trim()">Crear casa</button>
         </form>
       </section>
 
       <section class="panel">
-        <h2>Secciones</h2>
-        <p class="n">Elige qué usa esta casa. Lo que desmarques se oculta para todos; no se borra nada.</p>
-        @for (m of modules; track m) {
-          <label class="switch-row">
-            <input type="checkbox" [checked]="!h.hiddenModules.includes(m)" (change)="setVisible(m, $any($event.target).checked)" />
-            <span>
-              <span class="t">{{ moduleLabels[m] }}</span>
-              <span class="n">{{ moduleDescriptions[m] }}</span>
-            </span>
-          </label>
+        <h2>Cuenta</h2>
+        <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
+        @if (googleError()) {
+          <p class="form-err" role="alert">{{ googleError() }}</p>
         }
-      </section>
-    }
-
-    <section class="panel">
-      <h2>Miembros <span class="count">{{ h.members.length }}</span></h2>
-      <ul class="members">
-        @for (m of h.members; track m.id) {
-          <li>
-            @if (m.id === me() || isAdmin()) {
-              <button type="button" class="swatch" [attr.data-c]="m.color"
-                      [attr.aria-expanded]="pickingColor() === m.id"
-                      [attr.aria-label]="'Color de ' + m.name + ': ' + colorLabels[m.color] + '. Cambiar'"
-                      (click)="pickingColor.set(pickingColor() === m.id ? null : m.id)"></button>
-            } @else {
-              <span class="swatch" [attr.data-c]="m.color" [title]="colorLabels[m.color]"></span>
-            }
-            <div class="who">
-              <span class="t">{{ m.name }}@if (m.id === me()) { <span class="you">(tú)</span> }</span>
-              <span class="n">{{ m.email }}</span>
+        @if (session.me()?.account; as account) {
+          @if (account.google) {
+            <div class="google-row">
+              <span class="n">Google conectado: puedes entrar con tu cuenta de Google.</span>
+              @if (account.password) {
+                <button type="button" class="link danger" (click)="unlinkGoogle()">Desconectar</button>
+              }
             </div>
-            <span class="role" [class.admin]="m.role === 'admin'">{{ roleLabels[m.role] }}</span>
-            @if (isAdmin() && m.id !== me()) {
-              <div class="acts-sm">
-                <button type="button" class="link" (click)="toggleAdmin(m)">
-                  {{ m.role === 'admin' ? 'Quitar admin' : 'Hacer admin' }}
-                </button>
-                <button type="button" class="link danger" (click)="removeMember(m)">Sacar</button>
-              </div>
-            }
-            @if (pickingColor() === m.id) {
-              <div class="palette" role="group" [attr.aria-label]="'Color de ' + m.name">
-                @for (c of colors; track c) {
-                  <button type="button" class="swatch" [attr.data-c]="c" [attr.aria-pressed]="m.color === c"
-                          [attr.aria-label]="colorLabels[c]" [title]="colorLabels[c]" (click)="setColor(m, c)"></button>
-                }
-              </div>
-            }
-          </li>
+          } @else {
+            <app-google-button mode="conectar" volver="/casa" label="Conectar con Google" />
+          }
         }
-      </ul>
-    </section>
-
-    @if (isAdmin()) {
-      <section class="panel">
-        <h2>Invitar</h2>
-        <p class="n">Crea un enlace y envíaselo a quien quieras invitar. Sirve para una sola persona y caduca en {{ invitationDays }} días.</p>
-        @if (newInvitation(); as inv) {
-          <div class="invite-link">
-            <input readonly [value]="inviteLink(inv.token)" aria-label="Enlace de invitación" (focus)="$any($event.target).select()" />
-            <button type="button" class="btn" (click)="copyInvitation()">{{ copied() ? 'Copiado' : 'Copiar' }}</button>
-          </div>
-          <p class="hint">Cópialo ahora: por seguridad no se puede volver a mostrar.</p>
-        } @else {
-          <button type="button" class="btn" (click)="createInvitation()">Crear enlace de invitación</button>
-        }
-        @if (invitations().length) {
-          <h3>Pendientes</h3>
-          <ul class="invites">
-            @for (inv of invitations(); track inv.id) {
-              <li>
-                <span class="n">Creada por {{ inv.createdBy }} el {{ formatDate(inv.createdAt) }} · caduca el {{ formatDate(inv.expiresAt) }}</span>
-                <button type="button" class="link danger" (click)="revoke(inv)">Anular</button>
-              </li>
-            }
-          </ul>
-        }
+        <div class="acts">
+          <button type="button" class="btn ghost" (click)="logout()">Cerrar sesión</button>
+          <button type="button" class="btn danger" (click)="leave()">Salir de esta casa</button>
+        </div>
       </section>
-    }
-
-    <section class="panel">
-      <h2>Tus casas</h2>
-      <ul class="houses">
-        @for (other of session.households(); track other.id) {
-          <li>
-            <span class="t">{{ other.name }}</span>
-            <span class="role" [class.admin]="other.role === 'admin'">{{ roleLabels[other.role] }}</span>
-            @if (other.id === h.id) {
-              <span class="n">Activa</span>
-            } @else {
-              <button type="button" class="link" (click)="session.select(other.id)">Cambiar a esta</button>
-            }
-          </li>
-        }
-      </ul>
-      <form class="inline" (ngSubmit)="createAnother()">
-        <label class="grow">
-          <span class="sr-only">Nombre de la casa nueva</span>
-          <input name="another" required [maxlength]="nameMax" placeholder="Nombre de otra casa" [(ngModel)]="anotherName" />
-        </label>
-        <button type="submit" class="btn ghost" [disabled]="!anotherName().trim()">Crear casa</button>
-      </form>
-    </section>
-
-    <section appDevicePanel></section>
-
-    <section class="panel">
-      <h2>Cuenta</h2>
-      <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
-      @if (googleError()) {
-        <p class="form-err" role="alert">{{ googleError() }}</p>
-      }
-      @if (session.me()?.account; as account) {
-        @if (account.google) {
-          <div class="google-row">
-            <span class="n">Google conectado: puedes entrar con tu cuenta de Google.</span>
-            @if (account.password) {
-              <button type="button" class="link danger" (click)="unlinkGoogle()">Desconectar</button>
-            }
-          </div>
-        } @else {
-          <app-google-button mode="conectar" volver="/casa" label="Conectar con Google" />
-        }
-      }
-      <div class="acts">
-        <button type="button" class="btn ghost" (click)="logout()">Cerrar sesión</button>
-        <button type="button" class="btn danger" (click)="leave()">Salir de esta casa</button>
-      </div>
-    </section>
+    </div>
   </div>
 }

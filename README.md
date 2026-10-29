@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA) y los avisos push. Cada casa elige qué secciones usa.
+Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el calendario con cumpleaños, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA) y los avisos push. Cada casa elige qué secciones usa.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -96,7 +96,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/auth/google` | Desconecta Google (solo si la cuenta tiene contraseña) |
 | POST   | `/api/households` | Crea una casa; quien la crea es administrador |
 | GET    | `/api/households/:householdId` | Casa con sus miembros |
-| PATCH  | `/api/households/:householdId` | Cambia el nombre (`name`) o las secciones ocultas (`hiddenModules`: `tareas`, `ideas`, `compra`, `recetas`, `gastos`) (admin) |
+| PATCH  | `/api/households/:householdId` | Cambia el nombre (`name`) o las secciones ocultas (`hiddenModules`: `tareas`, `calendario`, `ideas`, `compra`, `recetas`, `gastos`) (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId` | Cambia el rol de un miembro (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId/color` | Cambia el color de un miembro (`{ "color": "verde" }`): el propio, o cualquiera si eres admin |
 | DELETE | `/api/households/:householdId/members/:userId` | Salir de la casa, o sacar a alguien (admin) |
@@ -146,6 +146,15 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | PATCH  | `/api/households/:householdId/bills/:id` | Edita o pausa (`active`) |
 | DELETE | `/api/households/:householdId/bills/:id` | Borra la factura; sus pagos se quedan |
 | POST   | `/api/households/:householdId/bills/:id/pay` | Apunta el pago como gasto y la pasa al siguiente vencimiento |
+| GET    | `/api/households/:householdId/calendar?from=AAAA-MM-DD&to=AAAA-MM-DD` | Todo lo que tiene fecha entre dos días (máximo 62): eventos, cumpleaños, tareas, recurrentes, menú y facturas |
+| GET    | `/api/households/:householdId/calendar/events/:id` | Un evento |
+| POST   | `/api/households/:householdId/calendar/events` | Crea un evento (`title`, `date`, `time` y `endDate` opcionales, `notes`) |
+| PATCH  | `/api/households/:householdId/calendar/events/:id` | Edita un evento (se envía entero) |
+| DELETE | `/api/households/:householdId/calendar/events/:id` | Borra un evento |
+| GET    | `/api/households/:householdId/calendar/birthdays` | Cumpleaños |
+| POST   | `/api/households/:householdId/calendar/birthdays` | Crea uno (`name`, `month`, `day`, `year` opcional, `notifyDays`) |
+| PATCH  | `/api/households/:householdId/calendar/birthdays/:id` | Edita uno (se envía entero) |
+| DELETE | `/api/households/:householdId/calendar/birthdays/:id` | Borra uno |
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
@@ -190,7 +199,7 @@ Cuerpo de una tarea recurrente:
 }
 ```
 
-Las rutas de una sección (tareas y recurrentes, ideas, compra, recetas y menú, gastos y facturas) responden 404 si la casa la tiene oculta.
+Las rutas de una sección (tareas y recurrentes, calendario, ideas, compra, recetas y menú, gastos y facturas) responden 404 si la casa la tiene oculta.
 
 Cuerpo de un gasto:
 

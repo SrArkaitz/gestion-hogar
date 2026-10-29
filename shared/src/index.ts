@@ -8,3 +8,4 @@ export * from './shopping';
 export * from './recipes';
 export * from './expenses';
 export * from './modules';
+export * from './calendar';

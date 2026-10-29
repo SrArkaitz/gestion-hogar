@@ -1,0 +1,100 @@
+<header class="top">
+  <div>
+    <h1>Calendario</h1>
+    <p class="sub">Todo lo que tiene fecha en casa, con los cumpleaños y vuestros planes.</p>
+  </div>
+  <button type="button" class="btn" (click)="editing.set(null)">Nuevo evento</button>
+</header>
+
+<app-calendar-tabs />
+
+<div class="cal-bar">
+  <div class="month-nav">
+    <button type="button" class="btn ghost sm" [attr.aria-label]="view() === 'mes' ? 'Mes anterior' : 'Semana anterior'" (click)="move(-1)">‹</button>
+    <h2 aria-live="polite">{{ title() }}</h2>
+    <button type="button" class="btn ghost sm" [attr.aria-label]="view() === 'mes' ? 'Mes siguiente' : 'Semana siguiente'" (click)="move(1)">›</button>
+    @if (!isCurrent()) {
+      <button type="button" class="link" (click)="goToday()">Hoy</button>
+    }
+  </div>
+  <div class="seg" role="group" aria-label="Vista">
+    <button type="button" [attr.aria-pressed]="view() === 'mes'" (click)="setView('mes')">Mes</button>
+    <button type="button" [attr.aria-pressed]="view() === 'semana'" (click)="setView('semana')">Semana</button>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+}
+
+@if (view() === 'mes') {
+  <div class="cal-month">
+    <div class="cal-grid" role="grid" [attr.aria-label]="title()">
+      @for (w of weekdayInitials; track $index) {
+        <span class="cal-wd" aria-hidden="true">{{ w }}</span>
+      }
+      @for (day of days(); track day) {
+        <button type="button" class="cal-day" role="gridcell" [class.out]="!inMonth(day)" [class.today]="day === today"
+                [attr.aria-selected]="day === selected()" [attr.aria-label]="dayText(day, { weekday: 'long', day: 'numeric', month: 'long' }) + (itemsOn(day).length ? ', ' + itemsOn(day).length + ' cosas' : '')"
+                (click)="selected.set(day)">
+          <span class="num">{{ +day.slice(8) }}</span>
+          <span class="chips">
+            @for (it of itemsOn(day).slice(0, chipsPerDay); track $index) {
+              <span class="chip-k" [attr.data-k]="it.kind" [class.done]="it.done">{{ it.title }}</span>
+            }
+            @if (itemsOn(day).length > chipsPerDay) {
+              <span class="more">+{{ itemsOn(day).length - chipsPerDay }}</span>
+            }
+          </span>
+          <span class="dots" aria-hidden="true">
+            @for (k of kindsOn(day); track k) {
+              <span class="dot-k" [attr.data-k]="k"></span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+
+    <section class="panel cal-day-panel" aria-live="polite">
+      <div class="cal-day-head">
+        <h2>{{ dayText(selected(), { weekday: 'long', day: 'numeric', month: 'long' }) }}</h2>
+        <button type="button" class="btn ghost sm" (click)="editing.set(null)">+ Evento</button>
+      </div>
+      <ul class="cal-items">
+        @for (it of itemsOn(selected()); track $index) {
+          <li>
+            <button type="button" class="cal-item" [attr.data-k]="it.kind" (click)="open(it)">
+              <span class="t" [class.done]="it.done">{{ it.title }}</span>
+              <span class="n">{{ kindLabels[it.kind] }}@if (it.detail) { · {{ it.detail }}}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="empty">{{ loading() ? 'Cargando…' : 'Nada este día.' }}</li>
+        }
+      </ul>
+    </section>
+  </div>
+} @else {
+  <div class="week">
+    @for (day of days(); track day) {
+      <section class="day" [class.today]="day === today" [attr.aria-label]="dayText(day, { weekday: 'long', day: 'numeric' })">
+        <h2>{{ dayText(day, { weekday: 'long', day: 'numeric' }) }}@if (day === today) { <span class="role">Hoy</span> }</h2>
+        <ul class="cal-items">
+          @for (it of itemsOn(day); track $index) {
+            <li>
+              <button type="button" class="cal-item" [attr.data-k]="it.kind" (click)="open(it)">
+                <span class="t" [class.done]="it.done">{{ it.title }}</span>
+                <span class="n">{{ kindLabels[it.kind] }}@if (it.detail) { · {{ it.detail }}}</span>
+              </button>
+            </li>
+          }
+        </ul>
+        <button type="button" class="add" (click)="selected.set(day); editing.set(null)">+ Evento</button>
+      </section>
+    }
+  </div>
+}
+
+@if (editing() !== undefined) {
+  <app-event-dialog [event]="editing() ?? null" [day]="selected()" (save)="onSave($event)" (delete)="onDelete()" (close)="editing.set(undefined)" />
+}

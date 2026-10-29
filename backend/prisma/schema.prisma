@@ -35,6 +35,8 @@ model Household {
   expenses      Expense[]
   settlements   Settlement[]
   bills         Bill[]
+  events        CalendarEvent[]
+  birthdays     Birthday[]
 }
 
 model User {
@@ -383,6 +385,41 @@ model Bill {
   active      Boolean   @default(true)
   notes       String    @default("")
   expenses    Expense[]
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+}
+
+/// Evento propio del calendario (lo demás que sale en él viene de las otras secciones).
+model CalendarEvent {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  title       String
+  /// AAAA-MM-DD
+  date        String
+  /// Último día si dura varios (AAAA-MM-DD)
+  endDate     String?
+  /// HH:MM, o null si es de todo el día
+  time        String?
+  notes       String    @default("")
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId, date])
+}
+
+/// Cumpleaños: se repite cada año. El año de nacimiento es opcional.
+model Birthday {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  month       Int
+  day         Int
+  year        Int?
+  /// Con cuántos días de antelación avisar (además del mismo día)
+  notifyDays  Int       @default(3)
   createdAt   DateTime  @default(now())
 
   @@index([householdId])
