@@ -1,0 +1,119 @@
+<header class="top">
+  <div>
+    <h1>Ideas</h1>
+    <p class="sub">Apuntadlas, valoradlas y convertid las buenas en tareas.</p>
+  </div>
+  <button type="button" class="btn" (click)="editing.set(null)">Nueva idea</button>
+</header>
+
+<div class="seg" role="tablist" aria-label="Estado de las ideas">
+  @for (t of tabs; track t.id) {
+    <button type="button" role="tab" [attr.aria-selected]="tab() === t.id"(click)="tab.set(t.id)">
+      {{ t.label }} <span class="n-tab">{{ counts()[t.id] }}</span>
+    </button>
+  }
+</div>
+
+@if (store.error() || store.loading()) {
+  <div class="status" [class.err]="!!store.error()" role="status">{{ store.error() ?? 'Cargando ideas…' }}</div>
+}
+@if (notice()) {
+  <div class="notice" role="status">
+    {{ notice() }} <a routerLink="/tareas">Ir a tareas</a>
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
+  </div>
+}
+
+<div class="ideas">
+  @for (idea of visible(); track idea.id) {
+    <article class="idea" [attr.data-s]="idea.status">
+      <button type="button" class="idea-body" (click)="open(idea)" [attr.aria-label]="'Editar ' + idea.title">
+        <span class="t">{{ idea.title }}</span>
+        @if (idea.description) {
+          <span class="n clamp">{{ idea.description }}</span>
+        }
+      </button>
+      <div class="meta">
+        @if (idea.status === 'en_valoracion') {
+          <span class="state">{{ statusLabels[idea.status] }}</span>
+        }
+        @if (idea.category) {
+          <span class="tag">{{ idea.category }}</span>
+        }
+        <span class="by">{{ proposedBy(idea) }}</span>
+      </div>
+      <div class="idea-acts">
+        @switch (idea.status) {
+          @case ('nueva') {
+            <button type="button" class="link" (click)="setStatus(idea, 'en_valoracion')">A valorar</button>
+            <button type="button" class="link danger" (click)="setStatus(idea, 'descartada')">Descartar</button>
+            <button type="button" class="btn sm" (click)="startAccept(idea)">Aceptar</button>
+          }
+          @case ('en_valoracion') {
+            <button type="button" class="link danger" (click)="setStatus(idea, 'descartada')">Descartar</button>
+            <button type="button" class="btn sm" (click)="startAccept(idea)">Aceptar</button>
+          }
+          @case ('aceptada') {
+            @if (idea.taskId) {
+              <a class="link" routerLink="/tareas">Ver en tareas</a>
+            } @else {
+              <span class="n">Su tarea se ha borrado</span>
+            }
+          }
+          @case ('descartada') {
+            <button type="button" class="link" (click)="setStatus(idea, 'nueva')">Recuperar</button>
+          }
+        }
+      </div>
+    </article>
+  } @empty {
+    @if (!store.loading()) {
+      <p class="empty">
+        @switch (tab()) {
+          @case ('abiertas') { No hay ideas abiertas. Apunta la primera con «Nueva idea». }
+          @case ('aceptadas') { Todavía no se ha aceptado ninguna idea. }
+          @case ('descartadas') { No hay ideas descartadas. }
+        }
+      </p>
+    }
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <app-idea-dialog
+    [idea]="editing() ?? null"
+    [usedCategories]="categories()"
+    [canDelete]="!!editing() && canDelete(editing()!)"
+    (save)="onSave($event)"
+    (delete)="onDelete()"
+    (close)="close()" />
+}
+
+@if (accepting(); as idea) {
+  <div class="veil" (click)="accepting.set(null)">
+    <form class="dlg" role="dialog" aria-modal="true" aria-label="Aceptar idea"
+          (click)="$event.stopPropagation()" (keydown.escape)="accepting.set(null)" (submit)="$event.preventDefault(); confirmAccept()">
+      <h3>Aceptar «{{ idea.title }}»</h3>
+      <p class="n">Se creará una tarea en «Por hacer» con su título, descripción y categoría.</p>
+      <div>
+        <span class="lbl" id="accept-prio">Prioridad de la tarea</span>
+        <div class="prio" role="group" aria-labelledby="accept-prio">
+          @for (p of priorities; track p) {
+            <button type="button" [attr.data-v]="p" [attr.aria-pressed]="acceptPriority() === p" (click)="acceptPriority.set(p)">
+              {{ priorityLabels[p] }}
+            </button>
+          }
+        </div>
+      </div>
+      @if (acceptError()) {
+        <p class="form-err" role="alert">{{ acceptError() }}</p>
+      }
+      <div class="acts">
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="accepting.set(null)">Cancelar</button>
+          <button type="submit" class="btn" [disabled]="busy()">Crear tarea</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

@@ -1,4 +1,5 @@
 import { Priority } from './common';
+import { Task } from './tasks';
 
 export const IDEA_STATUSES = ['nueva', 'en_valoracion', 'aceptada', 'descartada'] as const;
 export type IdeaStatus = (typeof IDEA_STATUSES)[number];
@@ -30,9 +31,16 @@ export interface IdeaInput {
   title: string;
   description?: string;
   category?: string | null;
+  /** Para pasar a valoración, descartar o recuperar. "aceptada" solo se pone al aceptarla. */
+  status?: Exclude<IdeaStatus, 'aceptada'>;
 }
 
 /** Datos para convertir una idea aceptada en tarea. */
 export interface AcceptIdeaInput {
   priority: Priority;
+}
+
+export interface AcceptIdeaResult {
+  idea: Idea;
+  task: Task;
 }

@@ -5,6 +5,7 @@ import { join, resolve } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
+import { IdeasModule } from './ideas/ideas.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TasksModule } from './tasks/tasks.module';
 
@@ -17,6 +18,7 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
     AuthModule,
     HouseholdsModule,
     TasksModule,
+    IdeasModule,
     ...(existsSync(publicDir)
       ? [
           ServeStaticModule.forRoot({

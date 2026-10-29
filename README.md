@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Ahora mismo está en marcha la **fase 1**. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa) y el tablero de Tareas. La página de Ideas todavía no guarda nada.
+Ahora mismo está en marcha la **fase 1**. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa) el tablero de Tareas y el módulo de Ideas. Falta publicarla en `hogar.kaitzlab.com` para cerrar la fase.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -123,6 +123,11 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/tasks` | Crea una tarea |
 | PATCH  | `/api/households/:householdId/tasks/:id` | Cambia campos de una tarea (también moverla de columna) |
 | DELETE | `/api/households/:householdId/tasks/:id` | Borra una tarea |
+| GET    | `/api/households/:householdId/ideas` | Ideas de la casa, de la más reciente a la más antigua |
+| POST   | `/api/households/:householdId/ideas` | Propone una idea (`title`, `description`, `category`) |
+| PATCH  | `/api/households/:householdId/ideas/:id` | Edita una idea o cambia su `status` a `nueva`, `en_valoracion` o `descartada` |
+| DELETE | `/api/households/:householdId/ideas/:id` | Borra una idea (quien la propuso o un administrador) |
+| POST   | `/api/households/:householdId/ideas/:id/accept` | Acepta la idea y crea su tarea (`{ "priority": "alta" }`) |
 
 Cuerpo de una tarea (solo `title` y `priority` son obligatorios al crearla):
 

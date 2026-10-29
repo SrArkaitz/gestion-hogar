@@ -36,9 +36,15 @@ export class TasksService {
     return rows.map(toTask);
   }
 
-  async create(householdId: string, createdById: string, body: unknown): Promise<Task> {
+  /** @param db cliente de Prisma o una transacción en curso (al aceptar una idea). */
+  async create(
+    householdId: string,
+    createdById: string,
+    body: unknown,
+    db: Prisma.TransactionClient = this.prisma,
+  ): Promise<Task> {
     const input = await this.validate(householdId, body, false);
-    const row = await this.prisma.task.create({
+    const row = await db.task.create({
       data: {
         householdId,
         createdById,
