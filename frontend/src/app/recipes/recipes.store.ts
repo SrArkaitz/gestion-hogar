@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { IsoDate, MenuEntry, MenuEntryInput, Recipe, RecipeInput, ShoppingItem, ShoppingLine } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
 import { errorMessage } from '../core/errors';
@@ -10,7 +10,10 @@ export class RecipesStore {
   private readonly http = inject(HttpClient);
   private householdId: string | null = null;
 
+  /** Las de la casa y las públicas de otras casas. */
   readonly recipes = signal<Recipe[]>([]);
+  /** Solo las de la casa: las que se pueden editar y poner en el menú. */
+  readonly own = computed(() => this.recipes().filter((r) => r.mine));
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
@@ -47,6 +50,13 @@ export class RecipesStore {
 
   async update(id: string, input: Partial<RecipeInput>): Promise<Recipe> {
     const recipe = await firstValueFrom(this.http.patch<Recipe>(`${this.api}/recipes/${id}`, input));
+    this.upsert(recipe);
+    return recipe;
+  }
+
+  /** Copia a esta casa una receta pública de otra. */
+  async copy(id: string): Promise<Recipe> {
+    const recipe = await firstValueFrom(this.http.post<Recipe>(`${this.api}/recipes/${id}/copy`, {}));
     this.upsert(recipe);
     return recipe;
   }

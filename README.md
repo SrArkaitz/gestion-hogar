@@ -121,10 +121,11 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/households/:householdId/shopping/products` | Productos ya comprados, de los más habituales a los menos |
 | DELETE | `/api/households/:householdId/shopping/products/:key` | Olvida un producto para que no se sugiera |
 | POST   | `/api/households/:householdId/shopping/items/bulk` | Añade varios (`{ "items": [{ "name", "quantity" }] }`); suma cantidades con lo que ya hubiera |
-| GET    | `/api/households/:householdId/recipes` | Recetario de la casa |
+| GET    | `/api/households/:householdId/recipes` | Recetario de la casa y recetas públicas de otras casas (`mine`, `author`) |
 | GET    | `/api/households/:householdId/recipes/:id` | Una receta |
-| POST   | `/api/households/:householdId/recipes` | Crea una receta |
-| PATCH  | `/api/households/:householdId/recipes/:id` | Edita; ingredientes y pasos se sustituyen enteros |
+| POST   | `/api/households/:householdId/recipes` | Crea una receta (`private: true` para que solo la vea la casa) |
+| POST   | `/api/households/:householdId/recipes/:id/copy` | Copia a la casa una receta pública de otra (la copia es privada) |
+| PATCH  | `/api/households/:householdId/recipes/:id` | Edita (solo las de la casa); ingredientes y pasos se sustituyen enteros |
 | DELETE | `/api/households/:householdId/recipes/:id` | Borra la receta, su foto y sus platos del menú |
 | PUT    | `/api/households/:householdId/recipes/:id/photo` | Sube la foto: el cuerpo es la imagen (`image/jpeg`, `image/png` o `image/webp`, hasta 8 MB) |
 | GET    | `/api/households/:householdId/recipes/:id/photo` | Descarga la foto |

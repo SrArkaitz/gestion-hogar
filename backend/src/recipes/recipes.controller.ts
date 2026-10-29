@@ -28,6 +28,12 @@ export class RecipesController {
     return this.recipes.create(householdId, user.id, body);
   }
 
+  /** Copia a esta casa una receta pública de otra. */
+  @Post(':id/copy')
+  copy(@Param('householdId') householdId: string, @CurrentUser() user: User, @Param('id') id: string): Promise<Recipe> {
+    return this.recipes.copy(householdId, user.id, id);
+  }
+
   @Patch(':id')
   update(@Param('householdId') householdId: string, @Param('id') id: string, @Body() body: unknown): Promise<Recipe> {
     return this.recipes.update(householdId, id, body);

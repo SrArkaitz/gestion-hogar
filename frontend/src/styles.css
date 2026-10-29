@@ -287,6 +287,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .dur[data-d="largo"] { background: var(--alta-bg); color: var(--alta); }
 .recipe { display: flex; flex-direction: column; gap: 16px; }
 .recipe .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; font-size: 12px; }
+.recipe-card .origin { font-size: 12px; color: var(--muted); }
+.recipe .origin { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
 .recipe-photo { width: 100%; max-height: 360px; object-fit: cover; border-radius: 14px; }
 .recipe-cols { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 14px; align-items: start; }
 @media (max-width: 760px) { .recipe-cols { grid-template-columns: minmax(0, 1fr); } }
@@ -306,8 +308,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .recipe-form { display: flex; flex-direction: column; gap: 14px; }
 .recipe-form .panel label { text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--fg); font-weight: 700; }
 .recipe-form .panel .lbl { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 700; color: var(--fg); }
-.recipe-form textarea, .recipe-form select, .recipe-form input:not([type="file"]) { font: inherit; font-size: 15px; font-weight: 400; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 9px 10px; width: 100%; }
+.recipe-form textarea, .recipe-form select, .recipe-form input:not([type="file"]):not([type="checkbox"]) { font: inherit; font-size: 15px; font-weight: 400; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 9px 10px; width: 100%; }
 .recipe-form textarea { min-height: 64px; resize: vertical; }
+.recipe-form .switch-row .n { font-weight: 400; color: var(--muted); }
 .form-row { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
 .form-row label.small { width: 120px; }
 .photo-field { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }

@@ -292,6 +292,8 @@ model Recipe {
   notes       String      @default("")
   /// Archivo de la foto en PHOTOS_DIR, o null
   photo       String?
+  /// Privada: solo la ve su casa. Si no, la ven todas las casas (sin poder cambiarla).
+  private     Boolean     @default(false)
   menu        MenuEntry[]
   createdById String
   createdBy   User        @relation(fields: [createdById], references: [id])

@@ -12,17 +12,26 @@
           <span class="tag">{{ kindLabels[r.kind] }}</span>
           <span class="dur" [attr.data-d]="r.duration">{{ durationLabels[r.duration] }}@if (r.minutes) { · {{ r.minutes }} min}</span>
         </p>
+        @if (!r.mine) {
+          <p class="origin">Compartida por {{ r.author }}, de otra casa.</p>
+        } @else if (r.private) {
+          <p class="origin">Privada: solo la ve esta casa.</p>
+        }
       </div>
       <div class="tools">
-        <button type="button" class="btn ghost" (click)="menuOpen.set(true)">Al menú</button>
-        <a class="btn ghost" [routerLink]="['/recetas', r.id, 'editar']">Editar</a>
+        @if (r.mine) {
+          <button type="button" class="btn ghost" (click)="menuOpen.set(true)">Al menú</button>
+          <a class="btn ghost" [routerLink]="['/recetas', r.id, 'editar']">Editar</a>
+        } @else {
+          <button type="button" class="btn" [disabled]="copying()" (click)="copy()">{{ copying() ? 'Guardando…' : 'Guardar en mi recetario' }}</button>
+        }
       </div>
     </header>
 
     @if (notice()) {
       <div class="notice" role="status">
         {{ notice() }}
-        @if (notice().includes('compra')) { <a routerLink="/compra">Ver la lista</a> } @else { <a routerLink="/recetas/menu">Ver el menú</a> }
+        @if (notice().includes('compra')) { <a routerLink="/compra">Ver la lista</a> } @else if (notice().includes('menú')) { <a routerLink="/recetas/menu">Ver el menú</a> }
         <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
       </div>
     }

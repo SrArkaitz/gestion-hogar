@@ -101,6 +101,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Raciones** para las que está pensada; las cantidades se escalan al cambiarlas.
 - **Ingredientes:** nombre, cantidad y unidad (g, kg, ml, l, unidades) o texto libre ("al gusto").
 - **Pasos** ordenados.
+- **Privada** (casilla, sin marcar por defecto). Si no es privada, es pública: la ven todas las casas de la app.
 
 **Menú semanal (opcional)**
 
@@ -115,6 +116,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Añadir a la compra** (desde una receta o desde la semana): se ve antes la lista de ingredientes para desmarcar lo que ya hay en casa; los que no llevan cantidad ("sal al gusto") salen desmarcados. Las cantidades de la misma magnitud se suman (500 g + 1 kg = 1,5 kg), también con lo que ya estuviera pendiente en la lista; si no se pueden sumar, se juntan ("6 bricks + 1 l").
 - **Fotos:** el navegador las reduce a 1600 px de lado antes de subirlas. Se guardan como archivos en `PHOTOS_DIR` (por defecto, junto a la base de datos) y entran en la copia diaria.
 - Borrar una receta la quita también del menú.
+- **Recetas de otras casas:** el recetario enseña también las públicas de las demás casas (de las que usan Recetas), con quién la apuntó y un filtro *De esta casa / De otras casas*. Se pueden ver y pasar a la compra, pero no cambiar ni poner en el menú. *Guardar en mi recetario* hace una copia (con foto) que ya es de la casa: se puede editar y usar en el menú. La copia empieza privada para que no salga repetida en las demás casas. Si la casa de origen la hace privada o la borra, deja de verse fuera, pero las copias se quedan.
 
 ### 3.5 Gastos y facturas
 
@@ -239,3 +241,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Inventario: cantidades con decimales y un mínimo por cosa; lo que se acaba se pasa a la compra con un botón, no de forma automática. |
 | 2026-10-29 | Archivos de los equipos: PDF o imagen de hasta 20 MB, subidos tal cual (sin multipart) y comprobados por su contenido. Se guardan en `data/files` con un nombre al azar. |
 | 2026-10-29 | Mantenimiento: intervalo en meses; al marcarla hecha, la próxima fecha se cuenta desde el día en que se hizo. |
+| 2026-10-29 | Recetas públicas por defecto: todas las casas ven las que no están marcadas como privadas, sin poder cambiarlas. Para usarlas en el menú se copian a la casa. |

@@ -31,8 +31,8 @@
   <div class="status" role="status">Cargando el menú…</div>
 }
 
-@if (!store.loading() && !store.recipes().length) {
-  <p class="empty">Para hacer el menú, primero <a routerLink="/recetas/nueva">apunta alguna receta</a>.</p>
+@if (!store.loading() && !store.own().length) {
+  <p class="empty">Para hacer el menú, primero <a routerLink="/recetas/nueva">apunta alguna receta</a> o guarda en vuestro recetario una de otra casa.</p>
 }
 
 <div class="week">
@@ -54,7 +54,7 @@
               }
             }
           </ul>
-          <button type="button" class="add" [disabled]="!store.recipes().length" (click)="openPicker({ date: day, meal })">+ Añadir</button>
+          <button type="button" class="add" [disabled]="!store.own().length" (click)="openPicker({ date: day, meal })">+ Añadir</button>
         </div>
       }
     </section>

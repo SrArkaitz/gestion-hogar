@@ -1,7 +1,7 @@
 <header class="top">
   <div>
     <h1>Recetas</h1>
-    <p class="sub">Vuestros platos, con lo que lleva cada uno y cómo se hace.</p>
+    <p class="sub">Vuestros platos y los que comparten otras casas, con lo que lleva cada uno y cómo se hace.</p>
   </div>
   <a class="btn" routerLink="/recetas/nueva">Nueva receta</a>
 </header>
@@ -26,6 +26,13 @@
         <button type="button" [attr.aria-pressed]="duration() === d" (click)="duration.set(d)">{{ durationLabels[d] }}</button>
       }
     </div>
+    @if (hasShared()) {
+      <div class="seg" role="group" aria-label="De quién">
+        <button type="button" [attr.aria-pressed]="origin() === ''" (click)="origin.set('')">Todas</button>
+        <button type="button" [attr.aria-pressed]="origin() === 'mine'" (click)="origin.set('mine')">De esta casa</button>
+        <button type="button" [attr.aria-pressed]="origin() === 'shared'" (click)="origin.set('shared')">De otras casas</button>
+      </div>
+    }
   </div>
 }
 
@@ -47,6 +54,11 @@
           <span class="tag">{{ kindLabels[r.kind] }}</span>
           <span class="dur" [attr.data-d]="r.duration">{{ durationLabels[r.duration] }}@if (r.minutes) { · {{ r.minutes }} min}</span>
         </span>
+        @if (!r.mine) {
+          <span class="origin">De {{ r.author }}</span>
+        } @else if (r.private) {
+          <span class="origin">Privada</span>
+        }
       </span>
     </a>
   } @empty {

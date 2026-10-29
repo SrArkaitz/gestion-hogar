@@ -79,7 +79,8 @@ export class RecipeFormPage implements OnDestroy {
     notes: RECIPE_NOTES_MAX,
   };
 
-  protected readonly recipe = computed(() => (this.id() ? (this.store.recipes().find((r) => r.id === this.id()) ?? null) : null));
+  /** Solo se editan las de esta casa; las públicas de otras no se encuentran aquí. */
+  protected readonly recipe = computed(() => (this.id() ? (this.store.own().find((r) => r.id === this.id()) ?? null) : null));
 
   protected readonly name = signal('');
   protected readonly kind = signal<RecipeKind>('unico');
@@ -89,6 +90,7 @@ export class RecipeFormPage implements OnDestroy {
   protected readonly rows = signal<IngredientRow[]>([{ name: '', qty: '', unit: 'g' }]);
   protected readonly steps = signal<string[]>(['']);
   protected readonly notes = signal('');
+  protected readonly isPrivate = signal(false);
 
   /** Foto nueva elegida (ya reducida) y su vista previa; o la decisión de quitar la que había. */
   protected readonly newPhoto = signal<Blob | null>(null);
@@ -131,6 +133,7 @@ export class RecipeFormPage implements OnDestroy {
         );
         this.steps.set(r.steps.length ? [...r.steps] : ['']);
         this.notes.set(r.notes);
+        this.isPrivate.set(r.private);
       });
     });
   }
@@ -269,6 +272,7 @@ export class RecipeFormPage implements OnDestroy {
       ingredients,
       steps: this.steps().map((s) => s.trim()).filter(Boolean),
       notes: this.notes().trim(),
+      private: this.isPrivate(),
     };
   }
 }

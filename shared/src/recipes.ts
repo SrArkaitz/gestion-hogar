@@ -58,6 +58,12 @@ export interface Recipe {
   notes: string;
   /** Nombre del archivo de la foto (cambia con cada foto nueva), o null. */
   photo: string | null;
+  /** Solo la ve su casa. Las demás son públicas: las ven todas las casas, sin poder cambiarlas. */
+  private: boolean;
+  /** Es de la casa activa (si no, es pública de otra casa y solo se puede ver o copiar). */
+  mine: boolean;
+  /** Quién la apuntó, en las de otras casas. */
+  author: string | null;
   createdById: string;
   createdAt: string;
   updatedAt: string;
@@ -72,6 +78,7 @@ export interface RecipeInput {
   ingredients: Ingredient[];
   steps: string[];
   notes?: string;
+  private?: boolean;
 }
 
 /** Un plato en el menú: un día, comida o cena, y para cuántas raciones. */

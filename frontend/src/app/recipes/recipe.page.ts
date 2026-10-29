@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   ingredientQuantity,
   Meal,
@@ -28,6 +28,7 @@ import { ShoppingPreview } from './shopping-preview';
 export class RecipePage {
   protected readonly store = inject(RecipesStore);
   private readonly session = inject(SessionService);
+  private readonly router = inject(Router);
   /** Sin la sección de Compra no se ofrece pasar ingredientes a la lista. */
   protected readonly usesShopping = computed(() => this.session.uses('compra'));
 
@@ -47,6 +48,7 @@ export class RecipePage {
   protected readonly factor = computed(() => this.servings() / (this.recipe()?.servings ?? 1));
 
   protected readonly notice = signal('');
+  protected readonly copying = signal(false);
   protected readonly preview = signal<ShoppingLine[] | null>(null);
   private readonly previewDialog = viewChild(ShoppingPreview);
 
@@ -84,6 +86,22 @@ export class RecipePage {
       this.notice.set(`${lines.length === 1 ? '1 ingrediente añadido' : `${lines.length} ingredientes añadidos`} a la compra.`);
     } catch (err) {
       this.previewDialog()?.showError(errorMessage(err, 'No se pudo añadir. Vuelve a intentarlo.'));
+    }
+  }
+
+  /** Guarda una copia (privada) en esta casa y la abre. */
+  protected async copy() {
+    const r = this.recipe();
+    if (!r) return;
+    this.copying.set(true);
+    try {
+      const copy = await this.store.copy(r.id);
+      await this.router.navigate(['/recetas', copy.id]);
+      this.notice.set('Guardada en vuestro recetario. Ya podéis cambiarla y ponerla en el menú.');
+    } catch (err) {
+      this.notice.set(errorMessage(err, 'No se pudo guardar la receta.'));
+    } finally {
+      this.copying.set(false);
     }
   }
 

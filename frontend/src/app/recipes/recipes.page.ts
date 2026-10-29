@@ -33,6 +33,9 @@ export class RecipesPage {
   protected readonly search = signal('');
   protected readonly kind = signal<RecipeKind | ''>('');
   protected readonly duration = signal<RecipeDuration | ''>('');
+  /** De quién: todas, las de esta casa o las públicas de otras. */
+  protected readonly origin = signal<'' | 'mine' | 'shared'>('');
+  protected readonly hasShared = computed(() => this.store.recipes().some((r) => !r.mine));
 
   protected readonly filtered = computed(() => {
     const q = productKey(this.search());
@@ -40,10 +43,11 @@ export class RecipesPage {
       (r) =>
         (!q || productKey(r.name).includes(q) || r.ingredients.some((i) => productKey(i.name).includes(q))) &&
         (!this.kind() || r.kind === this.kind()) &&
-        (!this.duration() || r.duration === this.duration()),
+        (!this.duration() || r.duration === this.duration()) &&
+        (!this.origin() || r.mine === (this.origin() === 'mine')),
     );
   });
-  protected readonly filtering = computed(() => !!this.search().trim() || !!this.kind() || !!this.duration());
+  protected readonly filtering = computed(() => !!this.search().trim() || !!this.kind() || !!this.duration() || !!this.origin());
 
   constructor() {
     effect(() => {
@@ -56,5 +60,6 @@ export class RecipesPage {
     this.search.set('');
     this.kind.set('');
     this.duration.set('');
+    this.origin.set('');
   }
 }

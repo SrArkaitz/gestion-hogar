@@ -65,7 +65,7 @@ export class MenuPage {
   protected readonly kind = signal<RecipeKind | ''>('');
   protected readonly candidates = computed(() => {
     const q = productKey(this.search());
-    return this.store.recipes().filter((r) => (!q || productKey(r.name).includes(q)) && (!this.kind() || r.kind === this.kind()));
+    return this.store.own().filter((r) => (!q || productKey(r.name).includes(q)) && (!this.kind() || r.kind === this.kind()));
   });
 
   // Editar un plato ya puesto
