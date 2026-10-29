@@ -1,0 +1,62 @@
+<header class="top">
+  <div>
+    <a class="back" routerLink="/tareas">← Tablero</a>
+    <h1>Tareas recurrentes</h1>
+    <p class="sub">Se crean solas en el tablero el día que toca. Si la anterior sigue sin hacer, no se repite.</p>
+  </div>
+  <button type="button" class="btn" (click)="editing.set(null)">Nueva recurrente</button>
+</header>
+
+@if (store.error() || store.loading() || status()) {
+  <div class="status" [class.err]="!!store.error() || !!status()" role="status">
+    {{ store.error() ?? (status() || 'Cargando…') }}
+  </div>
+}
+
+<div class="ideas">
+  @for (item of sorted(); track item.id) {
+    <article class="idea rec" [class.paused]="!item.active" [style.--stripe]="stripe(item)">
+      <button type="button" class="idea-body" (click)="editing.set(item)" [attr.aria-label]="'Editar ' + item.title">
+        <span class="t">{{ item.title }}</span>
+        <span class="n"><span aria-hidden="true">↻ </span>{{ describe(item) }}</span>
+      </button>
+      <div class="meta">
+        @if (item.active) {
+          <span class="next">Próxima: {{ when(item.nextDate) }}</span>
+        } @else {
+          <span class="state">En pausa</span>
+        }
+        <span class="pill" [attr.data-p]="item.priority">{{ priorityLabels[item.priority] }}</span>
+        @if (item.category) {
+          <span class="tag">{{ item.category }}</span>
+        }
+        @if (item.assigneeIds.length) {
+          <span class="avatars" role="img" [attr.aria-label]="assigneesLabel(item)">
+            @for (m of assignees(item); track m.id) {
+              <span class="avatar" [attr.data-c]="m.color" [title]="m.name" aria-hidden="true">{{ initials(m.name) }}</span>
+            }
+          </span>
+        }
+      </div>
+      <div class="idea-acts">
+        <button type="button" class="link" (click)="toggleActive(item)">{{ item.active ? 'Pausar' : 'Reanudar' }}</button>
+      </div>
+    </article>
+  } @empty {
+    @if (!store.loading() && !store.error()) {
+      <p class="empty">
+        Aún no hay ninguna. Crea una para lo que se repite: sacar la basura, regar las plantas, cambiar las sábanas…
+      </p>
+    }
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <app-recurring-dialog
+    [item]="editing() ?? null"
+    [members]="store.members()"
+    [usedCategories]="categories()"
+    (save)="onSave($event)"
+    (delete)="onDelete()"
+    (close)="editing.set(undefined)" />
+}

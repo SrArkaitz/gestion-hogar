@@ -24,6 +24,7 @@ model Household {
   invitations Invitation[]
   tasks       Task[]
   ideas       Idea[]
+  recurring   RecurringTask[]
 }
 
 model User {
@@ -37,12 +38,15 @@ model User {
   googleId     String?  @unique
   createdAt    DateTime @default(now())
 
-  memberships   HouseholdMember[]
-  sessions      Session[]
-  invitations   Invitation[] @relation("InvitationCreatedBy")
-  tasksCreated  Task[]       @relation("TaskCreatedBy")
-  tasksAssigned TaskAssignee[]
-  ideas         Idea[]
+  memberships       HouseholdMember[]
+  sessions          Session[]
+  invitations       Invitation[]            @relation("InvitationCreatedBy")
+  tasksCreated      Task[]                  @relation("TaskCreatedBy")
+  tasksAssigned     TaskAssignee[]
+  ideas             Idea[]
+  recurringCreated  RecurringTask[]         @relation("RecurringCreatedBy")
+  recurringAssigned RecurringTaskAssignee[]
+  pushSubscriptions PushSubscription[]
 }
 
 /// Pertenencia de una persona a una casa.
@@ -102,26 +106,91 @@ model TaskAssignee {
 }
 
 model Task {
-  id          String    @id @default(uuid())
+  id          String         @id @default(uuid())
   householdId String
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household   Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
   title       String
-  notes       String    @default("")
+  notes       String         @default("")
   /// por_hacer | en_curso | hecho
-  status      String    @default("por_hacer")
+  status      String         @default("por_hacer")
   /// alta | media | baja
-  priority    String    @default("media")
+  priority    String         @default("media")
   /// AAAA-MM-DD
   due         String?
   category    String?
   assignees   TaskAssignee[]
   createdById String
-  createdBy   User      @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  createdBy   User           @relation("TaskCreatedBy", fields: [createdById], references: [id])
   idea        Idea?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  /// Plantilla que la creó, si es una tarea recurrente
+  recurringId String?
+  recurring   RecurringTask? @relation(fields: [recurringId], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@index([householdId, status])
+  @@index([recurringId])
+}
+
+/// Plantilla de una tarea que se crea sola cada cierto tiempo (ver recurring.ts en @hogar/shared).
+model RecurringTask {
+  id          String                  @id @default(uuid())
+  householdId String
+  household   Household               @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  title       String
+  notes       String                  @default("")
+  priority    String                  @default("media")
+  category    String?
+  assignees   RecurringTaskAssignee[]
+  /// dias | semanas | meses | dias_semana
+  frequency   String
+  interval    Int                     @default(1)
+  /// Días de la semana (1 = lunes … 7 = domingo) separados por comas, solo en dias_semana
+  weekdays    String                  @default("")
+  /// AAAA-MM-DD
+  startDate   String
+  /// Fecha en la que toca crear la próxima tarea (AAAA-MM-DD)
+  nextDate    String
+  /// Última fecha ya tratada, haya creado tarea o no (AAAA-MM-DD)
+  lastDate    String?
+  active      Boolean                 @default(true)
+  tasks       Task[]
+  createdById String
+  createdBy   User                    @relation("RecurringCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  @@index([active, nextDate])
+  @@index([householdId])
+}
+
+model RecurringTaskAssignee {
+  recurringId String
+  recurring   RecurringTask @relation(fields: [recurringId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([recurringId, userId])
+  @@index([userId])
+}
+
+/// Dispositivo (navegador) que ha aceptado recibir avisos push.
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Ajustes que genera el propio servidor, como las claves VAPID de los avisos push.
+model AppSetting {
+  key   String @id
+  value String
 }
 
 // ---------- Ideas ----------

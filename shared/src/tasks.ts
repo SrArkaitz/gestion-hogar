@@ -25,6 +25,8 @@ export interface Task {
   createdById: string;
   /** Idea de la que salió, si la hay. */
   ideaId: string | null;
+  /** Tarea recurrente que la creó, si la hay. */
+  recurringId: string | null;
   createdAt: string;
   updatedAt: string;
 }

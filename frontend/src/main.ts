@@ -13,3 +13,8 @@ bootstrapApplication(App, {
     provideRouter(routes, withComponentInputBinding()),
   ],
 }).catch((err) => console.error(err));
+
+// Service worker: hace instalable la app y recibe los avisos push (public/sw.js).
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch((err) => console.warn('No se pudo registrar el service worker', err));
+}

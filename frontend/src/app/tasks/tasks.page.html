@@ -3,7 +3,10 @@
     <h1>Tareas</h1>
     <p class="sub">Lo que hay que hacer en casa, por prioridad.</p>
   </div>
-  <button type="button" class="btn" (click)="openNew()">Nueva tarea</button>
+  <div class="tools">
+    <a class="btn ghost" routerLink="recurrentes">Recurrentes</a>
+    <button type="button" class="btn" (click)="openNew()">Nueva tarea</button>
+  </div>
 </header>
 
 <div class="filters" role="group" aria-label="Filtros">
@@ -77,6 +80,9 @@
             }
             <div class="meta">
               <span class="pill">{{ priorityLabels[task.priority] }}</span>
+              @if (task.recurringId) {
+                <span class="rec-icon" title="Tarea recurrente" role="img" aria-label="Recurrente">↻</span>
+              }
               @if (task.due) {
                 <span class="due" [class.late]="isLate(task)">{{ isLate(task) ? 'Vencida · ' : '' }}{{ dueText(task) }}</span>
               }

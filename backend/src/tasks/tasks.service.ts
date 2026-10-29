@@ -1,7 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ISO_DATE_RE, PRIORITIES, Priority, Task, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
+import { parseAssigneeIds } from '../common/assignees';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
+import { PushService } from '../notifications/push.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 const CATEGORY_MAX = 40;
@@ -21,6 +23,7 @@ const toTask = (r: Row): Task => ({
   assigneeIds: r.assignees.map((a) => a.userId),
   createdById: r.createdById,
   ideaId: r.idea?.id ?? null,
+  recurringId: r.recurringId,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
 });
@@ -28,7 +31,12 @@ const toTask = (r: Row): Task => ({
 /** Tareas de una casa. El HouseholdGuard ya ha comprobado que el usuario es miembro. */
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(TasksService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly push: PushService,
+  ) {}
 
   async list(householdId: string): Promise<Task[]> {
     const rows = await this.prisma.task.findMany({ where: { householdId }, include, orderBy: { createdAt: 'asc' } });
@@ -57,21 +65,44 @@ export class TasksService {
       },
       include,
     });
-    return toTask(row);
+    const task = toTask(row);
+    // Dentro de una transacción aún podría deshacerse: entonces no se avisa.
+    if (db === this.prisma) void this.notifyAssigned(householdId, task, [], createdById);
+    return task;
   }
 
   /** Cambia solo los campos enviados (sirve también para mover de columna). */
-  async update(householdId: string, id: string, body: unknown): Promise<Task> {
+  async update(householdId: string, id: string, actorId: string, body: unknown): Promise<Task> {
     await this.find(householdId, id);
     const { assigneeIds, ...patch } = await this.validate(householdId, body, true);
+    const before = assigneeIds ? await this.prisma.taskAssignee.findMany({ where: { taskId: id } }) : [];
     const assignees = assigneeIds && { deleteMany: {}, create: assigneeIds.map((userId) => ({ userId })) };
     const row = await this.prisma.task.update({ where: { id }, data: { ...patch, assignees }, include });
-    return toTask(row);
+    const task = toTask(row);
+    if (assigneeIds) void this.notifyAssigned(householdId, task, before.map((a) => a.userId), actorId);
+    return task;
   }
 
   async remove(householdId: string, id: string): Promise<void> {
     await this.find(householdId, id);
     await this.prisma.task.delete({ where: { id } });
+  }
+
+  /** Avisa a quien acaba de entrar en la tarea, salvo a quien la ha asignado (ya lo sabe). */
+  private async notifyAssigned(householdId: string, task: Task, before: string[], actorId: string) {
+    const added = task.assigneeIds.filter((id) => !before.includes(id) && id !== actorId);
+    if (!added.length) return;
+    try {
+      const actor = await this.prisma.user.findUnique({ where: { id: actorId }, select: { name: true } });
+      await this.push.send(added, {
+        title: `${actor?.name ?? 'Alguien'} te ha asignado una tarea`,
+        body: task.title,
+        url: `/tareas?casa=${householdId}`,
+        tag: `asignada-${task.id}`,
+      });
+    } catch (err) {
+      this.logger.warn(`No se pudo avisar de la tarea asignada: ${(err as Error).message}`);
+    }
   }
 
   private async find(householdId: string, id: string) {
@@ -105,18 +136,7 @@ export class TasksService {
       if (category.length > CATEGORY_MAX) throw new BadRequestException(`La categoría no puede pasar de ${CATEGORY_MAX} caracteres`);
       out.category = category || null;
     }
-    if (b['assigneeIds'] !== undefined) {
-      const ids = b['assigneeIds'];
-      if (!Array.isArray(ids) || !ids.every((id) => typeof id === 'string')) {
-        throw new BadRequestException('assigneeIds tiene que ser una lista de usuarios');
-      }
-      const unique = [...new Set(ids as string[])];
-      const members = unique.length
-        ? await this.prisma.householdMember.count({ where: { householdId, userId: { in: unique } } })
-        : 0;
-      if (members !== unique.length) throw new BadRequestException('Solo se puede asignar a miembros de la casa');
-      out.assigneeIds = unique;
-    }
+    if (b['assigneeIds'] !== undefined) out.assigneeIds = await parseAssigneeIds(this.prisma, householdId, b['assigneeIds']);
     return out;
   }
 }

@@ -8,7 +8,9 @@ import { BackupModule } from './backup/backup.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
 import { IdeasModule } from './ideas/ideas.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RecurringModule } from './recurring/recurring.module';
 import { TasksModule } from './tasks/tasks.module';
 
 // Carpeta con el frontend compilado. En Docker se copia a backend/public.
@@ -18,10 +20,12 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
   imports: [
     ScheduleModule.forRoot(),
     PrismaModule,
+    NotificationsModule,
     AuthModule,
     HouseholdsModule,
     TasksModule,
     IdeasModule,
+    RecurringModule,
     BackupModule,
     ...(existsSync(publicDir)
       ? [

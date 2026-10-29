@@ -36,6 +36,8 @@ export class ThemeService {
     const theme = this.theme();
     const dark = theme === 'oscuro' || (theme === 'sistema' && this.media.matches);
     document.documentElement.dataset['theme'] = dark ? 'dark' : 'light';
+    // Barra del sistema (móvil y app instalada) del color de la barra lateral.
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', dark ? '#111513' : '#ffffff');
   }
 }
 

@@ -15,14 +15,23 @@ export const authGuard: CanActivateFn = async (_route, state) => {
   return router.createUrlTree(['/entrar'], { queryParams: { volver: state.url } });
 };
 
-/** Pide estar en al menos una casa; si no, manda a crear la primera. */
-export const householdGuard: CanActivateFn = async () => {
+/**
+ * Pide estar en al menos una casa; si no, manda a crear la primera. Con ?casa=<id> (los avisos
+ * enlazan así a su casa) cambia a esa casa si es una de las suyas y quita el parámetro.
+ */
+export const householdGuard: CanActivateFn = async (route, state) => {
   const session = inject(SessionService);
   const router = inject(Router);
   await session.ensureLoaded();
   // Sin sesión decide authGuard, que va primero.
   if (!session.user()) return true;
-  return session.households().length > 0 || router.createUrlTree(['/bienvenida']);
+  if (!session.households().length) return router.createUrlTree(['/bienvenida']);
+  const casa = route.queryParamMap.get('casa');
+  if (casa === null) return true;
+  if (session.households().some((h) => h.id === casa)) session.select(casa);
+  const url = router.parseUrl(state.url);
+  delete url.queryParams['casa'];
+  return url;
 };
 
 /** Para entrar y registrarse: si ya hay sesión, a la app. */

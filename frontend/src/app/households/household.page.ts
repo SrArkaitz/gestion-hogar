@@ -14,23 +14,20 @@ import {
   ROLE_LABELS,
 } from '@hogar/shared';
 import { GoogleButton } from '../auth/google-button';
+import { DevicePanel } from './device-panel';
 import { errorMessage, googleErrorMessage } from '../core/errors';
 import { HouseholdsService } from '../core/households.service';
 import { SessionService } from '../core/session.service';
-import { THEME_LABELS, THEMES, ThemeService } from '../core/theme.service';
 
 /** Ajustes de la casa activa: nombre, miembros, invitaciones, otras casas y cuenta. */
 @Component({
   selector: 'app-household-page',
-  imports: [FormsModule, GoogleButton],
+  imports: [FormsModule, GoogleButton, DevicePanel],
   host: { class: 'view' },
   templateUrl: './household.page.html',
 })
 export class HouseholdPage {
   protected readonly session = inject(SessionService);
-  protected readonly theme = inject(ThemeService);
-  protected readonly themes = THEMES;
-  protected readonly themeLabels = THEME_LABELS;
   private readonly api = inject(HouseholdsService);
   private readonly router = inject(Router);
 

@@ -114,17 +114,11 @@
       </form>
     </section>
 
+    <section appDevicePanel></section>
+
     <section class="panel">
       <h2>Cuenta</h2>
       <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
-      <div class="theme-row">
-        <span class="n" id="theme-lbl">Tema en este dispositivo</span>
-        <div class="seg" role="group" aria-labelledby="theme-lbl">
-          @for (t of themes; track t) {
-            <button type="button" [attr.aria-pressed]="theme.theme() === t" (click)="theme.set(t)">{{ themeLabels[t] }}</button>
-          }
-        </div>
-      </div>
       @if (googleError()) {
         <p class="form-err" role="alert">{{ googleError() }}</p>
       }

@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Ahora mismo está en marcha la **fase 1**. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa) el tablero de Tareas y el módulo de Ideas. Falta publicarla en `hogar.kaitzlab.com` para cerrar la fase.
+Está publicada en `https://hogar.kaitzlab.com`. Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el módulo de Ideas, la app instalable (PWA) y los avisos push.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -109,6 +109,14 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/tasks` | Crea una tarea |
 | PATCH  | `/api/households/:householdId/tasks/:id` | Cambia campos de una tarea (también moverla de columna) |
 | DELETE | `/api/households/:householdId/tasks/:id` | Borra una tarea |
+| GET    | `/api/households/:householdId/recurring` | Tareas recurrentes de la casa |
+| POST   | `/api/households/:householdId/recurring` | Crea una; si empieza hoy, crea ya su tarea |
+| PATCH  | `/api/households/:householdId/recurring/:id` | Edita, pausa (`{ "active": false }`) o reactiva |
+| DELETE | `/api/households/:householdId/recurring/:id` | Borra la plantilla; las tareas que creó se quedan |
+| GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
+| POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
+| DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
+| POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
 | GET    | `/api/households/:householdId/ideas` | Ideas de la casa, de la más reciente a la más antigua |
 | POST   | `/api/households/:householdId/ideas` | Propone una idea (`title`, `description`, `category`) |
 | PATCH  | `/api/households/:householdId/ideas/:id` | Edita una idea o cambia su `status` a `nueva`, `en_valoracion` o `descartada` |
@@ -133,4 +141,22 @@ Cuerpo de una tarea (solo `title` y `priority` son obligatorios al crearla):
 - `priority`: `alta`, `media` o `baja`
 - `due` y `category` admiten `null` para quitarlos
 - `assigneeIds`: lista de miembros de la casa; `[]` deja la tarea sin asignar. Al editar, sustituye a la lista anterior
+- Las tareas creadas por una recurrente llevan `recurringId`
 - Colores de los miembros: `azul`, `verde`, `naranja`, `morado`, `rojo`, `celeste`, `rosa`, `lima`, `amarillo` o `gris`
+
+Cuerpo de una tarea recurrente:
+
+```json
+{
+  "title": "Sacar la basura",
+  "priority": "media",
+  "assigneeIds": ["<id de un miembro>"],
+  "frequency": "dias_semana",
+  "weekdays": [1, 4],
+  "startDate": "2026-11-02"
+}
+```
+
+- `frequency`: `dias`, `semanas` o `meses` (con `interval`, cada cuántos) o `dias_semana` (con `weekdays`, de 1 = lunes a 7 = domingo)
+- En `semanas` y `meses`, `startDate` marca el día de la semana o del mes; en `meses`, si el mes no tiene ese día se usa el último
+- Cada noche, a las 00:01, se crean las tareas que tocan ese día, con ese día como fecha límite. Si la anterior de la misma plantilla sigue sin hacer, no se crea otra

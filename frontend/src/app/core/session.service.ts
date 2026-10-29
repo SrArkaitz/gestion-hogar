@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { AuthProviders, HouseholdSummary, LoginInput, Me, RegisterInput } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
+import { PushClientService } from './push.service';
 
 const STORAGE_KEY = 'hogar.casa';
 
@@ -9,6 +10,7 @@ const STORAGE_KEY = 'hogar.casa';
 @Injectable({ providedIn: 'root' })
 export class SessionService {
   private readonly http = inject(HttpClient);
+  private readonly push = inject(PushClientService);
   private loaded?: Promise<void>;
   private readonly selectedId = signal<string | null>(readStored());
 
@@ -64,6 +66,8 @@ export class SessionService {
 
   async logout(): Promise<void> {
     try {
+      // Que quien entre después en este navegador no reciba los avisos de esta cuenta.
+      await this.push.forget().catch(() => undefined);
       await firstValueFrom(this.http.post('/api/auth/logout', {}));
     } finally {
       this.clear();

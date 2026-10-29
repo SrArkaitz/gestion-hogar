@@ -98,8 +98,9 @@ export class HouseholdsService {
     }
     await this.prisma.$transaction([
       this.prisma.householdMember.delete({ where: { householdId_userId: { householdId, userId: targetId } } }),
-      // Deja de estar asignada a las tareas de esta casa.
+      // Deja de estar asignada a las tareas (y recurrentes) de esta casa.
       this.prisma.taskAssignee.deleteMany({ where: { userId: targetId, task: { householdId } } }),
+      this.prisma.recurringTaskAssignee.deleteMany({ where: { userId: targetId, recurring: { householdId } } }),
     ]);
     return false;
   }

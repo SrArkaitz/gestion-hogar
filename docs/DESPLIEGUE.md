@@ -106,7 +106,24 @@ y comprueba que `PUBLIC_URL` es `https://hogar.kaitzlab.com` (del paso 3). **Upd
 - Si ya existe una cuenta con contraseña y el mismo correo, **no** se une sola. Hay que entrar con la contraseña y pulsar *Casa → Cuenta → Conectar con Google*. Así nadie que se haya registrado antes con tu correo puede quedarse con tu cuenta.
 - Si el `redirect_uri` no coincide (Google muestra `Error 400: redirect_uri_mismatch`), revisa que `PUBLIC_URL` más `/api/auth/google/callback` coincida exactamente con la URI que pusiste en Google Cloud: `https` y sin barra final en `PUBLIC_URL`.
 
-## 5. Copias de seguridad
+## 5. App en el móvil y avisos
+
+No hay nada que configurar: el servidor genera la primera vez las claves de los avisos (VAPID) y las guarda en la base de datos, así que se conservan en las actualizaciones y en las copias. Solo hace falta HTTPS, que ya da Cloudflare.
+
+En cada dispositivo, entra en `https://hogar.kaitzlab.com` → **Casa → Este dispositivo**:
+
+- **Instalar la app:** en Android y en el PC, botón *Instalar en este dispositivo* (o *Instalar app* en el menú del navegador). En iPhone y iPad, desde Safari: Compartir → *Añadir a pantalla de inicio*.
+- **Avisos:** *Activar avisos* y aceptar el permiso. En iPhone y iPad hay que hacerlo desde la app instalada (iOS 16.4 o posterior); en Safari normal no se puede.
+- *Enviar uno de prueba* comprueba que llegan.
+
+Qué avisos llegan:
+
+- A las 9:00 (hora de `TZ`), las tareas sin hacer que vencen ese día o ya han vencido: las tuyas y las que no tienen a nadie asignado.
+- Cuando alguien te asigna una tarea.
+
+**Comprobación:** tras activar los avisos, *Enviar uno de prueba* tiene que mostrar «Avisos activados» en el dispositivo. Si no llega, revisa que el sistema no tenga silenciadas las notificaciones del navegador o de la app.
+
+## 6. Copias de seguridad
 
 La app hace una copia de la base de datos cada día a las 03:30 (hora de `TZ`), y otra al arrancar si ese día aún no la había. Guarda las últimas 14 (`BACKUP_KEEP`) en `/app/data/backups`, dentro del mismo volumen que la base de datos.
 
@@ -129,11 +146,11 @@ docker cp gestion-hogar:/app/data/backups ./copias-hogar
    `docker cp ./hogar-2026-11-03.db gestion-hogar:/app/data/hogar.db`
 3. Arranca: `docker start gestion-hogar`. Si la copia es de una versión anterior de la app, las migraciones que falten se aplican solas al arrancar.
 
-## 6. Actualizar
+## 7. Actualizar
 
-Cuando haya cambios en `main`: Portainer → Stacks → `gestion-hogar` → **Pull and redeploy**. Las migraciones de la base de datos se aplican solas al arrancar. Antes de una actualización grande, haz una copia a mano (apartado 5).
+Cuando haya cambios en `main`: Portainer → Stacks → `gestion-hogar` → **Pull and redeploy**. Las migraciones de la base de datos se aplican solas al arrancar. Antes de una actualización grande, haz una copia a mano (apartado 6).
 
-## 7. Opcional: Cloudflare Access
+## 8. Opcional: Cloudflare Access
 
 El registro está abierto: cualquiera que llegue a `hogar.kaitzlab.com` puede crearse una cuenta, aunque solo vea sus propias casas. Si prefieres que la web ni siquiera se abra a desconocidos, pon delante Cloudflare Access:
 

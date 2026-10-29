@@ -59,7 +59,21 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Campos:** título, notas, prioridad, fecha límite (opcional), personas asignadas (ninguna, una o varias) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
 - **Tarjetas:** el lateral lleva el color de la persona asignada; si hay varias, se reparte a partes iguales entre sus colores (con dos, mitad y mitad). Sin nadie asignado, el lateral es gris. La prioridad se ve en su etiqueta.
 - **Orden:** dentro de cada columna, primero por prioridad y luego por antigüedad. Las tareas vencidas se marcan.
-- **Tareas recurrentes:** una plantilla (título, prioridad, asignada, categoría) más una frecuencia (cada N días, semanas o meses, o días concretos de la semana). Un proceso en el servidor crea la tarea cuando toca. Si la anterior sigue sin hacer, no se duplica.
+- **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Recurrentes*.
+  - **Fecha de inicio:** en semanas y meses marca el ritmo (el mismo día de la semana o del mes; si el mes no tiene ese día, el último).
+  - **Cuándo se crean:** cada noche a las 00:01 (y al arrancar el servidor) se crean las que tocan ese día, con ese día como fecha límite. Si se crea una que empieza hoy, su tarea aparece ya.
+  - **Sin duplicados:** si la tarea anterior de la misma plantilla sigue sin hacer, ese día se salta. Si el servidor estuvo apagado varios días, se crea una sola tarea, no una por día perdido.
+  - **Pausar:** una plantilla en pausa no crea tareas; al reactivarla sigue desde hoy, sin recuperar lo perdido.
+  - Las tareas creadas llevan el icono ↻ en el tablero. Borrar la plantilla no borra las tareas que ya creó.
+
+### 3.1b Avisos y app instalable
+
+- **App instalable (PWA):** manifiesto, iconos y un service worker. Se instala desde el menú del navegador o desde *Casa → Este dispositivo*; en iPhone, con Compartir → Añadir a pantalla de inicio. El service worker no guarda nada en caché: la app necesita conexión y así nunca se queda una versión vieja.
+- **Avisos push:** cada persona los activa en cada dispositivo desde *Casa → Este dispositivo*, donde también puede mandarse uno de prueba. En iPhone y iPad solo funcionan con la app instalada (iOS 16.4 o posterior).
+  - **Recordatorio diario a las 9:00:** un aviso por casa con las tareas sin hacer que vencen ese día o ya han vencido. Las asignadas le llegan a quien las tiene; las sin asignar, a toda la casa.
+  - **Al asignar una tarea:** aviso a quien acaba de entrar en ella, salvo a quien la asigna.
+  - Tocar un aviso abre la página en la casa que corresponde (`?casa=`), aunque la activa fuera otra.
+- **Claves VAPID:** el servidor las genera la primera vez y las guarda en la base de datos; no hay nada que configurar. Al cerrar sesión se quitan los avisos de ese dispositivo.
 
 ### 3.2 Ideas
 
@@ -154,7 +168,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fase 1 en curso.**
+**Fases 1 y 2 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -162,7 +176,10 @@ Cada fase deja algo que ya se puede usar.
 - Hecho: módulo de Ideas (pestañas Abiertas, Aceptadas y Descartadas; valorar, aceptar con prioridad creando la tarea enlazada, descartar y recuperar).
 - Hecho: copia de seguridad diaria de la base de datos (VACUUM INTO a las 03:30, últimas 14) y guía de despliegue en [`DESPLIEGUE.md`](DESPLIEGUE.md).
 - Hecho: acceso con Google (OpenID Connect con PKCE), opcional según la configuración del servidor.
-- Siguiente: publicar en `hogar.kaitzlab.com` siguiendo la guía, que cierra la fase 1. Las copias de las fotos llegarán con la primera fase que tenga fotos (recetas).
+- Hecho: publicada en `hogar.kaitzlab.com` (cierra la fase 1). El acceso con Google aún no está configurado en producción.
+- Hecho: colores por persona, varias personas por tarea, tema claro u oscuro y paleta inspirada en Trello.
+- Hecho (fase 2): tareas recurrentes, app instalable y avisos push (recordatorio diario y al asignar).
+- Siguiente: fase 3, lista de la compra. Las copias de las fotos llegarán con la primera fase que tenga fotos (recetas).
 
 ## 8. Decisiones tomadas
 
@@ -178,3 +195,7 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Repositorio con npm workspaces y un único `package-lock.json`. `shared/` es el paquete `@hogar/shared`. |
 | 2026-10-29 | Estados, prioridades y categorías se guardan como texto y se validan con las constantes de `@hogar/shared`. Las categorías son texto libre con sugerencias. |
 | 2026-10-29 | Se mantienen Angular 20 y NestJS 11 por ahora. La subida a Angular 22 y NestJS 12 se hará como paso aparte. |
+| 2026-10-29 | Una tarea puede tener varias personas asignadas; cada miembro tiene un color por casa. |
+| 2026-10-29 | Tareas recurrentes: la tarea se crea el día que toca y vence ese día; si la anterior sigue sin hacer, no se duplica. |
+| 2026-10-29 | Avisos: recordatorio diario a las 9:00 y aviso al asignar. Claves VAPID generadas por el servidor y guardadas en la base de datos. |
+| 2026-10-29 | El service worker no usa caché: la app solo funciona con conexión. |

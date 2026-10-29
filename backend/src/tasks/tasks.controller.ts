@@ -20,8 +20,13 @@ export class TasksController {
   }
 
   @Patch(':id')
-  update(@Param('householdId') householdId: string, @Param('id') id: string, @Body() body: unknown): Promise<Task> {
-    return this.tasks.update(householdId, id, body);
+  update(
+    @Param('householdId') householdId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+    @Body() body: unknown,
+  ): Promise<Task> {
+    return this.tasks.update(householdId, id, user.id, body);
   }
 
   @Delete(':id')

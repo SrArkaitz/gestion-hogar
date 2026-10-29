@@ -2,16 +2,22 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Gestión del Hogar</title>
+  <title>Hogar</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
+  <!-- Color de la barra del sistema; ThemeService lo cambia con el tema -->
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Hogar">
   <script>
     // Aplica el tema guardado antes de pintar, para que no parpadee (ver core/theme.service.ts).
     (function () {
       var t; try { t = localStorage.getItem('hogar.tema'); } catch (e) {}
       var dark = t === 'oscuro' || (t !== 'claro' && matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      document.querySelector('meta[name="theme-color"]').content = dark ? '#111513' : '#ffffff';
     })();
   </script>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">

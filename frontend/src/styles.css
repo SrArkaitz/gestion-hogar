@@ -115,7 +115,10 @@ a.btn { display: inline-block; text-align: center; text-decoration: none; }
 .or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 
 /* Página de casa */
-.theme-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.device-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+.device-block { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.panel .device-row h3, .panel .device-block h3 { margin: 0; }
+.link:disabled { opacity: .6; cursor: default; }
 .google-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
 .panel .btn.google { align-self: flex-start; }
 .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start; }
@@ -167,9 +170,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 .card { background: var(--card); color: var(--fg); border-radius: 10px; box-shadow: var(--shadow); padding: 10px 12px 10px 14px; cursor: grab; position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .card::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 5px; border-radius: 0 3px 3px 0; background: var(--stripe, var(--line)); }
-.card[data-p="alta"] { --p: var(--alta); --pb: var(--alta-bg); }
-.card[data-p="media"] { --p: var(--media); --pb: var(--media-bg); }
-.card[data-p="baja"] { --p: var(--baja); --pb: var(--baja-bg); }
+[data-p="alta"] { --p: var(--alta); --pb: var(--alta-bg); }
+[data-p="media"] { --p: var(--media); --pb: var(--media-bg); }
+[data-p="baja"] { --p: var(--baja); --pb: var(--baja-bg); }
 .card.done .t { text-decoration: line-through; color: var(--muted); }
 .cdk-drag-preview { box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
 .cdk-drag-placeholder { opacity: .35; }
@@ -195,6 +198,26 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .idea-body:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
 .idea .meta .by { color: var(--muted); }
 .state { background: var(--media-bg); color: var(--media); font-weight: 700; border-radius: 999px; padding: 1px 8px; text-transform: uppercase; letter-spacing: .05em; font-size: 10.5px; }
+/* Tareas recurrentes */
+.rec { position: relative; padding-left: 16px; }
+.rec::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 5px; border-radius: 0 3px 3px 0; background: var(--stripe, var(--line)); }
+.rec.paused { opacity: .7; }
+.rec .next { color: var(--muted); }
+.rec-icon { color: var(--muted); font-size: 14px; line-height: 1; }
+.back { display: inline-block; font-size: 13.5px; margin-bottom: 4px; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.repeat { border: 1px solid var(--line); border-radius: 12px; margin: 0; padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.repeat legend { padding: 0 4px; margin: 0 0 0 -4px; }
+.repeat .hint { margin: -6px 0 0; }
+.every { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--fg); }
+.every input { width: 80px; }
+.row.one { grid-template-columns: minmax(0, 1fr); }
+.weekdays { display: flex; gap: 5px; flex-wrap: wrap; }
+.weekdays button { width: 36px; height: 36px; border-radius: 50%; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--line); background: var(--bg); color: var(--muted); }
+.weekdays button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.preview { margin: 0; font-size: 13.5px; font-weight: 700; color: var(--fg); background: var(--accent-bg); border-radius: 8px; padding: 6px 10px; }
+.dlg label.check { flex-direction: row; align-items: flex-start; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--fg); }
+.dlg label.check input { width: auto; margin-top: 3px; }
 .idea-acts { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 8px; }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
