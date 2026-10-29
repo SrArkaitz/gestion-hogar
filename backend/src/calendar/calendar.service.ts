@@ -65,7 +65,8 @@ const MAX_REPEATS = 400;
 export class CalendarService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async items(householdId: string, fromValue: unknown, toValue: unknown): Promise<CalendarItem[]> {
+  /** @param userId quien mira: de las tareas personales solo salen las suyas. */
+  async items(householdId: string, userId: string, fromValue: unknown, toValue: unknown): Promise<CalendarItem[]> {
     const from = date(fromValue, 'Fecha inicial'), to = date(toValue, 'Fecha final');
     const days = (Date.parse(to) - Date.parse(from)) / 86_400_000;
     if (days < 0 || days > CALENDAR_RANGE_MAX) throw new BadRequestException(`Rango de fechas no válido (máximo ${CALENDAR_RANGE_MAX} días)`);
@@ -101,12 +102,12 @@ export class CalendarService {
 
     if (uses('tareas')) {
       const tasks = await this.prisma.task.findMany({
-        where: { householdId, due: { gte: from, lte: to } },
+        where: { householdId, due: { gte: from, lte: to }, OR: [{ personal: false }, { createdById: userId }] },
         include: { assignees: { include: { user: { select: { name: true } } } } },
       });
       for (const t of tasks) {
-        const people = t.assignees.map((a) => a.user.name.split(' ')[0]).join(', ');
-        items.push(item('tarea', t.due!, t.title, t.id, '/tareas', {
+        const people = t.personal ? 'Personal' : t.assignees.map((a) => a.user.name.split(' ')[0]).join(', ');
+        items.push(item('tarea', t.due!, t.title, t.id, t.personal ? '/tareas/personales' : '/tareas', {
           detail: [TASK_STATUS_LABELS[t.status as TaskStatus], people].filter(Boolean).join(' · '),
           done: t.status === 'hecho',
         }));

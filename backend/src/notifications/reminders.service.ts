@@ -157,7 +157,8 @@ export class RemindersService {
     // Un resumen por persona y casa.
     const digests = new Map<string, Digest>();
     for (const task of tasks) {
-      const people = task.assignees.length ? task.assignees : task.household.members;
+      // Las personales, solo a su dueño; las del hogar sin nadie asignado, a toda la casa.
+      const people = task.personal || task.assignees.length ? task.assignees : task.household.members;
       for (const { userId } of people) {
         const key = `${userId}|${task.householdId}`;
         let digest = digests.get(key);

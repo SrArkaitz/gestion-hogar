@@ -12,8 +12,8 @@ export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 
   @Get()
-  list(@Param('householdId') householdId: string): Promise<Task[]> {
-    return this.tasks.list(householdId);
+  list(@Param('householdId') householdId: string, @CurrentUser() user: User): Promise<Task[]> {
+    return this.tasks.list(householdId, user.id);
   }
 
   @Post()
@@ -33,7 +33,7 @@ export class TasksController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('householdId') householdId: string, @Param('id') id: string): Promise<void> {
-    return this.tasks.remove(householdId, id);
+  remove(@Param('householdId') householdId: string, @Param('id') id: string, @CurrentUser() user: User): Promise<void> {
+    return this.tasks.remove(householdId, id, user.id);
   }
 }

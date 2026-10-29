@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   Member,
@@ -18,6 +18,7 @@ import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
 import { assigneesLabel, assigneesOf, initials, stripeFor } from './people';
 import { TaskDialog } from './task-dialog';
+import { TasksTabs } from './tasks-tabs';
 import { TasksStore } from './tasks.store';
 
 /** Filtro por persona: todas, las mías, sin asignar o un miembro concreto (su id). */
@@ -25,13 +26,16 @@ type PersonFilter = 'todas' | 'mias' | 'nadie' | string;
 
 @Component({
   selector: 'app-tasks-page',
-  imports: [CdkDropListGroup, CdkDropList, CdkDrag, RouterLink, TaskDialog],
+  imports: [CdkDropListGroup, CdkDropList, CdkDrag, RouterLink, TaskDialog, TasksTabs],
   host: { class: 'view' },
   templateUrl: './tasks.page.html',
 })
 export class TasksPage {
   protected readonly store = inject(TasksStore);
   private readonly session = inject(SessionService);
+
+  /** Tablero de tareas personales (de la ruta): solo las tuyas, sin asignar a nadie. */
+  readonly personal = input(false, { transform: (v: boolean | undefined) => !!v });
 
   protected readonly statuses = TASK_STATUSES;
   protected readonly statusLabels = TASK_STATUS_LABELS;
@@ -52,9 +56,12 @@ export class TasksPage {
   private readonly today = todayIso();
 
 
-  /** Categorías usadas en la casa, para el filtro y las sugerencias. */
+  /** Las del tablero que se ve: del hogar o personales. */
+  protected readonly boardTasks = computed(() => this.store.tasks().filter((t) => t.personal === this.personal()));
+
+  /** Categorías usadas en este tablero, para el filtro y las sugerencias. */
   protected readonly categories = computed(() =>
-    [...new Set(this.store.tasks().map((t) => t.category).filter((c): c is string => !!c))].sort((a, b) =>
+    [...new Set(this.boardTasks().map((t) => t.category).filter((c): c is string => !!c))].sort((a, b) =>
       a.localeCompare(b, 'es'),
     ),
   );
@@ -64,7 +71,7 @@ export class TasksPage {
     const person = this.person();
     const category = this.category();
     const priority = this.priority();
-    return this.store.tasks().filter(
+    return this.boardTasks().filter(
       (t) =>
         (person === 'todas' ||
           (person === 'mias' && !!me && t.assigneeIds.includes(me)) ||
@@ -95,6 +102,11 @@ export class TasksPage {
         this.category.set('');
         this.store.load(id);
       }
+    });
+    // Al pasar de un tablero a otro, los filtros empiezan de cero.
+    effect(() => {
+      this.personal();
+      untracked(() => this.clearFilters());
     });
   }
 
@@ -157,7 +169,7 @@ export class TasksPage {
     const task = this.editing();
     try {
       if (task) await this.store.update(task.id, input);
-      else await this.store.create(input);
+      else await this.store.create({ ...input, personal: this.personal() });
       this.close();
     } catch (err) {
       this.dialog()?.showError(errorMessage(err, 'No se pudo guardar. Revisa la conexión y vuelve a intentarlo.'));

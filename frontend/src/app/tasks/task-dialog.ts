@@ -41,16 +41,20 @@ import {
           </div>
         </div>
 
-        <div>
-          <span class="lbl" id="assignees-lbl">Asignada a</span>
-          <div class="people" role="group" aria-labelledby="assignees-lbl">
-            @for (m of members(); track m.id) {
-              <button type="button" [attr.data-c]="m.color" [attr.aria-pressed]="assigneeIds().includes(m.id)" (click)="toggleAssignee(m.id)">
-                <span class="dot"></span>{{ m.name }}
-              </button>
-            }
+        @if (personal()) {
+          <p class="hint">Tarea personal: solo la ves tú.</p>
+        } @else {
+          <div>
+            <span class="lbl" id="assignees-lbl">Asignada a</span>
+            <div class="people" role="group" aria-labelledby="assignees-lbl">
+              @for (m of members(); track m.id) {
+                <button type="button" [attr.data-c]="m.color" [attr.aria-pressed]="assigneeIds().includes(m.id)" (click)="toggleAssignee(m.id)">
+                  <span class="dot"></span>{{ m.name }}
+                </button>
+              }
+            </div>
           </div>
-        </div>
+        }
 
         <div class="row two">
           <label>Fecha límite
@@ -100,6 +104,8 @@ export class TaskDialog implements OnInit {
   /** Categorías ya usadas en la casa, para sugerirlas. */
   readonly usedCategories = input<string[]>([]);
   readonly initialStatus = input<TaskStatus>('por_hacer');
+  /** Tarea personal: no se asigna a nadie (es de quien la crea). */
+  readonly personal = input(false);
 
   readonly save = output<TaskInput>();
   readonly delete = output<void>();

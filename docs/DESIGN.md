@@ -56,6 +56,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.1 Tareas
 
+- **Dos pestañas:** *Del hogar*, las de la casa, que ven todos sus miembros; y *Personales*, las tuyas, que solo ves tú. Funcionan igual (columnas, prioridad, fecha, categoría). Una tarea personal no se asigna a nadie más: es de quien la crea y lleva su color. Tampoco pasa de una pestaña a la otra.
+- **Personales:** salen en tu calendario y en tu recordatorio de las 9:00, nunca en los de los demás. Si sales de una casa, se borran tus personales de esa casa. Las recurrentes son solo del hogar.
 - **Columnas:** Por hacer, En curso y Hecho. Se mueven arrastrando, también en el móvil.
 - **Campos:** título, notas, prioridad, fecha límite (opcional), personas asignadas (ninguna, una o varias) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
 - **Tarjetas:** el lateral lleva el color de la persona asignada; si hay varias, se reparte a partes iguales entre sus colores (con dos, mitad y mitad). Sin nadie asignado, el lateral es gris. La prioridad se ve en su etiqueta.
@@ -242,3 +244,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Archivos de los equipos: PDF o imagen de hasta 20 MB, subidos tal cual (sin multipart) y comprobados por su contenido. Se guardan en `data/files` con un nombre al azar. |
 | 2026-10-29 | Mantenimiento: intervalo en meses; al marcarla hecha, la próxima fecha se cuenta desde el día en que se hizo. |
 | 2026-10-29 | Recetas públicas por defecto: todas las casas ven las que no están marcadas como privadas, sin poder cambiarlas. Para usarlas en el menú se copian a la casa. |
+| 2026-10-29 | Tareas personales: viven en la misma casa y el mismo tablero, en su propia pestaña, pero solo las ve quien las crea. |

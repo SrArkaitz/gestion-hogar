@@ -20,6 +20,8 @@ export interface Task {
   priority: Priority;
   due: IsoDate | null;
   category: string | null;
+  /** Tarea personal: solo la ve quien la creó, y es suya. Las demás son del hogar. */
+  personal: boolean;
   /** Personas asignadas (puede haber varias o ninguna). */
   assigneeIds: string[];
   createdById: string;
@@ -39,4 +41,6 @@ export interface TaskInput {
   due?: IsoDate | null;
   category?: string | null;
   assigneeIds?: string[];
+  /** Solo al crearla: después no se cambia. */
+  personal?: boolean;
 }

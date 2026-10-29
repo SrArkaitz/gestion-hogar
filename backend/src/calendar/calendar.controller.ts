@@ -13,8 +13,13 @@ export class CalendarController {
 
   /** Todo lo que tiene fecha entre dos días (eventos, cumpleaños y lo de las demás secciones). */
   @Get()
-  items(@Param('householdId') householdId: string, @Query('from') from: unknown, @Query('to') to: unknown): Promise<CalendarItem[]> {
-    return this.calendar.items(householdId, from, to);
+  items(
+    @Param('householdId') householdId: string,
+    @CurrentUser() user: User,
+    @Query('from') from: unknown,
+    @Query('to') to: unknown,
+  ): Promise<CalendarItem[]> {
+    return this.calendar.items(householdId, user.id, from, to);
   }
 
   @Get('events/:id')

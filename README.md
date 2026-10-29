@@ -105,8 +105,8 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/households/:householdId/invitations/:id` | Anula una invitación (admin) |
 | GET    | `/api/invitations/:token` | A qué casa invita un enlace (pública) |
 | POST   | `/api/invitations/:token/accept` | Acepta la invitación |
-| GET    | `/api/households/:householdId/tasks` | Tareas de la casa |
-| POST   | `/api/households/:householdId/tasks` | Crea una tarea |
+| GET    | `/api/households/:householdId/tasks` | Tareas del hogar y tus tareas personales (`personal: true`) |
+| POST   | `/api/households/:householdId/tasks` | Crea una tarea (`personal: true` para que solo la veas tú) |
 | PATCH  | `/api/households/:householdId/tasks/:id` | Cambia campos de una tarea (también moverla de columna) |
 | DELETE | `/api/households/:householdId/tasks/:id` | Borra una tarea |
 | GET    | `/api/households/:householdId/recurring` | Tareas recurrentes de la casa |

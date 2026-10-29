@@ -1,26 +1,32 @@
 <header class="top">
   <div>
     <h1>Tareas</h1>
-    <p class="sub">Lo que hay que hacer en casa, por prioridad.</p>
+    <p class="sub">{{ personal() ? 'Tus cosas: solo las ves tú.' : 'Lo que hay que hacer en casa, por prioridad.' }}</p>
   </div>
   <div class="tools">
-    <a class="btn ghost" routerLink="recurrentes">Recurrentes</a>
+    @if (!personal()) {
+      <a class="btn ghost" routerLink="/tareas/recurrentes">Recurrentes</a>
+    }
     <button type="button" class="btn" (click)="openNew()">Nueva tarea</button>
   </div>
 </header>
 
+<app-tasks-tabs />
+
 <div class="filters" role="group" aria-label="Filtros">
-  <label>
-    <span class="sr-only">Persona</span>
-    <select [value]="person()" (change)="person.set(value($event))">
-      <option value="todas">Todas las personas</option>
-      <option value="mias">Mis tareas</option>
-      <option value="nadie">Sin asignar</option>
-      @for (m of store.members(); track m.id) {
-        <option [value]="m.id">{{ m.name }}</option>
-      }
-    </select>
-  </label>
+  @if (!personal()) {
+    <label>
+      <span class="sr-only">Persona</span>
+      <select [value]="person()" (change)="person.set(value($event))">
+        <option value="todas">Todas las personas</option>
+        <option value="mias">Mis tareas</option>
+        <option value="nadie">Sin asignar</option>
+        @for (m of store.members(); track m.id) {
+          <option [value]="m.id">{{ m.name }}</option>
+        }
+      </select>
+    </label>
+  }
   @if (categories().length) {
     <label>
       <span class="sr-only">Categoría</span>
@@ -89,7 +95,7 @@
               @if (task.category) {
                 <span class="tag">{{ task.category }}</span>
               }
-              @if (task.assigneeIds.length) {
+              @if (task.assigneeIds.length && !personal()) {
                 <span class="avatars" role="img" [attr.aria-label]="assigneesLabel(task)">
                   @for (m of assignees(task); track m.id) {
                     <span class="avatar" [attr.data-c]="m.color" [title]="m.name" aria-hidden="true">{{ initials(m.name) }}</span>
@@ -99,7 +105,7 @@
             </div>
           </article>
         } @empty {
-          <p class="empty">{{ filtering() ? 'Nada con estos filtros.' : 'Sin tareas.' }}</p>
+          <p class="empty">{{ filtering() ? 'Nada con estos filtros.' : personal() && status === 'por_hacer' ? 'Sin tareas. Lo que apuntes aquí solo lo ves tú.' : 'Sin tareas.' }}</p>
         }
       </div>
       @if (status !== 'hecho') {
@@ -115,6 +121,7 @@
     [members]="store.members()"
     [usedCategories]="categories()"
     [initialStatus]="newStatus()"
+    [personal]="personal()"
     (save)="onSave($event)"
     (delete)="onDelete()"
     (close)="close()" />

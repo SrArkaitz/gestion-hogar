@@ -20,6 +20,7 @@ const toTask = (r: Row): Task => ({
   priority: r.priority as Priority,
   due: r.due,
   category: r.category,
+  personal: r.personal,
   assigneeIds: r.assignees.map((a) => a.userId),
   createdById: r.createdById,
   ideaId: r.idea?.id ?? null,
@@ -27,6 +28,9 @@ const toTask = (r: Row): Task => ({
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
 });
+
+/** Las del hogar y las personales de esa persona: las de los demás no se ven. */
+const visibleTo = (userId: string): Prisma.TaskWhereInput => ({ OR: [{ personal: false }, { createdById: userId }] });
 
 /** Tareas de una casa. El HouseholdGuard ya ha comprobado que el usuario es miembro. */
 @Injectable()
@@ -38,8 +42,8 @@ export class TasksService {
     private readonly push: PushService,
   ) {}
 
-  async list(householdId: string): Promise<Task[]> {
-    const rows = await this.prisma.task.findMany({ where: { householdId }, include, orderBy: { createdAt: 'asc' } });
+  async list(householdId: string, userId: string): Promise<Task[]> {
+    const rows = await this.prisma.task.findMany({ where: { householdId, ...visibleTo(userId) }, include, orderBy: { createdAt: 'asc' } });
     return rows.map(toTask);
   }
 
@@ -50,7 +54,9 @@ export class TasksService {
     body: unknown,
     db: Prisma.TransactionClient = this.prisma,
   ): Promise<Task> {
-    const { assigneeIds, ...input } = await this.validate(householdId, body, false);
+    const { assigneeIds, personal, ...input } = await this.validate(householdId, body, false);
+    // Una tarea personal es siempre de quien la crea.
+    const people = personal ? [createdById] : (assigneeIds ?? []);
     const row = await db.task.create({
       data: {
         householdId,
@@ -61,7 +67,8 @@ export class TasksService {
         priority: input.priority!,
         due: input.due ?? null,
         category: input.category ?? null,
-        assignees: { create: (assigneeIds ?? []).map((userId) => ({ userId })) },
+        personal: !!personal,
+        assignees: { create: people.map((userId) => ({ userId })) },
       },
       include,
     });
@@ -73,8 +80,10 @@ export class TasksService {
 
   /** Cambia solo los campos enviados (sirve también para mover de columna). */
   async update(householdId: string, id: string, actorId: string, body: unknown): Promise<Task> {
-    await this.find(householdId, id);
-    const { assigneeIds, ...patch } = await this.validate(householdId, body, true);
+    const current = await this.find(householdId, id, actorId);
+    // En las personales no se cambia ni la persona ni el tipo.
+    const { assigneeIds: requested, personal: _personal, ...patch } = await this.validate(householdId, body, true);
+    const assigneeIds = current.personal ? undefined : requested;
     const before = assigneeIds ? await this.prisma.taskAssignee.findMany({ where: { taskId: id } }) : [];
     const assignees = assigneeIds && { deleteMany: {}, create: assigneeIds.map((userId) => ({ userId })) };
     const row = await this.prisma.task.update({ where: { id }, data: { ...patch, assignees }, include });
@@ -83,8 +92,8 @@ export class TasksService {
     return task;
   }
 
-  async remove(householdId: string, id: string): Promise<void> {
-    await this.find(householdId, id);
+  async remove(householdId: string, id: string, userId: string): Promise<void> {
+    await this.find(householdId, id, userId);
     await this.prisma.task.delete({ where: { id } });
   }
 
@@ -105,8 +114,9 @@ export class TasksService {
     }
   }
 
-  private async find(householdId: string, id: string) {
-    const task = await this.prisma.task.findFirst({ where: { id, householdId } });
+  /** Las personales de otra persona se responden como si no existieran. */
+  private async find(householdId: string, id: string, userId: string) {
+    const task = await this.prisma.task.findFirst({ where: { id, householdId, ...visibleTo(userId) } });
     if (!task) throw new NotFoundException('La tarea no existe');
     return task;
   }
@@ -135,6 +145,10 @@ export class TasksService {
       const category = typeof b['category'] === 'string' ? b['category'].trim() : '';
       if (category.length > CATEGORY_MAX) throw new BadRequestException(`La categoría no puede pasar de ${CATEGORY_MAX} caracteres`);
       out.category = category || null;
+    }
+    if (b['personal'] !== undefined) {
+      if (typeof b['personal'] !== 'boolean') throw new BadRequestException('«Personal» tiene que ser sí o no');
+      out.personal = b['personal'];
     }
     if (b['assigneeIds'] !== undefined) out.assigneeIds = await parseAssigneeIds(this.prisma, householdId, b['assigneeIds']);
     return out;
