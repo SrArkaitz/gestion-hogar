@@ -53,13 +53,14 @@ El cliente de Prisma se genera en `backend/src/generated/` al compilar o arranca
 
 ## Despliegue en el servidor (Docker)
 
-La guía paso a paso para publicarla en `https://hogar.kaitzlab.com` está en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md): Portainer, Cloudflare Tunnel, cookie segura, copias de seguridad y Cloudflare Access.
+La guía paso a paso para publicarla en `https://hogar.kaitzlab.com` está en [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md): Portainer, Cloudflare Tunnel, cookie segura, acceso con Google, copias de seguridad y Cloudflare Access.
 
 En resumen:
 
 - El contenedor aplica las migraciones pendientes cada vez que arranca, así que basta con reconstruirlo para actualizar.
 - Hace una copia de la base de datos cada día a las 03:30 y guarda las últimas 14.
-- `COOKIE_SECURE=false` (valor actual) permite iniciar sesión por `http://IP:8085`. Cámbialo a `true` cuando solo entres por `https://hogar.kaitzlab.com`.
+- La configuración (`COOKIE_SECURE`, `PUBLIC_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`…) se pone en las *Environment variables* del stack de Portainer, no en el repositorio.
+- `COOKIE_SECURE` es `false` si no se define, para poder iniciar sesión por `http://IP:8085`. Ponlo a `true` cuando solo entres por `https://hogar.kaitzlab.com`.
 
 ### Por terminal
 
@@ -88,7 +89,11 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/auth/register` | Crea una cuenta e inicia sesión (pública) |
 | POST   | `/api/auth/login` | Inicia sesión (pública) |
 | POST   | `/api/auth/logout` | Cierra la sesión (pública) |
-| GET    | `/api/auth/me` | Usuario actual y sus casas con su rol |
+| GET    | `/api/auth/me` | Usuario actual, sus casas con su rol y sus formas de entrar |
+| GET    | `/api/auth/providers` | Si el acceso con Google está configurado (pública) |
+| GET    | `/api/auth/google` | Redirige a Google para entrar o registrarse; `?modo=conectar` lo conecta a la cuenta con sesión; `?volver=/ruta` (pública) |
+| GET    | `/api/auth/google/callback` | Vuelta desde Google; redirige a la app, con `?error=…` si algo falla (pública) |
+| DELETE | `/api/auth/google` | Desconecta Google (solo si la cuenta tiene contraseña) |
 | POST   | `/api/households` | Crea una casa; quien la crea es administrador |
 | GET    | `/api/households/:householdId` | Casa con sus miembros |
 | PATCH  | `/api/households/:householdId` | Cambia el nombre (admin) |

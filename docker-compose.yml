@@ -6,14 +6,21 @@ services:
     restart: unless-stopped
     ports:
       - "8085:3000"
+    # Los valores ${...} se toman de las "Environment variables" del stack en Portainer
+    # (o de un archivo .env junto a este). Así los secretos no quedan en el repositorio.
     environment:
       # También fija la hora de la copia de seguridad diaria (03:30).
       - TZ=Europe/Madrid
       # La cookie de sesión solo viaja por HTTPS si es "true". Déjalo en "false" mientras
-      # entres por http://IP:8085; cámbialo a "true" cuando solo uses https://hogar.kaitzlab.com.
-      - COOKIE_SECURE=false
+      # entres por http://IP:8085; pon "true" cuando solo uses https://hogar.kaitzlab.com.
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      # Dirección pública de la app, sin barra final. La necesita el acceso con Google.
+      - PUBLIC_URL=${PUBLIC_URL:-}
+      # Acceso con Google (docs/DESPLIEGUE.md, paso 4). Sin estos dos, el botón no aparece.
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
       # Copias diarias que se guardan.
-      - BACKUP_KEEP=14
+      - BACKUP_KEEP=${BACKUP_KEEP:-14}
       # Para guardar las copias en otro disco, descomenta esta línea y la del volumen de abajo.
       # - BACKUP_DIR=/backups
     volumes:

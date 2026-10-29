@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HouseholdSummary, LoginInput, Me, RegisterInput } from '@hogar/shared';
+import { AuthProviders, HouseholdSummary, LoginInput, Me, RegisterInput } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
 
 const STORAGE_KEY = 'hogar.casa';
@@ -21,6 +21,9 @@ export class SessionService {
     return list.find((h) => h.id === this.selectedId()) ?? list[0] ?? null;
   });
   readonly isAdmin = computed(() => this.household()?.role === 'admin');
+  /** Formas de entrar que ofrece el servidor (null mientras se consulta). */
+  readonly providers = signal<AuthProviders | null>(null);
+  private providersLoaded = false;
 
   /** Carga la sesión una sola vez (la usan los guards de las rutas). */
   ensureLoaded(): Promise<void> {
@@ -41,6 +44,22 @@ export class SessionService {
 
   async register(input: RegisterInput): Promise<void> {
     this.setMe(await firstValueFrom(this.http.post<Me>('/api/auth/register', input)));
+  }
+
+  /** Consulta una vez si el servidor tiene configurado el acceso con Google. */
+  async loadProviders(): Promise<void> {
+    if (this.providersLoaded) return;
+    this.providersLoaded = true;
+    try {
+      this.providers.set(await firstValueFrom(this.http.get<AuthProviders>('/api/auth/providers')));
+    } catch {
+      this.providersLoaded = false;
+      this.providers.set({ google: false });
+    }
+  }
+
+  async unlinkGoogle(): Promise<void> {
+    this.me.set(await firstValueFrom(this.http.delete<Me>('/api/auth/google')));
   }
 
   async logout(): Promise<void> {

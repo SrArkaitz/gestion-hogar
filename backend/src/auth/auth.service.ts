@@ -4,6 +4,7 @@ import * as argon2 from 'argon2';
 import { RateLimiter } from '../common/rate-limiter';
 import { asObject, emailField, requiredText } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
+import { GoogleLoginError, GoogleProfile } from './google.service';
 
 const MINUTE = 60_000;
 
@@ -44,7 +45,8 @@ export class AuthService {
     this.loginFailuresByIp.check(ip);
 
     const user = await this.prisma.user.findUnique({ where: { email: input.email } });
-    const ok = user
+    // Sin usuario, o con cuenta solo de Google, se compara con un hash de relleno para tardar lo mismo.
+    const ok = user?.passwordHash
       ? await argon2.verify(user.passwordHash, input.password)
       : await argon2.verify(await this.getDummyHash(), input.password).then(() => false);
     if (!user || !ok) {
@@ -56,6 +58,40 @@ export class AuthService {
     return user.id;
   }
 
+  /**
+   * Entrar con Google. Busca la cuenta por su id de Google y, si no hay, crea una nueva.
+   * Si ya existe una cuenta con ese correo sin Google conectado, no se une sola: como el
+   * registro no verifica correos, podría haberla creado otra persona con una contraseña suya.
+   */
+  async loginWithGoogle(profile: GoogleProfile): Promise<string> {
+    const linked = await this.prisma.user.findUnique({ where: { googleId: profile.sub } });
+    if (linked) return linked.id;
+    if (await this.prisma.user.findUnique({ where: { email: profile.email } })) {
+      throw new GoogleLoginError('cuenta-existe');
+    }
+    const user = await this.prisma.user.create({
+      data: { name: profile.name, email: profile.email, googleId: profile.sub, passwordHash: null },
+    });
+    return user.id;
+  }
+
+  /** Conecta Google a la cuenta con sesión iniciada. */
+  async linkGoogle(userId: string, profile: GoogleProfile): Promise<void> {
+    const other = await this.prisma.user.findUnique({ where: { googleId: profile.sub } });
+    if (other && other.id !== userId) throw new GoogleLoginError('google-en-uso');
+    await this.prisma.user.update({ where: { id: userId }, data: { googleId: profile.sub } });
+  }
+
+  /** Solo si la cuenta tiene contraseña: si no, se quedaría sin forma de entrar. */
+  async unlinkGoogle(userId: string): Promise<Me> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (!user.passwordHash) {
+      throw new BadRequestException('Tu cuenta no tiene contraseña: si desconectas Google no podrías entrar');
+    }
+    await this.prisma.user.update({ where: { id: userId }, data: { googleId: null } });
+    return this.me(userId);
+  }
+
   async me(userId: string): Promise<Me> {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -63,12 +99,15 @@ export class AuthService {
         id: true,
         name: true,
         email: true,
+        passwordHash: true,
+        googleId: true,
         memberships: { include: { household: true }, orderBy: { joinedAt: 'asc' } },
       },
     });
     return {
       user: { id: user.id, name: user.name, email: user.email },
       households: user.memberships.map((m) => ({ id: m.household.id, name: m.household.name, role: m.role as Role })),
+      account: { password: !!user.passwordHash, google: !!user.googleId },
     };
   }
 

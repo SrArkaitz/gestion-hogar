@@ -42,7 +42,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.0 Usuarios y casas
 
-- **Cuenta:** nombre, correo y contraseña (mínimo 8 caracteres). El registro está abierto a cualquiera.
+- **Cuenta:** nombre, correo y contraseña (mínimo 8 caracteres), o con Google. El registro está abierto a cualquiera.
+- **Con Google:** entrar con Google crea la cuenta si no existe (sin contraseña). Si ya hay una cuenta con contraseña y el mismo correo, no se une sola, porque el registro no verifica correos y otra persona podría haberla creado. Se conecta desde *Casa → Cuenta* con la sesión iniciada. Se puede desconectar si la cuenta tiene contraseña.
 - **Casas:** cualquiera puede crear las que quiera. Al registrarse sin invitación se pide crear la primera.
 - **Roles por casa:** *administrador* o *miembro*. Una misma persona puede ser administradora en una casa y miembro en otra.
 - **Administradores:** cambian el nombre de la casa, invitan, sacan a miembros y nombran o quitan administradores.
@@ -157,6 +158,7 @@ Cada fase deja algo que ya se puede usar.
 - Hecho: tablero de Tareas (columnas con arrastrar y soltar, prioridad, fecha límite con marca de vencida, asignación a miembros, categoría con sugerencias, filtros por persona, categoría y prioridad).
 - Hecho: módulo de Ideas (pestañas Abiertas, Aceptadas y Descartadas; valorar, aceptar con prioridad creando la tarea enlazada, descartar y recuperar).
 - Hecho: copia de seguridad diaria de la base de datos (VACUUM INTO a las 03:30, últimas 14) y guía de despliegue en [`DESPLIEGUE.md`](DESPLIEGUE.md).
+- Hecho: acceso con Google (OpenID Connect con PKCE), opcional según la configuración del servidor.
 - Siguiente: publicar en `hogar.kaitzlab.com` siguiendo la guía, que cierra la fase 1. Las copias de las fotos llegarán con la primera fase que tenga fotos (recetas).
 
 ## 8. Decisiones tomadas
@@ -169,6 +171,7 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-28 | Recetas con tipo de plato, duración por tramos y minutos opcionales; menú semanal opcional. |
 | 2026-10-28 | El calendario incluye cumpleaños. |
 | 2026-10-29 | Registro abierto. Cada persona puede estar en varias casas, con rol de administrador o miembro en cada una. Sustituye a la decisión inicial de registro cerrado y un único hogar. |
+| 2026-10-29 | Acceso con Google además de correo y contraseña. Una cuenta con contraseña no se une sola a Google por coincidir el correo: se conecta desde la cuenta. |
 | 2026-10-29 | Repositorio con npm workspaces y un único `package-lock.json`. `shared/` es el paquete `@hogar/shared`. |
 | 2026-10-29 | Estados, prioridades y categorías se guardan como texto y se validan con las constantes de `@hogar/shared`. Las categorías son texto libre con sugerencias. |
 | 2026-10-29 | Se mantienen Angular 20 y NestJS 11 por ahora. La subida a Angular 22 y NestJS 12 se hará como paso aparte. |

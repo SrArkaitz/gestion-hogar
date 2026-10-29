@@ -100,7 +100,14 @@ a.btn { display: inline-block; text-align: center; text-decoration: none; }
 .auth-card label, .panel label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 .auth-card input, .panel input { font: inherit; font-size: 16px; text-transform: none; letter-spacing: 0; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 10px; width: 100%; }
 
+.btn.google { display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: #1f1f1f; border: 1px solid #747775; font-weight: 500; }
+.btn.google svg { width: 18px; height: 18px; flex: none; }
+.or { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 12.5px; color: var(--muted); }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+
 /* Página de casa */
+.google-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.panel .btn.google { align-self: flex-start; }
 .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .panel h2 { font-family: var(--f-display); font-weight: 500; font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px; }

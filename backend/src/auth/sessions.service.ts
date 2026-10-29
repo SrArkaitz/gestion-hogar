@@ -60,7 +60,7 @@ export class SessionsService {
  * En producción la cookie solo viaja por HTTPS. Para entrar por http://IP:puerto
  * desde casa hay que poner COOKIE_SECURE=false.
  */
-function cookieOptions(): CookieOptions {
+export function cookieOptions(): CookieOptions {
   const secure = process.env.COOKIE_SECURE
     ? process.env.COOKIE_SECURE === 'true'
     : process.env.NODE_ENV === 'production';

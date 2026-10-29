@@ -26,7 +26,28 @@ export interface HouseholdSummary {
 export interface Me {
   user: User;
   households: HouseholdSummary[];
+  /** Formas de entrar que tiene la cuenta. */
+  account: { password: boolean; google: boolean };
 }
+
+/** Respuesta de /api/auth/providers: formas de entrar disponibles en el servidor. */
+export interface AuthProviders {
+  google: boolean;
+}
+
+/**
+ * Errores al volver de Google. La API redirige a /entrar?error=… (o /casa?error=… al conectar)
+ * y el frontend muestra el mensaje.
+ */
+export const GOOGLE_ERRORS = {
+  cancelado: 'Has cancelado el acceso con Google.',
+  'cuenta-existe':
+    'Ya hay una cuenta con ese correo. Entra con tu contraseña y conecta Google desde Casa → Cuenta.',
+  'google-en-uso': 'Esa cuenta de Google ya está conectada a otro usuario.',
+  'correo-sin-verificar': 'Google no ha verificado el correo de esa cuenta.',
+  fallo: 'No se pudo entrar con Google. Vuelve a intentarlo.',
+} as const;
+export type GoogleError = keyof typeof GOOGLE_ERRORS;
 
 /** Miembro de una casa tal como lo ve el resto de la app (sin datos de acceso). */
 export interface Member {

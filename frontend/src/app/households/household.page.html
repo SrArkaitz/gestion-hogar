@@ -101,6 +101,21 @@
     <section class="panel">
       <h2>Cuenta</h2>
       <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
+      @if (googleError()) {
+        <p class="form-err" role="alert">{{ googleError() }}</p>
+      }
+      @if (session.me()?.account; as account) {
+        @if (account.google) {
+          <div class="google-row">
+            <span class="n">Google conectado: puedes entrar con tu cuenta de Google.</span>
+            @if (account.password) {
+              <button type="button" class="link danger" (click)="unlinkGoogle()">Desconectar</button>
+            }
+          </div>
+        } @else {
+          <app-google-button mode="conectar" volver="/casa" label="Conectar con Google" />
+        }
+      }
       <div class="acts">
         <button type="button" class="btn ghost" (click)="logout()">Cerrar sesión</button>
         <button type="button" class="btn danger" (click)="leave()">Salir de esta casa</button>

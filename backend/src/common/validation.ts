@@ -23,6 +23,13 @@ export function emailField(value: unknown): string {
   return email;
 }
 
+/** Ruta interna a la que volver tras entrar. Cualquier cosa que no empiece por "/" (u otra web) se cambia por "/". */
+export function safeReturnUrl(value: unknown): string {
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') && !value.includes('\\')
+    ? value
+    : '/';
+}
+
 /** Valor que tiene que estar en una lista de constantes de @hogar/shared. */
 export function oneOf<T extends string>(value: unknown, options: readonly T[], label: string): T {
   if (!options.includes(value as T)) throw new BadRequestException(`${label} no válido`);

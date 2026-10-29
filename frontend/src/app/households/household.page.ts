@@ -1,15 +1,16 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CreatedInvitation, Household, Invitation, INVITATION_DAYS, Member, NAME_MAX_LENGTH, ROLE_LABELS } from '@hogar/shared';
-import { errorMessage } from '../core/errors';
+import { GoogleButton } from '../auth/google-button';
+import { errorMessage, googleErrorMessage } from '../core/errors';
 import { HouseholdsService } from '../core/households.service';
 import { SessionService } from '../core/session.service';
 
 /** Ajustes de la casa activa: nombre, miembros, invitaciones, otras casas y cuenta. */
 @Component({
   selector: 'app-household-page',
-  imports: [FormsModule],
+  imports: [FormsModule, GoogleButton],
   host: { class: 'view' },
   templateUrl: './household.page.html',
 })
@@ -17,6 +18,10 @@ export class HouseholdPage {
   protected readonly session = inject(SessionService);
   private readonly api = inject(HouseholdsService);
   private readonly router = inject(Router);
+
+  /** Código con el que vuelve la API si falla conectar Google (?error=…). */
+  readonly error_ = input<string>(undefined, { alias: 'error' });
+  protected readonly googleError = computed(() => googleErrorMessage(this.error_()));
 
   protected readonly roleLabels = ROLE_LABELS;
   protected readonly nameMax = NAME_MAX_LENGTH;
@@ -121,6 +126,11 @@ export class HouseholdPage {
       this.session.upsertHousehold(await this.api.create(this.anotherName()));
       this.anotherName.set('');
     });
+  }
+
+  protected async unlinkGoogle() {
+    if (!confirm('¿Desconectar Google? Seguirás entrando con tu correo y contraseña.')) return;
+    await this.run('Google desconectado.', () => this.session.unlinkGoogle());
   }
 
   protected async logout() {

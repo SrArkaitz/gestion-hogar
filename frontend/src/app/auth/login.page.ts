@@ -1,17 +1,25 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { errorMessage, safeReturnUrl } from '../core/errors';
+import { errorMessage, googleErrorMessage, safeReturnUrl } from '../core/errors';
 import { SessionService } from '../core/session.service';
+import { GoogleButton } from './google-button';
 
 @Component({
   selector: 'app-login-page',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, GoogleButton],
   host: { class: 'auth' },
   template: `
     <form class="auth-card" (ngSubmit)="submit()">
       <p class="brand">Hogar</p>
       <h1>Entrar</h1>
+      @if (googleError()) {
+        <p class="form-err" role="alert">{{ googleError() }}</p>
+      }
+      <app-google-button [volver]="target()" />
+      @if (session.providers()?.google) {
+        <p class="or"><span>o con tu correo</span></p>
+      }
       <label>Correo
         <input type="email" name="email" autocomplete="email" required [(ngModel)]="email" />
       </label>
@@ -27,11 +35,16 @@ import { SessionService } from '../core/session.service';
   `,
 })
 export class LoginPage {
-  private readonly session = inject(SessionService);
+  protected readonly session = inject(SessionService);
   private readonly router = inject(Router);
 
   /** Ruta a la que volver después de entrar (?volver=…). */
   readonly volver = input<string>();
+  /** Código con el que vuelve la API si falla el acceso con Google (?error=…). */
+  readonly error_ = input<string>(undefined, { alias: 'error' });
+
+  protected readonly target = computed(() => safeReturnUrl(this.volver()));
+  protected readonly googleError = computed(() => googleErrorMessage(this.error_()));
 
   protected readonly email = signal('');
   protected readonly password = signal('');
@@ -44,7 +57,7 @@ export class LoginPage {
     this.error.set('');
     try {
       await this.session.login({ email: this.email(), password: this.password() });
-      this.router.navigateByUrl(safeReturnUrl(this.volver()));
+      this.router.navigateByUrl(this.target());
     } catch (err) {
       this.error.set(errorMessage(err, 'No se pudo entrar. Vuelve a intentarlo.'));
     } finally {

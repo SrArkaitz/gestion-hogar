@@ -61,16 +61,52 @@ El túnel conecta el Beelink con Cloudflare desde dentro, así que no hay que ab
 
 Ahora que hay HTTPS, la cookie de sesión debe viajar solo cifrada.
 
-1. Portainer → Stacks → `gestion-hogar` → **Editor**. Cambia `COOKIE_SECURE=false` por `COOKIE_SECURE=true`.
+1. Portainer → Stacks → `gestion-hogar` → **Editor**. Debajo del editor, en **Environment variables**, añade:
+   - `COOKIE_SECURE` = `true`
+   - `PUBLIC_URL` = `https://hogar.kaitzlab.com`
 2. **Update the stack**.
+
+Las variables del stack se conservan aunque hagas *Pull and redeploy*: el `docker-compose.yml` las lee con `${…}`.
 
 Desde este momento, entra siempre por `https://hogar.kaitzlab.com`, también desde casa. Por `http://IP:8085` la web se abre, pero no se puede iniciar sesión.
 
-> El cambio en el editor de Portainer se pierde si después haces *Pull and redeploy*, porque vuelve a leer el `docker-compose.yml` del repositorio. Para que quede fijo, cambia también el valor en el repositorio y haz commit, o define la variable en el apartado **Environment variables** del stack.
-
 **Comprobación:** en `https://hogar.kaitzlab.com` crea tu cuenta y tu casa. Cierra el navegador, vuelve a abrir la web y comprueba que sigues dentro.
 
-## 4. Copias de seguridad
+## 4. Acceso con Google
+
+Opcional. Sin este paso la app funciona igual, solo con correo y contraseña, y el botón de Google no aparece.
+
+**En Google Cloud** ([console.cloud.google.com](https://console.cloud.google.com)), con tu cuenta de Google:
+
+1. Crea un proyecto nuevo, por ejemplo `Hogar`.
+2. Ve a **Google Auth Platform** (en algunas versiones de la consola, *APIs y servicios → Pantalla de consentimiento de OAuth*) y pulsa **Comenzar**:
+   - Nombre de la aplicación: `Hogar`. Correo de asistencia: el tuyo.
+   - Público: **Externo**.
+   - Información de contacto: tu correo.
+3. En **Clientes → Crear cliente**:
+   - Tipo de aplicación: **Aplicación web**. Nombre: `Hogar`.
+   - **URIs de redirección autorizados**, añade las dos:
+     - `https://hogar.kaitzlab.com/api/auth/google/callback`
+     - `http://localhost:4200/api/auth/google/callback` (para probar en local)
+   - Crear. Copia el **ID de cliente** y el **secreto del cliente**.
+4. En **Público**, pulsa **Publicar aplicación** para pasarla a *En producción*. Mientras esté *En pruebas*, solo pueden entrar los correos que añadas como usuarios de prueba. La app solo pide nombre y correo, así que Google no exige ninguna verificación.
+
+**En Portainer**, en las **Environment variables** del stack `gestion-hogar`, añade:
+
+- `GOOGLE_CLIENT_ID` = el ID de cliente
+- `GOOGLE_CLIENT_SECRET` = el secreto del cliente
+
+y comprueba que `PUBLIC_URL` es `https://hogar.kaitzlab.com` (del paso 3). **Update the stack**.
+
+**Comprobación:** `https://hogar.kaitzlab.com/api/auth/providers` debe responder `{"google":true}`, y en la pantalla de entrar aparece "Continuar con Google".
+
+**Cómo se comporta:**
+
+- Con Google, quien no tiene cuenta la crea al momento, con su nombre y su correo de Google y sin contraseña.
+- Si ya existe una cuenta con contraseña y el mismo correo, **no** se une sola. Hay que entrar con la contraseña y pulsar *Casa → Cuenta → Conectar con Google*. Así nadie que se haya registrado antes con tu correo puede quedarse con tu cuenta.
+- Si el `redirect_uri` no coincide (Google muestra `Error 400: redirect_uri_mismatch`), revisa que `PUBLIC_URL` más `/api/auth/google/callback` coincida exactamente con la URI que pusiste en Google Cloud: `https` y sin barra final en `PUBLIC_URL`.
+
+## 5. Copias de seguridad
 
 La app hace una copia de la base de datos cada día a las 03:30 (hora de `TZ`), y otra al arrancar si ese día aún no la había. Guarda las últimas 14 (`BACKUP_KEEP`) en `/app/data/backups`, dentro del mismo volumen que la base de datos.
 
@@ -93,11 +129,11 @@ docker cp gestion-hogar:/app/data/backups ./copias-hogar
    `docker cp ./hogar-2026-11-03.db gestion-hogar:/app/data/hogar.db`
 3. Arranca: `docker start gestion-hogar`. Si la copia es de una versión anterior de la app, las migraciones que falten se aplican solas al arrancar.
 
-## 5. Actualizar
+## 6. Actualizar
 
-Cuando haya cambios en `main`: Portainer → Stacks → `gestion-hogar` → **Pull and redeploy**. Las migraciones de la base de datos se aplican solas al arrancar. Antes de una actualización grande, haz una copia a mano (apartado 4).
+Cuando haya cambios en `main`: Portainer → Stacks → `gestion-hogar` → **Pull and redeploy**. Las migraciones de la base de datos se aplican solas al arrancar. Antes de una actualización grande, haz una copia a mano (apartado 5).
 
-## 6. Opcional: Cloudflare Access
+## 7. Opcional: Cloudflare Access
 
 El registro está abierto: cualquiera que llegue a `hogar.kaitzlab.com` puede crearse una cuenta, aunque solo vea sus propias casas. Si prefieres que la web ni siquiera se abra a desconocidos, pon delante Cloudflare Access:
 
@@ -105,14 +141,17 @@ El registro está abierto: cualquiera que llegue a `hogar.kaitzlab.com` puede cr
 2. Dominio: `hogar.kaitzlab.com`.
 3. Política **Allow** con **Emails**: tu correo y el de quien quieras dejar entrar. Cloudflare les mandará un código por correo la primera vez.
 
-Con Access activo, quien no esté en la lista no llega ni a la pantalla de entrar.
+Con Access activo, quien no esté en la lista no llega ni a la pantalla de entrar. El acceso con Google sigue funcionando por detrás: Access solo decide quién llega a la web.
 
 ## Variables de entorno
 
 | Variable | Por defecto | Para qué |
 |----------|-------------|----------|
 | `TZ` | `Europe/Madrid` | Zona horaria (también la de la copia diaria) |
-| `COOKIE_SECURE` | `true` en producción | `false` para poder iniciar sesión por `http://` |
+| `COOKIE_SECURE` | `false` en el `docker-compose.yml` | `true` cuando solo se entra por HTTPS |
+| `PUBLIC_URL` | (vacío) | Dirección pública sin barra final, para el acceso con Google |
+| `GOOGLE_CLIENT_ID` | (vacío) | ID del cliente OAuth de Google |
+| `GOOGLE_CLIENT_SECRET` | (vacío) | Secreto del cliente OAuth de Google |
 | `BACKUP_KEEP` | `14` | Copias diarias que se guardan |
 | `BACKUP_DIR` | `/app/data/backups` | Carpeta de las copias |
 | `DATABASE_URL` | `file:/app/data/hogar.db` | Archivo de la base de datos (no hace falta cambiarlo) |

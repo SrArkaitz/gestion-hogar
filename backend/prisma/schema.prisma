@@ -31,7 +31,10 @@ model User {
   /// Siempre en minúsculas
   email        String   @unique
   name         String
-  passwordHash String
+  /// null en cuentas creadas con Google que no tienen contraseña
+  passwordHash String?
+  /// Identificador de la cuenta de Google conectada (claim "sub")
+  googleId     String?  @unique
   createdAt    DateTime @default(now())
 
   memberships   HouseholdMember[]

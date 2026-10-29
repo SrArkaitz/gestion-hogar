@@ -1,4 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { GOOGLE_ERRORS } from '@hogar/shared';
+
+/** Mensaje para el ?error=… con el que vuelve la API tras pasar por Google. */
+export function googleErrorMessage(code: string | undefined | null): string {
+  if (!code) return '';
+  return code in GOOGLE_ERRORS ? GOOGLE_ERRORS[code as keyof typeof GOOGLE_ERRORS] : GOOGLE_ERRORS.fallo;
+}
 
 /** Mensaje para mostrar al usuario a partir de un error de la API. */
 export function errorMessage(err: unknown, fallback: string): string {
@@ -13,5 +20,5 @@ export function errorMessage(err: unknown, fallback: string): string {
 
 /** Ruta interna a la que volver tras entrar. Ignora cualquier cosa que no empiece por "/". */
 export function safeReturnUrl(url: string | undefined | null): string {
-  return url && url.startsWith('/') && !url.startsWith('//') ? url : '/';
+  return url && url.startsWith('/') && !url.startsWith('//') && !url.includes('\\') ? url : '/';
 }
