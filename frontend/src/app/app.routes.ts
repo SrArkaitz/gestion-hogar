@@ -23,6 +23,8 @@ export const routes: Routes = [
       { path: 'ideas', canActivate: [sectionGuard('ideas')], loadChildren: () => import('./ideas/ideas.routes').then((m) => m.IDEAS_ROUTES) },
       { path: 'recetas', canActivate: [sectionGuard('recetas')], loadChildren: () => import('./recipes/recipes.routes').then((m) => m.RECIPES_ROUTES) },
       { path: 'gastos', canActivate: [sectionGuard('gastos')], loadChildren: () => import('./expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES) },
+      { path: 'inventario', canActivate: [sectionGuard('inventario')], loadChildren: () => import('./inventory/inventory.routes').then((m) => m.INVENTORY_ROUTES) },
+      { path: 'mantenimiento', canActivate: [sectionGuard('mantenimiento')], title: 'Mantenimiento · Hogar', loadComponent: () => import('./maintenance/maintenance.page').then((m) => m.MaintenancePage) },
       { path: 'compra', canActivate: [sectionGuard('compra')], title: 'Compra · Hogar', loadComponent: () => import('./shopping/shopping.page').then((m) => m.ShoppingPage) },
       { path: 'casa', title: 'Casa · Hogar', loadComponent: () => import('./households/household.page').then((m) => m.HouseholdPage) },
     ],

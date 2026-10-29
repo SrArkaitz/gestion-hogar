@@ -135,11 +135,18 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.7 Inventario
 
-*Se detalla al llegar a su fase.*
+- **Despensa y casa:** cada cosa con su sitio (Despensa, Nevera, Limpieza, Baño, Botiquín… o uno propio), cantidad con decimales, unidad opcional y un mínimo opcional. Con `+` y `−` se cambia la cantidad al momento. Se agrupa por sitio.
+- **Se acaba:** lo que está en su mínimo o por debajo sale arriba, con un botón *Pasar a la compra* que lo añade a la lista (si la casa usa Compra); lo que ya está en la lista no se duplica.
+- **Equipos y garantías:** electrodomésticos, aparatos o vehículos con marca, modelo, fecha de compra, fin de la garantía y notas. Se les adjuntan archivos (manual, factura, ticket): PDF o imagen JPG, PNG o WebP, hasta 20 MB. El tipo se comprueba por el contenido, no por el nombre, y se guardan con un nombre al azar en el volumen de datos. Entran en la copia diaria.
+- El fin de la garantía sale en el calendario.
 
 ### 3.8 Mantenimiento
 
-*Se detalla al llegar a su fase.*
+- **Revisión:** nombre (ITV, caldera, filtros…), grupo con sugerencias (Casa, Coche…), cada cuántos meses (o sin repetir), próxima fecha, con cuántos días de antelación avisar (por defecto 7) y notas.
+- **Hecha:** se apunta la fecha, el coste opcional y notas. Queda en su historial y la próxima fecha pasa a esa fecha más su intervalo. Las entradas del historial se pueden borrar.
+- **Estado:** vencida, toca pronto (dentro de sus días de aviso) o en orden, con el color en el borde de la tarjeta.
+- **Avisos** a las 9:00, a toda la casa: cuando faltan sus días de aviso, el día que toca y, si sigue vencida, una vez por semana.
+- Las próximas fechas salen en el calendario.
 
 ## 4. Arquitectura
 
@@ -151,7 +158,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 | Tipos comunes | Carpeta `shared/` | Los modelos (tarea, receta, gasto…) se definen una vez y los usan frontend y backend. |
 | Tareas programadas | `@nestjs/schedule` | Tareas recurrentes, recordatorios y avisos de cumpleaños. |
 | Notificaciones | Web Push (PWA) | Avisos en móvil y PC sin tienda de apps. Requiere HTTPS. |
-| Fotos | Archivos en un volumen de Docker | Fotos de platos y documentos de garantías. |
+| Fotos y documentos | Archivos en un volumen de Docker | Fotos de platos y documentos de los equipos (manuales, facturas). |
 
 **Estructura del repositorio**
 
@@ -170,7 +177,7 @@ gestion-hogar/
 - **Login:** contraseñas cifradas (argon2), sesión de 30 días en cookie `HttpOnly` y `Secure` (en la base de datos solo se guarda el hash del token), límite de intentos fallidos por correo e IP y de registros por IP.
 - **Acceso a datos:** todas las rutas de un módulo cuelgan de `/api/households/:householdId/…` y un guard comprueba que el usuario es miembro de esa casa. A quien no lo es se le responde como si la casa no existiera.
 - **Capa extra opcional:** Cloudflare Access delante de la app.
-- **Copias de seguridad:** copia automática diaria de la base de datos y de las fotos, guardando varias versiones.
+- **Copias de seguridad:** copia automática diaria de la base de datos, las fotos y los documentos, guardando varias versiones.
 
 ## 6. Hoja de ruta
 
@@ -188,7 +195,7 @@ Cada fase deja algo que ya se puede usar.
 
 ## 7. Estado actual
 
-**Fases 1 a 6 hechas.** La app está publicada en `https://hogar.kaitzlab.com`.
+**Fases 1 a 7 hechas: toda la hoja de ruta.** La app está publicada en `https://hogar.kaitzlab.com`.
 
 - Hecho: estructura del repositorio con npm workspaces (`shared/`, `backend/`, `frontend/`), Prisma 7 con SQLite, navegación entre módulos (barra lateral en PC y barra inferior en móvil). El prototipo de tablero inicial se ha eliminado.
 - Hecho: usuarios y casas (registro, login, varias casas por persona, administradores, invitaciones y selector de casa activa).
@@ -204,7 +211,7 @@ Cada fase deja algo que ya se puede usar.
 - Hecho (fase 5): gastos repartidos, saldos y pagos para quedar en paz, facturas fijas con aviso y resumen del mes.
 - Hecho: cada casa elige qué secciones usa (los administradores, en *Casa → Secciones*).
 - Hecho (fase 6): calendario de mes y semana con lo de las demás secciones, cumpleaños y eventos, con avisos.
-- Siguiente: fase 7, inventario y mantenimiento.
+- Hecho (fase 7): inventario con aviso de lo que se acaba y paso a la compra, equipos con garantía y archivos adjuntos, y revisiones de mantenimiento con historial y avisos. En el móvil, si hay más de cinco secciones, las que no caben van a un menú *Más*.
 
 ## 8. Decisiones tomadas
 
@@ -229,3 +236,6 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Calendario: no copia datos de las otras secciones, los junta al pedirlos (una sola ruta de la API). Eventos y cumpleaños son suyos. |
 | 2026-10-29 | Cada casa elige qué secciones usa. Se guarda la lista de las ocultas, así que una sección nueva aparece visible en todas las casas. Ocultar no borra datos. |
 | 2026-10-29 | Compra: una lista por casa, secciones fijas (adivinadas y luego recordadas por producto), lo comprado se queda en el carro hasta quitarlo y los habituales salen solos de lo ya comprado. Se sincroniza consultando al servidor cada pocos segundos. |
+| 2026-10-29 | Inventario: cantidades con decimales y un mínimo por cosa; lo que se acaba se pasa a la compra con un botón, no de forma automática. |
+| 2026-10-29 | Archivos de los equipos: PDF o imagen de hasta 20 MB, subidos tal cual (sin multipart) y comprobados por su contenido. Se guardan en `data/files` con un nombre al azar. |
+| 2026-10-29 | Mantenimiento: intervalo en meses; al marcarla hecha, la próxima fecha se cuenta desde el día en que se hizo. |

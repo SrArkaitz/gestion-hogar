@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { databaseFile, PrismaService } from '../prisma/prisma.service';
+import { filesDir } from '../inventory/files';
 import { photosDir } from '../recipes/photos';
 
 const FILE_RE = /^hogar-\d{4}-\d{2}-\d{2}\.db$/;
@@ -14,9 +15,10 @@ const FILE_RE = /^hogar-\d{4}-\d{2}-\d{2}\.db$/;
  * BACKUP_DIR: carpeta de las copias (por defecto, data/backups junto a la base de datos).
  * BACKUP_KEEP: cuántas copias diarias se guardan (por defecto 14).
  *
- * Las fotos de las recetas se copian a BACKUP_DIR/fotos. Cada foto tiene un nombre único y no
- * cambia, así que basta con copiar las nuevas; las viejas se dejan porque las copias anteriores
- * de la base de datos pueden seguir apuntando a ellas.
+ * Las fotos de las recetas se copian a BACKUP_DIR/fotos y los archivos de los equipos a
+ * BACKUP_DIR/archivos. Cada uno tiene un nombre único y no cambia, así que basta con copiar los
+ * nuevos; los viejos se dejan porque las copias anteriores de la base de datos pueden seguir
+ * apuntando a ellos.
  */
 @Injectable()
 export class BackupService implements OnApplicationBootstrap {
@@ -40,18 +42,17 @@ export class BackupService implements OnApplicationBootstrap {
       if (existsSync(target)) unlinkSync(target);
       await this.prisma.$executeRawUnsafe(`VACUUM INTO '${target.replace(/'/g, "''")}'`);
       this.prune();
-      const photos = this.copyPhotos();
-      this.logger.log(`Copia de seguridad hecha: ${target}${photos ? ` y ${photos} fotos nuevas` : ''}`);
+      const copied = this.copyNew(photosDir(), 'fotos') + this.copyNew(filesDir(), 'archivos');
+      this.logger.log(`Copia de seguridad hecha: ${target}${copied ? ` y ${copied} fotos o archivos nuevos` : ''}`);
     } catch (err) {
       this.logger.error(`No se pudo hacer la copia de seguridad: ${(err as Error).message}`);
     }
   }
 
-  /** Copia las fotos que aún no estén en la copia. @returns cuántas ha copiado. */
-  private copyPhotos(): number {
-    const source = photosDir();
+  /** Copia los archivos de una carpeta que aún no estén en la copia. @returns cuántos ha copiado. */
+  private copyNew(source: string, folder: string): number {
     if (!existsSync(source)) return 0;
-    const target = join(this.dir, 'fotos');
+    const target = join(this.dir, folder);
     mkdirSync(target, { recursive: true });
     const copied = new Set(readdirSync(target));
     let count = 0;

@@ -154,6 +154,25 @@ export class CalendarService {
       }
     }
 
+    if (uses('mantenimiento')) {
+      // Revisiones: la próxima y las siguientes (cada N meses), como las facturas.
+      for (const m of await this.prisma.maintenance.findMany({ where: { householdId, nextDue: { not: null } } })) {
+        for (let n = 0; n < MAX_REPEATS; n++) {
+          const d = addMonths(m.nextDue!, n * (m.interval ?? 0));
+          if (d > to) break;
+          if (d >= from) items.push(item('mantenimiento', d, m.name, m.id, '/mantenimiento', { detail: m.group }));
+          if (!m.interval) break;
+        }
+      }
+    }
+
+    if (uses('inventario')) {
+      const equipment = await this.prisma.equipment.findMany({ where: { householdId, warrantyUntil: { gte: from, lte: to } } });
+      for (const e of equipment) {
+        items.push(item('garantia', e.warrantyUntil!, `Fin de la garantía: ${e.name}`, e.id, '/inventario/equipos', { detail: [e.brand, e.model].filter(Boolean).join(' ') || null }));
+      }
+    }
+
     return items.sort(
       (a, b) =>
         a.date.localeCompare(b.date) ||

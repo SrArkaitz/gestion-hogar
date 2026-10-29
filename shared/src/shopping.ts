@@ -66,13 +66,19 @@ export interface ShoppingProduct {
   count: number;
 }
 
+/** Una sola palabra corta en mayúsculas: unas siglas (ITV, IBI, IKEA), que se dejan tal cual. */
+const ACRONYM_MAX = 4;
+
 /**
  * Nombre bien escrito: "leche" y "LECHE" pasan a "Leche". Si mezcla mayúsculas y minúsculas
- * se respeta ("Pilas AAA", "Coca-Cola") y solo se pone en mayúscula la primera letra.
+ * se respeta ("Pilas AAA", "Coca-Cola") y solo se pone en mayúscula la primera letra. Unas
+ * siglas sueltas ("ITV") también se respetan.
  */
 export function tidyName(name: string): string {
   const text = name.trim().replace(/\s+/g, ' ');
-  const uniform = text === text.toLocaleLowerCase('es') || text === text.toLocaleUpperCase('es');
+  const upper = text === text.toLocaleUpperCase('es');
+  if (upper && !text.includes(' ') && text.length <= ACRONYM_MAX) return text;
+  const uniform = upper || text === text.toLocaleLowerCase('es');
   const rest = uniform ? text.slice(1).toLocaleLowerCase('es') : text.slice(1);
   return text.charAt(0).toLocaleUpperCase('es') + rest;
 }

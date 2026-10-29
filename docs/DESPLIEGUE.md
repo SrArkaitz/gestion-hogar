@@ -119,6 +119,7 @@ En cada dispositivo, entra en `https://hogar.kaitzlab.com` → **Casa → Este d
 Qué avisos llegan:
 
 - A las 9:00 (hora de `TZ`), las tareas sin hacer que vencen ese día o ya han vencido: las tuyas y las que no tienen a nadie asignado.
+- A las 9:00, a toda la casa: facturas que vencen en los próximos 3 días o ya vencieron, eventos del día, cumpleaños dentro de sus días de aviso y revisiones de mantenimiento que tocan pronto, hoy o siguen vencidas (estas, una vez por semana).
 - Cuando alguien te asigna una tarea.
 
 **Comprobación:** tras activar los avisos, *Enviar uno de prueba* tiene que mostrar «Avisos activados» en el dispositivo. Si no llega, revisa que el sistema no tenga silenciadas las notificaciones del navegador o de la app.
@@ -127,7 +128,7 @@ Qué avisos llegan:
 
 La app hace una copia de la base de datos cada día a las 03:30 (hora de `TZ`), y otra al arrancar si ese día aún no la había. Guarda las últimas 14 (`BACKUP_KEEP`) en `/app/data/backups`, dentro del mismo volumen que la base de datos.
 
-Las fotos de las recetas viven en `/app/data/photos` (mismo volumen) y en cada copia se pasan las nuevas a `backups/fotos`. Las fotos antiguas no se borran de la copia, porque las copias anteriores de la base de datos pueden seguir usándolas.
+Las fotos de las recetas viven en `/app/data/photos` (mismo volumen) y en cada copia se pasan las nuevas a `backups/fotos`. Igual con los archivos de los equipos (manuales, facturas): viven en `/app/data/files` y se copian a `backups/archivos`. Lo antiguo no se borra de la copia, porque las copias anteriores de la base de datos pueden seguir usándolo.
 
 **Recomendado:** guardar las copias en otro disco o en el NAS. Si el disco del volumen falla, así no se pierden también las copias.
 
@@ -146,8 +147,9 @@ docker cp gestion-hogar:/app/data/backups ./copias-hogar
 1. Para el contenedor: `docker stop gestion-hogar`.
 2. Copia la copia elegida encima de la base de datos:
    `docker cp ./hogar-2026-11-03.db gestion-hogar:/app/data/hogar.db`
-3. Si se perdieron las fotos, cópialas también:
+3. Si se perdieron las fotos o los archivos, cópialos también:
    `docker cp ./copias-hogar/fotos/. gestion-hogar:/app/data/photos/`
+   `docker cp ./copias-hogar/archivos/. gestion-hogar:/app/data/files/`
 4. Arranca: `docker start gestion-hogar`. Si la copia es de una versión anterior de la app, las migraciones que falten se aplican solas al arrancar.
 
 ## 7. Actualizar
@@ -177,4 +179,5 @@ Con Access activo, quien no esté en la lista no llega ni a la pantalla de entra
 | `BACKUP_DIR` | `/app/data/backups` | Carpeta de las copias |
 | `DATABASE_URL` | `file:/app/data/hogar.db` | Archivo de la base de datos (no hace falta cambiarlo) |
 | `PHOTOS_DIR` | `/app/data/photos` | Carpeta de las fotos de las recetas (no hace falta cambiarlo) |
+| `FILES_DIR` | `/app/data/files` | Carpeta de los archivos de los equipos (no hace falta cambiarlo) |
 | `PORT` | `3000` | Puerto dentro del contenedor (el de fuera se cambia en `ports`) |

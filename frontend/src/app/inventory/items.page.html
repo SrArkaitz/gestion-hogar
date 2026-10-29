@@ -1,0 +1,104 @@
+<header class="top">
+  <div>
+    <h1>Inventario</h1>
+    <p class="sub">Lo que hay en casa. Pon un mínimo y te diremos cuándo se acaba.</p>
+  </div>
+  <button type="button" class="btn" (click)="open(null)">Añadir</button>
+</header>
+
+<app-inventory-tabs />
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+}
+@if (status()) {
+  <div class="notice" role="status">
+    {{ status() }} <a routerLink="/compra">Ver la lista</a>
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="status.set('')">×</button>
+  </div>
+}
+
+@if (low().length) {
+  <section class="panel low">
+    <div class="cal-day-head">
+      <h2>Se acaba <span class="count">{{ low().length }}</span></h2>
+      @if (usesShopping()) {
+        <button type="button" class="btn sm" (click)="toShopping()">Pasar a la compra</button>
+      }
+    </div>
+    <p class="n">{{ lowNames() }}</p>
+  </section>
+}
+
+<div class="shop">
+  @for (g of groups(); track g.location) {
+    <section class="shop-sec">
+      <h2>{{ g.location }} <span class="count">{{ g.items.length }}</span></h2>
+      <ul>
+        @for (item of g.items; track item.id) {
+          <li class="inv-item" [class.low]="isLow(item)">
+            <button type="button" class="what" (click)="open(item)" [attr.aria-label]="'Editar ' + item.name">
+              <span class="t">{{ item.name }}</span>
+              @if (item.minimum !== null) {
+                <span class="q">mín. {{ number(item.minimum) }}</span>
+              }
+            </button>
+            <span class="stepper" role="group" [attr.aria-label]="'Cantidad de ' + item.name">
+              <button type="button" [attr.aria-label]="'Uno menos de ' + item.name" [disabled]="item.quantity <= 0" (click)="step(item, -1)">−</button>
+              <span>{{ number(item.quantity) }}@if (item.unit) { {{ item.unit }}}</span>
+              <button type="button" [attr.aria-label]="'Uno más de ' + item.name" (click)="step(item, 1)">+</button>
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+  } @empty {
+    @if (!loading()) {
+      <p class="empty">Aún no hay nada. Apunta lo que tenéis en la despensa, la limpieza o el botiquín.</p>
+    }
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <div class="veil" (click)="editing.set(undefined)">
+    <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar' : 'Añadir al inventario'"
+          (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
+      <h3>{{ editing() ? 'Editar' : 'Añadir al inventario' }}</h3>
+      <label>Qué
+        <input name="name" required [maxlength]="max.name" placeholder="Arroz" [(ngModel)]="name" />
+      </label>
+      <label>Dónde
+        <input name="location" [maxlength]="max.location" list="inv-locations" placeholder="Despensa" [(ngModel)]="location" />
+        <datalist id="inv-locations">
+          @for (l of locationOptions(); track l) {
+            <option [value]="l"></option>
+          }
+        </datalist>
+      </label>
+      <div class="row">
+        <label>Cantidad
+          <input name="quantity" inputmode="decimal" required [(ngModel)]="quantity" />
+        </label>
+        <label>Unidad <span class="hint">(opcional)</span>
+          <input name="unit" [maxlength]="max.unit" placeholder="paquetes" [(ngModel)]="unit" />
+        </label>
+        <label>Mínimo <span class="hint">(opcional)</span>
+          <input name="minimum" inputmode="decimal" placeholder="1" [(ngModel)]="minimum" />
+        </label>
+      </div>
+      <p class="hint">Con el mínimo o menos, sale en «Se acaba».</p>
+      @if (formError()) {
+        <p class="form-err" role="alert">{{ formError() }}</p>
+      }
+      <div class="acts">
+        @if (editing()) {
+          <button type="button" class="btn danger" (click)="remove()">Quitar</button>
+        }
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="editing.set(undefined)">Cancelar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

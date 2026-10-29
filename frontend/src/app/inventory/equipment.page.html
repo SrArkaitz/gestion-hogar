@@ -1,0 +1,91 @@
+<header class="top">
+  <div>
+    <h1>Inventario</h1>
+    <p class="sub">Electrodomésticos, aparatos y vehículos: su garantía, el manual y la factura a mano.</p>
+  </div>
+  <button type="button" class="btn" (click)="open(null)">Nuevo equipo</button>
+</header>
+
+<app-inventory-tabs />
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+}
+
+<div class="ideas">
+  @for (e of list(); track e.id) {
+    <article class="idea equip" [class.expired]="e.warrantyUntil && e.warrantyUntil < today">
+      <button type="button" class="idea-body" (click)="open(e)" [attr.aria-label]="'Editar ' + e.name">
+        <span class="t">{{ e.name }}</span>
+        @if (e.brand || e.model) {
+          <span class="n">{{ brandModel(e) }}</span>
+        }
+        <span class="n warranty">{{ warrantyText(e) }}</span>
+      </button>
+      @if (e.files.length) {
+        <ul class="files">
+          @for (f of e.files; track f.id) {
+            <li>
+              <a [href]="store.fileUrl(e.id, f.id)" target="_blank" rel="noopener">{{ f.name }}</a>
+              <span class="n">{{ sizeText(f.size) }}</span>
+              <button type="button" class="icon danger" [attr.aria-label]="'Quitar ' + f.name" (click)="removeFile(e, f.id, f.name)">×</button>
+            </li>
+          }
+        </ul>
+      }
+      <div class="idea-acts">
+        <label class="btn ghost sm file">
+          {{ uploading() === e.id ? 'Subiendo…' : 'Adjuntar archivo' }}
+          <input type="file" [accept]="accept" [disabled]="uploading() === e.id" (change)="attach(e, $event)" />
+        </label>
+      </div>
+    </article>
+  } @empty {
+    @if (!loading()) {
+      <p class="empty">Aún no hay equipos. Apunta la lavadora, la caldera o el coche, con su garantía y su manual.</p>
+    }
+  }
+</div>
+
+@if (editing() !== undefined) {
+  <div class="veil" (click)="editing.set(undefined)">
+    <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar equipo' : 'Nuevo equipo'"
+          (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
+      <h3>{{ editing() ? 'Editar equipo' : 'Nuevo equipo' }}</h3>
+      <label>Qué es
+        <input name="name" required [maxlength]="max.name" placeholder="Lavadora" [(ngModel)]="name" />
+      </label>
+      <div class="row two">
+        <label>Marca
+          <input name="brand" [maxlength]="max.text" [(ngModel)]="brand" />
+        </label>
+        <label>Modelo
+          <input name="model" [maxlength]="max.text" [(ngModel)]="model" />
+        </label>
+      </div>
+      <div class="row two">
+        <label>Comprado el
+          <input type="date" name="purchaseDate" [(ngModel)]="purchaseDate" />
+        </label>
+        <label>Garantía hasta
+          <input type="date" name="warrantyUntil" [(ngModel)]="warrantyUntil" />
+        </label>
+      </div>
+      <label>Notas
+        <textarea name="notes" [maxlength]="max.notes" placeholder="Número de serie, dónde se compró…" [(ngModel)]="notes"></textarea>
+      </label>
+      @if (formError()) {
+        <p class="form-err" role="alert">{{ formError() }}</p>
+      }
+      <div class="acts">
+        @if (editing()) {
+          <button type="button" class="btn danger" (click)="remove()">Borrar</button>
+        }
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="editing.set(undefined)">Cancelar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

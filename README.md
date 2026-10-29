@@ -77,7 +77,7 @@ git pull
 docker compose up -d --build
 ```
 
-La base de datos vive en el volumen de Docker `gestion-hogar-data` (`/app/data/hogar.db` dentro del contenedor), las fotos de las recetas en `/app/data/photos` y las copias diarias (base de datos y fotos) en `/app/data/backups`. El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
+La base de datos vive en el volumen de Docker `gestion-hogar-data` (`/app/data/hogar.db` dentro del contenedor), las fotos de las recetas en `/app/data/photos`, los archivos de los equipos (manuales, facturas) en `/app/data/files` y las copias diarias (base de datos, fotos y archivos) en `/app/data/backups`. El puerto se cambia en `docker-compose.yml` (`"8085:3000"`).
 
 ## API
 
@@ -96,7 +96,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/auth/google` | Desconecta Google (solo si la cuenta tiene contraseña) |
 | POST   | `/api/households` | Crea una casa; quien la crea es administrador |
 | GET    | `/api/households/:householdId` | Casa con sus miembros |
-| PATCH  | `/api/households/:householdId` | Cambia el nombre (`name`) o las secciones ocultas (`hiddenModules`: `tareas`, `calendario`, `ideas`, `compra`, `recetas`, `gastos`) (admin) |
+| PATCH  | `/api/households/:householdId` | Cambia el nombre (`name`) o las secciones ocultas (`hiddenModules`: `tareas`, `calendario`, `ideas`, `compra`, `recetas`, `gastos`, `inventario`, `mantenimiento`) (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId` | Cambia el rol de un miembro (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId/color` | Cambia el color de un miembro (`{ "color": "verde" }`): el propio, o cualquiera si eres admin |
 | DELETE | `/api/households/:householdId/members/:userId` | Salir de la casa, o sacar a alguien (admin) |
@@ -146,7 +146,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | PATCH  | `/api/households/:householdId/bills/:id` | Edita o pausa (`active`) |
 | DELETE | `/api/households/:householdId/bills/:id` | Borra la factura; sus pagos se quedan |
 | POST   | `/api/households/:householdId/bills/:id/pay` | Apunta el pago como gasto y la pasa al siguiente vencimiento |
-| GET    | `/api/households/:householdId/calendar?from=AAAA-MM-DD&to=AAAA-MM-DD` | Todo lo que tiene fecha entre dos días (máximo 62): eventos, cumpleaños, tareas, recurrentes, menú y facturas |
+| GET    | `/api/households/:householdId/calendar?from=AAAA-MM-DD&to=AAAA-MM-DD` | Todo lo que tiene fecha entre dos días (máximo 62): eventos, cumpleaños, tareas, recurrentes, menú, facturas, revisiones y fin de garantías |
 | GET    | `/api/households/:householdId/calendar/events/:id` | Un evento |
 | POST   | `/api/households/:householdId/calendar/events` | Crea un evento (`title`, `date`, `time` y `endDate` opcionales, `notes`) |
 | PATCH  | `/api/households/:householdId/calendar/events/:id` | Edita un evento (se envía entero) |
@@ -155,6 +155,24 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/calendar/birthdays` | Crea uno (`name`, `month`, `day`, `year` opcional, `notifyDays`) |
 | PATCH  | `/api/households/:householdId/calendar/birthdays/:id` | Edita uno (se envía entero) |
 | DELETE | `/api/households/:householdId/calendar/birthdays/:id` | Borra uno |
+| GET    | `/api/households/:householdId/inventory/items` | Lo que hay en casa |
+| POST   | `/api/households/:householdId/inventory/items` | Añade una cosa (`name`, `location`, `quantity`, `unit`, `minimum`) |
+| PATCH  | `/api/households/:householdId/inventory/items/:id` | Cambia lo que se envíe (por ejemplo, solo `quantity`) |
+| DELETE | `/api/households/:householdId/inventory/items/:id` | Quita una cosa |
+| GET    | `/api/households/:householdId/inventory/equipment` | Equipos con sus archivos |
+| POST   | `/api/households/:householdId/inventory/equipment` | Crea uno (`name`, `brand`, `model`, `purchaseDate`, `warrantyUntil`, `notes`) |
+| PATCH  | `/api/households/:householdId/inventory/equipment/:id` | Edita uno (se envía entero) |
+| DELETE | `/api/households/:householdId/inventory/equipment/:id` | Borra el equipo y sus archivos |
+| POST   | `/api/households/:householdId/inventory/equipment/:id/files` | Adjunta un archivo: el cuerpo es el PDF o la imagen tal cual (hasta 20 MB) y el nombre va en la cabecera `X-File-Name` |
+| GET    | `/api/households/:householdId/inventory/equipment/:id/files/:fileId` | Descarga el archivo |
+| DELETE | `/api/households/:householdId/inventory/equipment/:id/files/:fileId` | Quita el archivo |
+| GET    | `/api/households/:householdId/maintenance` | Revisiones, de la más próxima a la más lejana |
+| POST   | `/api/households/:householdId/maintenance` | Crea una (`name`, `group`, `interval` en meses o `null`, `nextDue`, `notifyDays`, `notes`) |
+| PATCH  | `/api/households/:householdId/maintenance/:id` | Edita una (se envía entera) |
+| DELETE | `/api/households/:householdId/maintenance/:id` | Borra la revisión y su historial |
+| POST   | `/api/households/:householdId/maintenance/:id/done` | La apunta como hecha (`date`, `notes`, `cost` en céntimos) y calcula la próxima fecha |
+| GET    | `/api/households/:householdId/maintenance/:id/logs` | Historial de una revisión |
+| DELETE | `/api/households/:householdId/maintenance/:id/logs/:logId` | Borra una entrada del historial |
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |

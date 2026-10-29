@@ -33,8 +33,9 @@ export class RemindersService {
       const tasks = await this.sendDueReminders(today);
       const bills = await this.sendBillReminders(today);
       const calendar = await this.sendCalendarReminders(today);
-      if (tasks || bills || calendar) {
-        this.logger.log(`Recordatorios enviados: ${tasks} de tareas, ${bills} de facturas y ${calendar} del calendario`);
+      const maintenance = await this.sendMaintenanceReminders(today);
+      if (tasks || bills || calendar || maintenance) {
+        this.logger.log(`Recordatorios enviados: ${tasks} de tareas, ${bills} de facturas, ${calendar} del calendario y ${maintenance} de mantenimiento`);
       }
     } catch (err) {
       this.logger.error(`No se pudieron enviar los recordatorios: ${(err as Error).message}`);
@@ -104,6 +105,39 @@ export class RemindersService {
       sent += await this.push.send(
         h.members.map((m) => m.userId),
         { title: `Hoy en el calendario · ${h.name}`, body: parts.join(' '), url: `/calendario?casa=${h.id}`, tag: `calendario-${h.id}` },
+      );
+    }
+    return sent;
+  }
+
+  /**
+   * Revisiones: se avisa el día que toca según su antelación, el mismo día y, si ya vencieron,
+   * una vez por semana (no todos los días). Un aviso por casa a todos sus miembros.
+   * @returns cuántos dispositivos han recibido algún aviso.
+   */
+  async sendMaintenanceReminders(today: IsoDate): Promise<number> {
+    const rows = await this.prisma.maintenance.findMany({
+      where: { nextDue: { not: null }, household: householdUses('mantenimiento') },
+      orderBy: { nextDue: 'asc' },
+      include: { household: { select: { id: true, name: true, members: { select: { userId: true } } } } },
+    });
+    const byHousehold = new Map<string, typeof rows>();
+    for (const m of rows) {
+      const days = Math.round((Date.parse(m.nextDue!) - Date.parse(today)) / 86_400_000);
+      const due = days === m.notifyDays || days === 0 || (days < 0 && days % 7 === 0);
+      if (due) byHousehold.set(m.householdId, [...(byHousehold.get(m.householdId) ?? []), m]);
+    }
+    let sent = 0;
+    for (const [householdId, list] of byHousehold) {
+      const { name, members } = list[0].household;
+      sent += await this.push.send(
+        members.map((m) => m.userId),
+        {
+          title: `${list.length === 1 ? 'Revisión pendiente' : `${list.length} revisiones pendientes`} · ${name}`,
+          body: list.map((m) => `${m.name} ${dueText(m.nextDue!, today)}`).join('. ') + '.',
+          url: `/mantenimiento?casa=${householdId}`,
+          tag: `mantenimiento-${householdId}`,
+        },
       );
     }
     return sent;

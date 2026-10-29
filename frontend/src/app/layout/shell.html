@@ -8,12 +8,21 @@
     <a class="brand" routerLink="/">Hogar</a>
     <app-household-switcher />
     <ul>
-      @for (item of nav(); track item.path) {
-        <li>
+      @for (item of nav(); track item.path; let i = $index) {
+        <!-- En el móvil, las que no caben van al menú "Más" (en el PC se ven todas). -->
+        <li [class.in-more]="hasMore() && i >= mobileSlots">
           <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon" /></svg>
             <span>{{ item.label }}</span>
           </a>
+        </li>
+      }
+      @if (hasMore()) {
+        <li class="more-item">
+          <button type="button" [class.active]="inMore()" [attr.aria-expanded]="moreOpen()" aria-controls="more-sheet" (click)="moreOpen.set(!moreOpen())">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" /></svg>
+            <span>Más</span>
+          </button>
         </li>
       }
     </ul>
@@ -22,6 +31,18 @@
       <button type="button" class="link" (click)="logout()">Cerrar sesión</button>
     </div>
   </nav>
+
+  @if (moreOpen()) {
+    <div class="more-veil" (click)="moreOpen.set(false)"></div>
+    <div class="more-sheet" id="more-sheet" role="menu" aria-label="Más secciones" (keydown.escape)="moreOpen.set(false)">
+      @for (item of nav().slice(mobileSlots); track item.path) {
+        <a role="menuitem" [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" (click)="moreOpen.set(false)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon" /></svg>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </div>
+  }
 
   <main class="page">
     <router-outlet />

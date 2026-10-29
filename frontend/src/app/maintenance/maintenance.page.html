@@ -1,0 +1,136 @@
+<header class="top">
+  <div>
+    <h1>Mantenimiento</h1>
+    <p class="sub">Revisiones de la casa y el coche: cuándo tocan y cuándo se hicieron.</p>
+  </div>
+  <button type="button" class="btn" (click)="open(null)">Nueva revisión</button>
+</header>
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+}
+@if (status()) {
+  <div class="notice" role="status">
+    {{ status() }}
+    <button type="button" class="link" aria-label="Cerrar aviso" (click)="status.set('')">×</button>
+  </div>
+}
+
+<div class="ideas">
+  @for (m of list(); track m.id) {
+    <article class="idea maint" [attr.data-state]="state(m)">
+      <button type="button" class="idea-body" (click)="open(m)" [attr.aria-label]="'Editar ' + m.name">
+        <span class="t">{{ m.name }}</span>
+        <span class="n">{{ everyText(m) }}@if (m.lastDone) { · última vez el {{ dateText(m.lastDone) }}}</span>
+      </button>
+      <div class="meta">
+        <span class="due-badge">{{ dueText(m) }}</span>
+        @if (m.group) {
+          <span class="tag">{{ m.group }}</span>
+        }
+      </div>
+      @if (history()?.id === m.id) {
+        <ul class="logs">
+          @for (log of history()!.logs; track log.id) {
+            <li>
+              <span class="when">{{ dateText(log.date) }}</span>
+              <span class="what">
+                @if (log.notes) { <span>{{ log.notes }}</span> }
+                @if (log.cost) { <span class="n">{{ euros(log.cost) }}</span> }
+              </span>
+              <button type="button" class="icon danger" [attr.aria-label]="'Borrar la entrada del ' + dateText(log.date)" (click)="removeLog(m, log)">×</button>
+            </li>
+          } @empty {
+            <li class="empty">Aún no consta ninguna.</li>
+          }
+        </ul>
+      }
+      <div class="idea-acts">
+        <button type="button" class="link" [attr.aria-expanded]="history()?.id === m.id" (click)="toggleHistory(m)">Historial</button>
+        <button type="button" class="btn sm" (click)="startDone(m)">Hecha</button>
+      </div>
+    </article>
+  } @empty {
+    @if (!loading()) {
+      <p class="empty">Aún no hay revisiones. Apunta la ITV, la caldera, los filtros… y os avisaremos cuando toquen.</p>
+    }
+  }
+</div>
+
+@if (doing(); as m) {
+  <div class="veil" (click)="doing.set(null)">
+    <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="'Apuntar ' + m.name" (click)="$event.stopPropagation()"
+          (keydown.escape)="doing.set(null)" (ngSubmit)="saveDone()" autocomplete="off">
+      <h3>{{ m.name }}: hecha</h3>
+      <div class="row two">
+        <label>Cuándo
+          <input type="date" name="doneDate" required [(ngModel)]="doneDate" />
+        </label>
+        <label>Coste (€) <span class="hint">(opcional)</span>
+          <input name="doneCost" inputmode="decimal" placeholder="0,00" [(ngModel)]="doneCost" />
+        </label>
+      </div>
+      <label>Notas
+        <textarea name="doneNotes" [maxlength]="max.notes" placeholder="Taller, qué se cambió…" [(ngModel)]="doneNotes"></textarea>
+      </label>
+      @if (m.interval) {
+        <p class="hint">La próxima se pondrá {{ everyText(m).toLowerCase() }} desde esta fecha.</p>
+      }
+      @if (doneError()) {
+        <p class="form-err" role="alert">{{ doneError() }}</p>
+      }
+      <div class="acts">
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="doing.set(null)">Cancelar</button>
+          <button type="submit" class="btn" [disabled]="!doneDate()">Apuntar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}
+
+@if (editing() !== undefined) {
+  <div class="veil" (click)="editing.set(undefined)">
+    <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar revisión' : 'Nueva revisión'"
+          (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
+      <h3>{{ editing() ? 'Editar revisión' : 'Nueva revisión' }}</h3>
+      <label>Qué
+        <input name="name" required [maxlength]="max.name" placeholder="ITV" [(ngModel)]="name" />
+      </label>
+      <label>Grupo
+        <input name="group" maxlength="40" list="maint-groups" placeholder="Coche" [(ngModel)]="group" />
+        <datalist id="maint-groups">
+          @for (g of groupOptions(); track g) {
+            <option [value]="g"></option>
+          }
+        </datalist>
+      </label>
+      <div class="row">
+        <label>Cada (meses)
+          <input type="number" name="interval" min="1" [max]="max.interval" inputmode="numeric" placeholder="No se repite" [(ngModel)]="interval" />
+        </label>
+        <label>Próxima vez
+          <input type="date" name="nextDue" [(ngModel)]="nextDue" />
+        </label>
+        <label>Avisar (días antes)
+          <input type="number" name="notifyDays" min="0" [max]="max.notice" inputmode="numeric" [(ngModel)]="notifyDays" />
+        </label>
+      </div>
+      <label>Notas
+        <textarea name="notes" [maxlength]="max.notes" [(ngModel)]="notes"></textarea>
+      </label>
+      @if (formError()) {
+        <p class="form-err" role="alert">{{ formError() }}</p>
+      }
+      <div class="acts">
+        @if (editing()) {
+          <button type="button" class="btn danger" (click)="remove()">Borrar</button>
+        }
+        <div class="r">
+          <button type="button" class="btn ghost" (click)="editing.set(undefined)">Cancelar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+}

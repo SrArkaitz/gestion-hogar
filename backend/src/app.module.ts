@@ -10,6 +10,8 @@ import { ExpensesModule } from './expenses/expenses.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
 import { IdeasModule } from './ideas/ideas.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RecipesModule } from './recipes/recipes.module';
@@ -34,6 +36,8 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
     RecipesModule,
     ExpensesModule,
     CalendarModule,
+    InventoryModule,
+    MaintenanceModule,
     BackupModule,
     ...(existsSync(publicDir)
       ? [

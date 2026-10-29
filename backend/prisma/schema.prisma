@@ -37,6 +37,9 @@ model Household {
   bills         Bill[]
   events        CalendarEvent[]
   birthdays     Birthday[]
+  inventory     InventoryItem[]
+  equipment     Equipment[]
+  maintenance   Maintenance[]
 }
 
 model User {
@@ -423,4 +426,90 @@ model Birthday {
   createdAt   DateTime  @default(now())
 
   @@index([householdId])
+}
+
+/// Algo que hay en casa (despensa, limpieza…), con el mínimo a partir del cual "se acaba".
+model InventoryItem {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  location    String?
+  quantity    Float     @default(0)
+  unit        String?
+  minimum     Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId])
+}
+
+/// Electrodoméstico, aparato o vehículo: garantía y papeles (manuales, facturas…).
+model Equipment {
+  id            String          @id @default(uuid())
+  householdId   String
+  household     Household       @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name          String
+  brand         String?
+  model         String?
+  /// AAAA-MM-DD
+  purchaseDate  String?
+  /// AAAA-MM-DD
+  warrantyUntil String?
+  notes         String          @default("")
+  files         EquipmentFile[]
+  createdAt     DateTime        @default(now())
+
+  @@index([householdId])
+}
+
+/// Archivo adjunto a un equipo, guardado en FILES_DIR.
+model EquipmentFile {
+  id          String    @id @default(uuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  /// Nombre original
+  name        String
+  /// Nombre en disco
+  file        String    @unique
+  mime        String
+  size        Int
+  createdAt   DateTime  @default(now())
+
+  @@index([equipmentId])
+}
+
+/// Revisión periódica (ITV, caldera, filtros…).
+model Maintenance {
+  id          String           @id @default(uuid())
+  householdId String
+  household   Household        @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  group       String?
+  /// Cada cuántos meses; null si no se repite
+  interval    Int?
+  /// AAAA-MM-DD
+  nextDue     String?
+  notifyDays  Int              @default(7)
+  notes       String           @default("")
+  logs        MaintenanceLog[]
+  createdAt   DateTime         @default(now())
+
+  @@index([householdId])
+}
+
+/// Una vez que se hizo una revisión.
+model MaintenanceLog {
+  id            String      @id @default(uuid())
+  maintenanceId String
+  maintenance   Maintenance @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
+  /// AAAA-MM-DD
+  date          String
+  notes         String      @default("")
+  /// Coste en céntimos
+  cost          Int?
+  createdById   String
+  createdAt     DateTime    @default(now())
+
+  @@index([maintenanceId, date])
 }

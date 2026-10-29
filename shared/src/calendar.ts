@@ -1,7 +1,7 @@
 import { IsoDate } from './common';
 
 /** De dónde sale cada cosa del calendario. Los dos primeros son del propio calendario. */
-export const CALENDAR_KINDS = ['evento', 'cumple', 'tarea', 'recurrente', 'menu', 'factura'] as const;
+export const CALENDAR_KINDS = ['evento', 'cumple', 'tarea', 'recurrente', 'menu', 'factura', 'mantenimiento', 'garantia'] as const;
 export type CalendarKind = (typeof CALENDAR_KINDS)[number];
 
 export const CALENDAR_KIND_LABELS: Record<CalendarKind, string> = {
@@ -11,6 +11,8 @@ export const CALENDAR_KIND_LABELS: Record<CalendarKind, string> = {
   recurrente: 'Tarea recurrente',
   menu: 'Menú',
   factura: 'Factura',
+  mantenimiento: 'Mantenimiento',
+  garantia: 'Garantía',
 };
 
 export const EVENT_TITLE_MAX = 120;
