@@ -98,6 +98,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/households/:householdId` | Casa con sus miembros |
 | PATCH  | `/api/households/:householdId` | Cambia el nombre (admin) |
 | PATCH  | `/api/households/:householdId/members/:userId` | Cambia el rol de un miembro (admin) |
+| PATCH  | `/api/households/:householdId/members/:userId/color` | Cambia el color de un miembro (`{ "color": "verde" }`): el propio, o cualquiera si eres admin |
 | DELETE | `/api/households/:householdId/members/:userId` | Salir de la casa, o sacar a alguien (admin) |
 | GET    | `/api/households/:householdId/invitations` | Invitaciones pendientes (admin) |
 | POST   | `/api/households/:householdId/invitations` | Crea un enlace de invitación (admin) |
@@ -124,10 +125,12 @@ Cuerpo de una tarea (solo `title` y `priority` son obligatorios al crearla):
   "priority": "alta",
   "due": "2026-11-15",
   "category": "Casa",
-  "assigneeId": "<id de un miembro de la casa>"
+  "assigneeIds": ["<id de un miembro de la casa>", "<id de otro>"]
 }
 ```
 
 - `status`: `por_hacer`, `en_curso` o `hecho`
 - `priority`: `alta`, `media` o `baja`
-- `due`, `category` y `assigneeId` admiten `null` para quitarlos
+- `due` y `category` admiten `null` para quitarlos
+- `assigneeIds`: lista de miembros de la casa; `[]` deja la tarea sin asignar. Al editar, sustituye a la lista anterior
+- Colores de los miembros: `azul`, `verde`, `naranja`, `morado`, `rojo`, `celeste`, `rosa`, `lima`, `amarillo` o `gris`

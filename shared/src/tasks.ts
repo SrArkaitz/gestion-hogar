@@ -20,7 +20,8 @@ export interface Task {
   priority: Priority;
   due: IsoDate | null;
   category: string | null;
-  assigneeId: string | null;
+  /** Personas asignadas (puede haber varias o ninguna). */
+  assigneeIds: string[];
   createdById: string;
   /** Idea de la que salió, si la hay. */
   ideaId: string | null;
@@ -35,5 +36,5 @@ export interface TaskInput {
   priority: Priority;
   due?: IsoDate | null;
   category?: string | null;
-  assigneeId?: string | null;
+  assigneeIds?: string[];
 }

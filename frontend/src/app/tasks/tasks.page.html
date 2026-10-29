@@ -66,6 +66,7 @@
                    [cdkDragStartDelay]="{ touch: 250, mouse: 0 }"
                    [class.done]="status === 'hecho'"
                    [attr.data-p]="task.priority"
+                   [style.--stripe]="stripe(task)"
                    tabindex="0"
                    [attr.aria-label]="task.title + ', prioridad ' + priorityLabels[task.priority]"
                    (click)="open(task)"
@@ -82,9 +83,12 @@
               @if (task.category) {
                 <span class="tag">{{ task.category }}</span>
               }
-              @if (task.assigneeId) {
-                <span class="avatar" [title]="memberNames().get(task.assigneeId) ?? ''"
-                      [attr.aria-label]="'Asignada a ' + (memberNames().get(task.assigneeId) ?? '')">{{ initials(task.assigneeId) }}</span>
+              @if (task.assigneeIds.length) {
+                <span class="avatars" role="img" [attr.aria-label]="assigneesLabel(task)">
+                  @for (m of assignees(task); track m.id) {
+                    <span class="avatar" [attr.data-c]="m.color" [title]="m.name" aria-hidden="true">{{ initials(m.name) }}</span>
+                  }
+                </span>
               }
             </div>
           </article>

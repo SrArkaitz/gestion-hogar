@@ -29,6 +29,14 @@
       <ul class="members">
         @for (m of h.members; track m.id) {
           <li>
+            @if (m.id === me() || isAdmin()) {
+              <button type="button" class="swatch" [attr.data-c]="m.color"
+                      [attr.aria-expanded]="pickingColor() === m.id"
+                      [attr.aria-label]="'Color de ' + m.name + ': ' + colorLabels[m.color] + '. Cambiar'"
+                      (click)="pickingColor.set(pickingColor() === m.id ? null : m.id)"></button>
+            } @else {
+              <span class="swatch" [attr.data-c]="m.color" [title]="colorLabels[m.color]"></span>
+            }
             <div class="who">
               <span class="t">{{ m.name }}@if (m.id === me()) { <span class="you">(tú)</span> }</span>
               <span class="n">{{ m.email }}</span>
@@ -40,6 +48,14 @@
                   {{ m.role === 'admin' ? 'Quitar admin' : 'Hacer admin' }}
                 </button>
                 <button type="button" class="link danger" (click)="removeMember(m)">Sacar</button>
+              </div>
+            }
+            @if (pickingColor() === m.id) {
+              <div class="palette" role="group" [attr.aria-label]="'Color de ' + m.name">
+                @for (c of colors; track c) {
+                  <button type="button" class="swatch" [attr.data-c]="c" [attr.aria-pressed]="m.color === c"
+                          [attr.aria-label]="colorLabels[c]" [title]="colorLabels[c]" (click)="setColor(m, c)"></button>
+                }
               </div>
             }
           </li>
@@ -101,6 +117,14 @@
     <section class="panel">
       <h2>Cuenta</h2>
       <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
+      <div class="theme-row">
+        <span class="n" id="theme-lbl">Tema en este dispositivo</span>
+        <div class="seg" role="group" aria-labelledby="theme-lbl">
+          @for (t of themes; track t) {
+            <button type="button" [attr.aria-pressed]="theme.theme() === t" (click)="theme.set(t)">{{ themeLabels[t] }}</button>
+          }
+        </div>
+      </div>
       @if (googleError()) {
         <p class="form-err" role="alert">{{ googleError() }}</p>
       }

@@ -1,5 +1,13 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Household, HouseholdSummary, NAME_MAX_LENGTH, Role, ROLES } from '@hogar/shared';
+import {
+  Household,
+  HouseholdSummary,
+  MEMBER_COLORS,
+  MemberColor,
+  NAME_MAX_LENGTH,
+  Role,
+  ROLES,
+} from '@hogar/shared';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -11,7 +19,7 @@ export class HouseholdsService {
   async create(userId: string, body: unknown): Promise<HouseholdSummary> {
     const name = requiredText(asObject(body)['name'], 'El nombre de la casa', NAME_MAX_LENGTH);
     const household = await this.prisma.household.create({
-      data: { name, members: { create: { userId, role: 'admin' } } },
+      data: { name, members: { create: { userId, role: 'admin', color: MEMBER_COLORS[0] } } },
     });
     return { id: household.id, name: household.name, role: 'admin' };
   }
@@ -29,6 +37,7 @@ export class HouseholdsService {
         name: m.user.name,
         email: m.user.email,
         role: m.role as Role,
+        color: m.color as MemberColor,
         joinedAt: m.joinedAt.toISOString(),
       })),
     };
@@ -47,6 +56,20 @@ export class HouseholdsService {
     await this.prisma.householdMember.update({
       where: { householdId_userId: { householdId, userId: targetId } },
       data: { role },
+    });
+    return this.get(householdId);
+  }
+
+  /** Cambia el color de un miembro. Cada uno elige el suyo; los administradores, el de cualquiera. */
+  async setColor(householdId: string, actor: { id: string; role: Role }, targetId: string, body: unknown): Promise<Household> {
+    if (actor.id !== targetId && actor.role !== 'admin') {
+      throw new ForbiddenException('Solo puedes cambiar tu color');
+    }
+    const color = oneOf(asObject(body)['color'], MEMBER_COLORS, 'Color');
+    await this.findMember(householdId, targetId);
+    await this.prisma.householdMember.update({
+      where: { householdId_userId: { householdId, userId: targetId } },
+      data: { color },
     });
     return this.get(householdId);
   }
@@ -75,8 +98,8 @@ export class HouseholdsService {
     }
     await this.prisma.$transaction([
       this.prisma.householdMember.delete({ where: { householdId_userId: { householdId, userId: targetId } } }),
-      // Sus tareas de esta casa se quedan sin asignar.
-      this.prisma.task.updateMany({ where: { householdId, assigneeId: targetId }, data: { assigneeId: null } }),
+      // Deja de estar asignada a las tareas de esta casa.
+      this.prisma.taskAssignee.deleteMany({ where: { userId: targetId, task: { householdId } } }),
     ]);
     return false;
   }

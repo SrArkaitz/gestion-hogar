@@ -41,7 +41,7 @@ model User {
   sessions      Session[]
   invitations   Invitation[] @relation("InvitationCreatedBy")
   tasksCreated  Task[]       @relation("TaskCreatedBy")
-  tasksAssigned Task[]       @relation("TaskAssignee")
+  tasksAssigned TaskAssignee[]
   ideas         Idea[]
 }
 
@@ -53,6 +53,8 @@ model HouseholdMember {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// admin | miembro
   role        String    @default("miembro")
+  /// Uno de MEMBER_COLORS (@hogar/shared)
+  color       String    @default("azul")
   joinedAt    DateTime  @default(now())
 
   @@id([householdId, userId])
@@ -88,6 +90,17 @@ model Invitation {
 
 // ---------- Tareas ----------
 
+/// Personas asignadas a una tarea (puede haber varias).
+model TaskAssignee {
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@index([userId])
+}
+
 model Task {
   id          String    @id @default(uuid())
   householdId String
@@ -101,8 +114,7 @@ model Task {
   /// AAAA-MM-DD
   due         String?
   category    String?
-  assigneeId  String?
-  assignee    User?     @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  assignees   TaskAssignee[]
   createdById String
   createdBy   User      @relation("TaskCreatedBy", fields: [createdById], references: [id])
   idea        Idea?

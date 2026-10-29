@@ -1,11 +1,23 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CreatedInvitation, Household, Invitation, INVITATION_DAYS, Member, NAME_MAX_LENGTH, ROLE_LABELS } from '@hogar/shared';
+import {
+  CreatedInvitation,
+  Household,
+  Invitation,
+  INVITATION_DAYS,
+  Member,
+  MEMBER_COLOR_LABELS,
+  MEMBER_COLORS,
+  MemberColor,
+  NAME_MAX_LENGTH,
+  ROLE_LABELS,
+} from '@hogar/shared';
 import { GoogleButton } from '../auth/google-button';
 import { errorMessage, googleErrorMessage } from '../core/errors';
 import { HouseholdsService } from '../core/households.service';
 import { SessionService } from '../core/session.service';
+import { THEME_LABELS, THEMES, ThemeService } from '../core/theme.service';
 
 /** Ajustes de la casa activa: nombre, miembros, invitaciones, otras casas y cuenta. */
 @Component({
@@ -16,6 +28,9 @@ import { SessionService } from '../core/session.service';
 })
 export class HouseholdPage {
   protected readonly session = inject(SessionService);
+  protected readonly theme = inject(ThemeService);
+  protected readonly themes = THEMES;
+  protected readonly themeLabels = THEME_LABELS;
   private readonly api = inject(HouseholdsService);
   private readonly router = inject(Router);
 
@@ -26,6 +41,10 @@ export class HouseholdPage {
   protected readonly roleLabels = ROLE_LABELS;
   protected readonly nameMax = NAME_MAX_LENGTH;
   protected readonly invitationDays = INVITATION_DAYS;
+  protected readonly colors = MEMBER_COLORS;
+  protected readonly colorLabels = MEMBER_COLOR_LABELS;
+  /** Miembro cuya paleta de colores está abierta. */
+  protected readonly pickingColor = signal<string | null>(null);
 
   protected readonly household = signal<Household | null>(null);
   protected readonly invitations = signal<Invitation[]>([]);
@@ -67,6 +86,13 @@ export class HouseholdPage {
     const role = member.role === 'admin' ? 'miembro' : 'admin';
     await this.run(`${member.name} ahora es ${ROLE_LABELS[role].toLowerCase()}.`, async (id) => {
       this.household.set(await this.api.setRole(id, member.id, role));
+    });
+  }
+
+  protected async setColor(member: Member, color: MemberColor) {
+    await this.run('', async (id) => {
+      this.household.set(await this.api.setColor(id, member.id, color));
+      this.pickingColor.set(null);
     });
   }
 

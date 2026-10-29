@@ -3,6 +3,39 @@ export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = { admin: 'Administrador', miembro: 'Miembro' };
 
+/** Colores que puede elegir cada persona en una casa (se ven en sus tarjetas y en su avatar). */
+export const MEMBER_COLORS = [
+  'azul',
+  'verde',
+  'naranja',
+  'morado',
+  'rojo',
+  'celeste',
+  'rosa',
+  'lima',
+  'amarillo',
+  'gris',
+] as const;
+export type MemberColor = (typeof MEMBER_COLORS)[number];
+
+export const MEMBER_COLOR_LABELS: Record<MemberColor, string> = {
+  azul: 'Azul',
+  verde: 'Verde',
+  naranja: 'Naranja',
+  morado: 'Morado',
+  rojo: 'Rojo',
+  celeste: 'Celeste',
+  rosa: 'Rosa',
+  lima: 'Lima',
+  amarillo: 'Amarillo',
+  gris: 'Gris',
+};
+
+/** Primer color que nadie usa en la casa; si están todos cogidos, se repiten en orden. */
+export function nextMemberColor(used: readonly string[]): MemberColor {
+  return MEMBER_COLORS.find((c) => !used.includes(c)) ?? MEMBER_COLORS[used.length % MEMBER_COLORS.length];
+}
+
 export const PASSWORD_MIN_LENGTH = 8;
 export const NAME_MAX_LENGTH = 60;
 
@@ -55,6 +88,7 @@ export interface Member {
   name: string;
   email: string;
   role: Role;
+  color: MemberColor;
   joinedAt: string;
 }
 

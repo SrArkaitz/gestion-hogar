@@ -1,5 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatedInvitation, HouseholdSummary, Invitation, INVITATION_DAYS, InvitationPreview, Role } from '@hogar/shared';
+import {
+  CreatedInvitation,
+  HouseholdSummary,
+  Invitation,
+  INVITATION_DAYS,
+  InvitationPreview,
+  nextMemberColor,
+  Role,
+} from '@hogar/shared';
 import { hashToken, newToken } from '../auth/sessions.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -60,7 +68,9 @@ export class InvitationsService {
       // Se marca como usada solo si nadie la ha usado entre medias.
       const used = await tx.invitation.updateMany({ where: { id: inv.id, usedAt: null }, data: { usedAt: new Date() } });
       if (used.count === 0) throw new NotFoundException(INVALID);
-      await tx.householdMember.create({ data: { householdId: inv.householdId, userId, role: 'miembro' } });
+      const members = await tx.householdMember.findMany({ where: { householdId: inv.householdId }, select: { color: true } });
+      const color = nextMemberColor(members.map((m) => m.color));
+      await tx.householdMember.create({ data: { householdId: inv.householdId, userId, role: 'miembro', color } });
     });
     return { id: inv.household.id, name: inv.household.name, role: 'miembro' };
   }

@@ -1,6 +1,7 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import {
+  Member,
   Priority,
   PRIORITIES,
   PRIORITY_LABELS,
@@ -47,7 +48,6 @@ export class TasksPage {
   private readonly householdId = computed(() => this.session.household()?.id);
   private readonly today = todayIso();
 
-  protected readonly memberNames = computed(() => new Map(this.store.members().map((m) => [m.id, m.name])));
 
   /** Categorías usadas en la casa, para el filtro y las sugerencias. */
   protected readonly categories = computed(() =>
@@ -64,9 +64,9 @@ export class TasksPage {
     return this.store.tasks().filter(
       (t) =>
         (person === 'todas' ||
-          (person === 'mias' && t.assigneeId === me) ||
-          (person === 'nadie' && !t.assigneeId) ||
-          t.assigneeId === person) &&
+          (person === 'mias' && !!me && t.assigneeIds.includes(me)) ||
+          (person === 'nadie' && !t.assigneeIds.length) ||
+          t.assigneeIds.includes(person)) &&
         (!category || t.category === category) &&
         (!priority || t.priority === priority),
     );
@@ -106,8 +106,26 @@ export class TasksPage {
     return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', ...(otherYear && { year: 'numeric' }) });
   }
 
-  protected initials(userId: string): string {
-    const name = this.memberNames().get(userId) ?? '?';
+  /** Personas asignadas a la tarea, en el orden de la casa. */
+  protected assignees(task: Task): Member[] {
+    return this.store.members().filter((m) => task.assigneeIds.includes(m.id));
+  }
+
+  /** Lateral de la tarjeta: el color de cada persona asignada, a partes iguales. */
+  protected stripe(task: Task): string | null {
+    const colors = this.assignees(task).map((m) => `var(--c-${m.color})`);
+    if (colors.length <= 1) return colors[0] ?? null;
+    const step = 100 / colors.length;
+    const stops = colors.map((c, i) => `${c} ${i * step}% ${(i + 1) * step}%`);
+    return `linear-gradient(to bottom, ${stops.join(', ')})`;
+  }
+
+  protected assigneesLabel(task: Task): string {
+    const names = this.assignees(task).map((m) => m.name);
+    return 'Asignada a ' + (names.length > 1 ? names.slice(0, -1).join(', ') + ' y ' + names.at(-1) : names[0]);
+  }
+
+  protected initials(name: string): string {
     return name
       .split(/\s+/)
       .slice(0, 2)

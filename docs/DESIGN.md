@@ -21,7 +21,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 | # | Módulo | Qué hace |
 |---|--------|----------|
-| 1 | **Tareas** | Tablero con columnas, prioridad (alta, media, baja), fecha límite y persona asignada. Incluye **tareas recurrentes** que se crean solas cada cierto tiempo. |
+| 1 | **Tareas** | Tablero con columnas, prioridad (alta, media, baja), fecha límite y personas asignadas. Incluye **tareas recurrentes** que se crean solas cada cierto tiempo. |
 | 2 | **Ideas** | Espacio aparte para apuntar ideas y valorarlas. Una idea **aceptada** pasa a ser una tarea con un botón. |
 | 3 | **Lista de la compra** | Lista compartida para usar en el súper desde el móvil, marcando lo que se va cogiendo. |
 | 4 | **Recetas y menús** | Recetario de platos y menú semanal opcional que manda los ingredientes a la lista de la compra. |
@@ -45,16 +45,19 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Cuenta:** nombre, correo y contraseña (mínimo 8 caracteres), o con Google. El registro está abierto a cualquiera.
 - **Con Google:** entrar con Google crea la cuenta si no existe (sin contraseña). Si ya hay una cuenta con contraseña y el mismo correo, no se une sola, porque el registro no verifica correos y otra persona podría haberla creado. Se conecta desde *Casa → Cuenta* con la sesión iniciada. Se puede desconectar si la cuenta tiene contraseña.
 - **Casas:** cualquiera puede crear las que quiera. Al registrarse sin invitación se pide crear la primera.
+- **Color de cada persona:** cada miembro tiene un color en cada casa, de una paleta de 10 (la de las etiquetas de Trello). Al entrar recibe el primero libre. Cada uno cambia el suyo desde *Casa → Miembros*; los administradores, el de cualquiera.
 - **Roles por casa:** *administrador* o *miembro*. Una misma persona puede ser administradora en una casa y miembro en otra.
 - **Administradores:** cambian el nombre de la casa, invitan, sacan a miembros y nombran o quitan administradores.
 - **Invitaciones:** enlace de un solo uso que caduca en 7 días y se puede anular. Quien lo abre sin cuenta puede registrarse y vuelve a la invitación para aceptarla.
-- **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, sus tareas de esa casa quedan sin asignar.
+- **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, deja de estar asignado a las tareas de esa casa.
+- **Tema:** claro, oscuro o el del sistema, desde *Casa → Cuenta*. Se guarda en cada dispositivo (no en la cuenta), así el móvil y el PC pueden tener uno distinto.
 - **Casa activa:** se elige en un selector (barra lateral en PC, barra superior en móvil) y se recuerda en el navegador.
 
 ### 3.1 Tareas
 
 - **Columnas:** Por hacer, En curso y Hecho. Se mueven arrastrando, también en el móvil.
-- **Campos:** título, notas, prioridad, fecha límite (opcional), persona asignada (opcional) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
+- **Campos:** título, notas, prioridad, fecha límite (opcional), personas asignadas (ninguna, una o varias) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
+- **Tarjetas:** el lateral lleva el color de la persona asignada; si hay varias, se reparte a partes iguales entre sus colores (con dos, mitad y mitad). Sin nadie asignado, el lateral es gris. La prioridad se ve en su etiqueta.
 - **Orden:** dentro de cada columna, primero por prioridad y luego por antigüedad. Las tareas vencidas se marcan.
 - **Tareas recurrentes:** una plantilla (título, prioridad, asignada, categoría) más una frecuencia (cada N días, semanas o meses, o días concretos de la semana). Un proceso en el servidor crea la tarea cuando toca. Si la anterior sigue sin hacer, no se duplica.
 

@@ -37,6 +37,18 @@ export class HouseholdsController {
     return this.households.setRole(id, userId, body);
   }
 
+  @Patch(':householdId/members/:userId/color')
+  @UseGuards(HouseholdGuard)
+  setColor(
+    @Param('householdId') id: string,
+    @Param('userId') userId: string,
+    @Req() req: AppRequest,
+    @Body() body: unknown,
+  ): Promise<Household> {
+    const actor = { id: req.user!.id, role: req.membership!.role };
+    return this.households.setColor(id, actor, userId, body);
+  }
+
   /** Salir de la casa (el propio usuario) o sacar a alguien (administradores). */
   @Delete(':householdId/members/:userId')
   @UseGuards(HouseholdGuard)

@@ -7,7 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 const CATEGORY_MAX = 40;
 const NOTES_MAX = 2000;
 
-type Row = Prisma.TaskGetPayload<{ include: { idea: { select: { id: true } } } }>;
+const include = { idea: { select: { id: true } }, assignees: { select: { userId: true } } } as const;
+type Row = Prisma.TaskGetPayload<{ include: typeof include }>;
 
 const toTask = (r: Row): Task => ({
   id: r.id,
@@ -17,14 +18,12 @@ const toTask = (r: Row): Task => ({
   priority: r.priority as Priority,
   due: r.due,
   category: r.category,
-  assigneeId: r.assigneeId,
+  assigneeIds: r.assignees.map((a) => a.userId),
   createdById: r.createdById,
   ideaId: r.idea?.id ?? null,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
 });
-
-const include = { idea: { select: { id: true } } } as const;
 
 /** Tareas de una casa. El HouseholdGuard ya ha comprobado que el usuario es miembro. */
 @Injectable()
@@ -43,7 +42,7 @@ export class TasksService {
     body: unknown,
     db: Prisma.TransactionClient = this.prisma,
   ): Promise<Task> {
-    const input = await this.validate(householdId, body, false);
+    const { assigneeIds, ...input } = await this.validate(householdId, body, false);
     const row = await db.task.create({
       data: {
         householdId,
@@ -54,7 +53,7 @@ export class TasksService {
         priority: input.priority!,
         due: input.due ?? null,
         category: input.category ?? null,
-        assigneeId: input.assigneeId ?? null,
+        assignees: { create: (assigneeIds ?? []).map((userId) => ({ userId })) },
       },
       include,
     });
@@ -64,8 +63,9 @@ export class TasksService {
   /** Cambia solo los campos enviados (sirve también para mover de columna). */
   async update(householdId: string, id: string, body: unknown): Promise<Task> {
     await this.find(householdId, id);
-    const patch = await this.validate(householdId, body, true);
-    const row = await this.prisma.task.update({ where: { id }, data: patch, include });
+    const { assigneeIds, ...patch } = await this.validate(householdId, body, true);
+    const assignees = assigneeIds && { deleteMany: {}, create: assigneeIds.map((userId) => ({ userId })) };
+    const row = await this.prisma.task.update({ where: { id }, data: { ...patch, assignees }, include });
     return toTask(row);
   }
 
@@ -105,15 +105,17 @@ export class TasksService {
       if (category.length > CATEGORY_MAX) throw new BadRequestException(`La categoría no puede pasar de ${CATEGORY_MAX} caracteres`);
       out.category = category || null;
     }
-    if (b['assigneeId'] !== undefined) {
-      const assigneeId = b['assigneeId'] || null;
-      if (assigneeId !== null) {
-        const member =
-          typeof assigneeId === 'string' &&
-          (await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId, userId: assigneeId } } }));
-        if (!member) throw new BadRequestException('Solo se puede asignar a miembros de la casa');
+    if (b['assigneeIds'] !== undefined) {
+      const ids = b['assigneeIds'];
+      if (!Array.isArray(ids) || !ids.every((id) => typeof id === 'string')) {
+        throw new BadRequestException('assigneeIds tiene que ser una lista de usuarios');
       }
-      out.assigneeId = assigneeId as string | null;
+      const unique = [...new Set(ids as string[])];
+      const members = unique.length
+        ? await this.prisma.householdMember.count({ where: { householdId, userId: { in: unique } } })
+        : 0;
+      if (members !== unique.length) throw new BadRequestException('Solo se puede asignar a miembros de la casa');
+      out.assigneeIds = unique;
     }
     return out;
   }

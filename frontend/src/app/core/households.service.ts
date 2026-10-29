@@ -6,6 +6,7 @@ import {
   HouseholdSummary,
   Invitation,
   InvitationPreview,
+  MemberColor,
   Role,
 } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
@@ -30,6 +31,10 @@ export class HouseholdsService {
 
   setRole(id: string, userId: string, role: Role): Promise<Household> {
     return firstValueFrom(this.http.patch<Household>(`${this.api}/${id}/members/${userId}`, { role }));
+  }
+
+  setColor(id: string, userId: string, color: MemberColor): Promise<Household> {
+    return firstValueFrom(this.http.patch<Household>(`${this.api}/${id}/members/${userId}/color`, { color }));
   }
 
   /** Sacar a alguien o salir uno mismo. */

@@ -41,17 +41,20 @@ import {
           </div>
         </div>
 
-        <div class="row">
+        <div>
+          <span class="lbl" id="assignees-lbl">Asignada a</span>
+          <div class="people" role="group" aria-labelledby="assignees-lbl">
+            @for (m of members(); track m.id) {
+              <button type="button" [attr.data-c]="m.color" [attr.aria-pressed]="assigneeIds().includes(m.id)" (click)="toggleAssignee(m.id)">
+                <span class="dot"></span>{{ m.name }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="row two">
           <label>Fecha límite
             <input type="date" name="due" [(ngModel)]="due" />
-          </label>
-          <label>Asignada a
-            <select name="assignee" [(ngModel)]="assigneeId">
-              <option value="">Nadie</option>
-              @for (m of members(); track m.id) {
-                <option [value]="m.id">{{ m.name }}</option>
-              }
-            </select>
           </label>
           <label>Categoría
             <input name="category" maxlength="40" list="task-categories" autocomplete="off" [(ngModel)]="category" />
@@ -111,7 +114,7 @@ export class TaskDialog implements OnInit {
   protected readonly notes = signal('');
   protected readonly priority = signal<Priority>('media');
   protected readonly due = signal('');
-  protected readonly assigneeId = signal('');
+  protected readonly assigneeIds = signal<string[]>([]);
   protected readonly category = signal('');
   protected readonly status = signal<TaskStatus>('por_hacer');
   protected readonly busy = signal(false);
@@ -127,7 +130,7 @@ export class TaskDialog implements OnInit {
     this.notes.set(t?.notes ?? '');
     this.priority.set(t?.priority ?? 'media');
     this.due.set(t?.due ?? '');
-    this.assigneeId.set(t?.assigneeId ?? '');
+    this.assigneeIds.set(t?.assigneeIds ?? []);
     this.category.set(t?.category ?? '');
     this.status.set(t?.status ?? this.initialStatus());
   }
@@ -148,9 +151,13 @@ export class TaskDialog implements OnInit {
       priority: this.priority(),
       status: this.status(),
       due: this.due() || null,
-      assigneeId: this.assigneeId() || null,
+      assigneeIds: this.assigneeIds(),
       category: this.category().trim() || null,
     });
+  }
+
+  protected toggleAssignee(id: string) {
+    this.assigneeIds.update((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
   }
 
   protected askDelete() {
