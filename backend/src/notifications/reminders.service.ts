@@ -9,6 +9,8 @@ import { PushService } from './push.service';
 interface Digest {
   householdId: string;
   householdName: string;
+  /** Lleva alguna del hogar (si no, son todas personales y el aviso abre esa pestaña). */
+  house: boolean;
   today: string[];
   late: string[];
 }
@@ -163,9 +165,10 @@ export class RemindersService {
         const key = `${userId}|${task.householdId}`;
         let digest = digests.get(key);
         if (!digest) {
-          digest = { householdId: task.householdId, householdName: task.household.name, today: [], late: [] };
+          digest = { householdId: task.householdId, householdName: task.household.name, house: false, today: [], late: [] };
           digests.set(key, digest);
         }
+        if (!task.personal) digest.house = true;
         (task.due === today ? digest.today : digest.late).push(task.title);
       }
     }
@@ -180,7 +183,7 @@ export class RemindersService {
       sent += await this.push.send([userId], {
         title: `${total === 1 ? '1 tarea pendiente' : `${total} tareas pendientes`} · ${d.householdName}`,
         body: parts.join(' '),
-        url: `/tareas?casa=${d.householdId}`,
+        url: `${d.house ? '/tareas/hogar' : '/tareas'}?casa=${d.householdId}`,
         tag: `recordatorio-${d.householdId}`,
       });
     }

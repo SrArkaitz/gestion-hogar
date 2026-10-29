@@ -107,7 +107,7 @@ export class CalendarService {
       });
       for (const t of tasks) {
         const people = t.personal ? 'Personal' : t.assignees.map((a) => a.user.name.split(' ')[0]).join(', ');
-        items.push(item('tarea', t.due!, t.title, t.id, t.personal ? '/tareas/personales' : '/tareas', {
+        items.push(item('tarea', t.due!, t.title, t.id, t.personal ? '/tareas' : '/tareas/hogar', {
           detail: [TASK_STATUS_LABELS[t.status as TaskStatus], people].filter(Boolean).join(' · '),
           done: t.status === 'hecho',
         }));

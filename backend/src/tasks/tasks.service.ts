@@ -176,7 +176,7 @@ export class TasksService implements OnApplicationBootstrap {
       await this.push.send(added, {
         title: `${actor?.name ?? 'Alguien'} te ha asignado una tarea`,
         body: task.title,
-        url: `/tareas?casa=${householdId}`,
+        url: `/tareas/hogar?casa=${householdId}`,
         tag: `asignada-${task.id}`,
       });
     } catch (err) {

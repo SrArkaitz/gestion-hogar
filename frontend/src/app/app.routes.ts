@@ -18,9 +18,10 @@ export const routes: Routes = [
     canActivate: [authGuard, householdGuard],
     children: [
       { path: '', pathMatch: 'full', canActivate: [homeGuard], children: [] },
-      { path: 'tareas', canActivate: [sectionGuard('tareas')], loadChildren: () => import('./tasks/tasks.routes').then((m) => m.TASKS_ROUTES) },
+      // Tareas lleva dentro Ideas, que se puede usar aunque la casa oculte las tareas: cada pestaña tiene su guard.
+      { path: 'tareas', loadChildren: () => import('./tasks/tasks.routes').then((m) => m.TASKS_ROUTES) },
       { path: 'calendario', canActivate: [sectionGuard('calendario')], loadChildren: () => import('./calendar/calendar.routes').then((m) => m.CALENDAR_ROUTES) },
-      { path: 'ideas', canActivate: [sectionGuard('ideas')], loadChildren: () => import('./ideas/ideas.routes').then((m) => m.IDEAS_ROUTES) },
+      { path: 'ideas', redirectTo: 'tareas/ideas' },
       { path: 'recetas', canActivate: [sectionGuard('recetas')], loadChildren: () => import('./recipes/recipes.routes').then((m) => m.RECIPES_ROUTES) },
       { path: 'gastos', canActivate: [sectionGuard('gastos')], loadChildren: () => import('./expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES) },
       { path: 'inventario', canActivate: [sectionGuard('inventario')], loadChildren: () => import('./inventory/inventory.routes').then((m) => m.INVENTORY_ROUTES) },

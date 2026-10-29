@@ -56,14 +56,14 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.1 Tareas
 
-- **Dos pestañas:** *Del hogar*, las de la casa, que ven todos sus miembros; y *Personales*, las tuyas, que solo ves tú. Funcionan igual (columnas, prioridad, fecha, categoría). Una tarea personal no se asigna a nadie más: es de quien la crea y lleva su color. Tampoco pasa de una pestaña a la otra.
+- **Tres pestañas, en este orden:** *Personales* (`/tareas`, la que se abre al entrar), las tuyas, que solo ves tú; *Del hogar* (`/tareas/hogar`), las de la casa, que ven todos sus miembros; e *Ideas* (`/tareas/ideas`, ver 3.2). Ideas ya no tiene entrada propia en el menú; si una casa oculta las tareas pero usa las ideas, «Tareas» lleva a ellas. Los dos tableros funcionan igual (columnas, prioridad, fecha, categoría). Una tarea personal no se asigna a nadie más: es de quien la crea y lleva su color. Tampoco pasa de una pestaña a la otra.
 - **Personales:** salen en tu calendario y en tu recordatorio de las 9:00, nunca en los de los demás. Si sales de una casa, se borran tus personales de esa casa. Las recurrentes son solo del hogar.
 - **Columnas:** Por hacer, En curso y Hecho. Se mueven arrastrando, también en el móvil.
 - **Campos:** título, notas, prioridad, fecha límite (opcional), personas asignadas (ninguna, una o varias) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
 - **Tarjetas:** el lateral lleva el color de la persona asignada; si hay varias, se reparte a partes iguales entre sus colores (con dos, mitad y mitad). Sin nadie asignado, el lateral es gris. La prioridad se ve en su etiqueta.
 - **Orden:** dentro de cada columna, primero por prioridad y luego por antigüedad. Las tareas vencidas se marcan.
 - **Archivar:** al pasar a Hecho se apunta cuándo. A los 7 días en Hecho se archivan solas (cada noche a las 00:05 y al arrancar el servidor), para que el tablero no se llene. Se pueden archivar antes a mano: una desde su diálogo o todas las hechas del tablero con *Archivar todas*. En *Ver archivadas* (al pie de Hecho) se recuperan, y vuelven a Hecho con la semana de nuevo, o se borran. Sacar una tarea de Hecho la deja sin fecha de hecha.
-- **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Recurrentes*.
+- **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Del hogar → Recurrentes*.
   - **Fecha de inicio:** en semanas y meses marca el ritmo (el mismo día de la semana o del mes; si el mes no tiene ese día, el último).
   - **Cuándo se crean:** cada noche a las 00:01 (y al arrancar el servidor) se crean las que tocan ese día, con ese día como fecha límite. Si se crea una que empieza hoy, su tarea aparece ya.
   - **Sin duplicados:** si la tarea anterior de la misma plantilla sigue sin hacer, ese día se salta. Si el servidor estuvo apagado varios días, se crea una sola tarea, no una por día perdido.
@@ -81,6 +81,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.2 Ideas
 
+- Es la tercera pestaña de *Tareas*. Se puede ocultar por separado en *Casa → Secciones*.
 - **Campos:** título, descripción, categoría (casa, viaje, compra grande, proyecto…), quién la propone y fecha.
 - **Estados:** Nueva, En valoración, Aceptada y Descartada.
 - **Aceptar:** se elige la prioridad y se crea una tarea en «Por hacer» con el título, la descripción (como notas) y la categoría de la idea, que queda enlazada a ella. Una idea aceptada ya no cambia de estado; si su tarea se borra, la idea sigue como aceptada.
@@ -247,3 +248,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Recetas públicas por defecto: todas las casas ven las que no están marcadas como privadas, sin poder cambiarlas. Para usarlas en el menú se copian a la casa. |
 | 2026-10-29 | Tareas personales: viven en la misma casa y el mismo tablero, en su propia pestaña, pero solo las ve quien las crea. |
 | 2026-10-30 | Las tareas hechas se archivan solas a los 7 días (o antes, a mano) y se pueden recuperar. |
+| 2026-10-30 | Tareas con tres pestañas: Personales (la primera), Del hogar e Ideas. Ideas deja de tener entrada propia en el menú. |

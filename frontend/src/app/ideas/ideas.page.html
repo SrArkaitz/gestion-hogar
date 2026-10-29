@@ -1,10 +1,12 @@
 <header class="top">
   <div>
-    <h1>Ideas</h1>
-    <p class="sub">Apuntadlas, valoradlas y convertid las buenas en tareas.</p>
+    <h1>Tareas</h1>
+    <p class="sub">Ideas: apuntadlas, valoradlas y convertid las buenas en tareas.</p>
   </div>
   <button type="button" class="btn" (click)="editing.set(null)">Nueva idea</button>
 </header>
+
+<app-tasks-tabs />
 
 <div class="seg" role="tablist" aria-label="Estado de las ideas">
   @for (t of tabs; track t.id) {
@@ -19,7 +21,7 @@
 }
 @if (notice()) {
   <div class="notice" role="status">
-    {{ notice() }} @if (usesTasks()) { <a routerLink="/tareas">Ir a tareas</a> }
+    {{ notice() }} @if (usesTasks()) { <a routerLink="/tareas/hogar">Ir a tareas</a> }
     <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
   </div>
 }
@@ -60,7 +62,7 @@
           @case ('aceptada') {
             @if (idea.taskId) {
               @if (usesTasks()) {
-                <a class="link" routerLink="/tareas">Ver en tareas</a>
+                <a class="link" routerLink="/tareas/hogar">Ver en tareas</a>
               }
             } @else {
               <span class="n">Su tarea se ha borrado</span>

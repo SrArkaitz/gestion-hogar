@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Idea, IDEA_STATUS_LABELS, IdeaInput, IdeaStatus, PRIORITIES, PRIORITY_LABELS, Priority } from '@hogar/shared';
 import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
+import { TasksTabs } from '../tasks/tasks-tabs';
 import { IdeaDialog } from './idea-dialog';
 import { IdeasStore } from './ideas.store';
 
@@ -16,7 +17,7 @@ const TAB_STATUSES: Record<Tab, IdeaStatus[]> = {
 
 @Component({
   selector: 'app-ideas-page',
-  imports: [IdeaDialog, RouterLink],
+  imports: [IdeaDialog, RouterLink, TasksTabs],
   host: { class: 'view' },
   templateUrl: './ideas.page.html',
 })
