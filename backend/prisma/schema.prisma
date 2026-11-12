@@ -71,6 +71,7 @@ model User {
   settlementsGot    Settlement[]            @relation("SettlementTo")
   eventsJoined      CalendarEventPerson[]
   favoritesMarked   RecipeFavorite[]
+  notifications     UserNotification[]
 }
 
 /// Pertenencia de una persona a una casa.
@@ -552,4 +553,19 @@ model RecipeFavorite {
 
   @@id([householdId, recipeId])
   @@index([recipeId])
+}
+
+/// Aviso guardado para la campanita: se crea con cada aviso que manda la app, tenga o no push.
+model UserNotification {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  /// Ruta de la app que se abre al tocarlo
+  url       String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }

@@ -2,10 +2,14 @@
   <!-- Móvil: casa activa arriba. En escritorio va en la barra lateral. -->
   <header class="mbar">
     <app-household-switcher />
+    <app-notifications-bell />
   </header>
 
   <nav class="nav" aria-label="Módulos">
-    <a class="brand" routerLink="/">Hogar</a>
+    <div class="brand-row">
+      <a class="brand" routerLink="/">Hogar</a>
+      <app-notifications-bell />
+    </div>
     <app-household-switcher />
     <ul>
       @for (item of nav(); track item.path; let i = $index) {

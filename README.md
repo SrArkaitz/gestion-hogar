@@ -183,6 +183,9 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
 | POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
+| GET    | `/api/notifications` | Tus últimos avisos de la campanita (`items`) y cuántos hay sin leer (`unread`) |
+| POST   | `/api/notifications/:id/read` | Marca un aviso como leído |
+| POST   | `/api/notifications/read-all` | Marca todos como leídos |
 | GET    | `/api/households/:householdId/ideas` | Ideas de la casa, de la más reciente a la más antigua |
 | POST   | `/api/households/:householdId/ideas` | Propone una idea (`title`, `description`, `category`) |
 | PATCH  | `/api/households/:householdId/ideas/:id` | Edita una idea o cambia su `status` a `nueva`, `en_valoracion` o `descartada` |

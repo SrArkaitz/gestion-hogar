@@ -9,6 +9,28 @@ export interface PushSubscriptionInput {
   keys: { p256dh: string; auth: string };
 }
 
+/** Un aviso de la campanita. */
+export interface AppNotification {
+  id: string;
+  title: string;
+  body: string;
+  /** Ruta de la app que se abre al tocarlo. */
+  url: string;
+  read: boolean;
+  createdAt: string;
+}
+
+/** Respuesta de /api/notifications: los últimos avisos y cuántos hay sin leer. */
+export interface NotificationList {
+  items: AppNotification[];
+  unread: number;
+}
+
+/** Días que se guardan los avisos de la campanita. */
+export const NOTIFICATION_KEEP_DAYS = 60;
+/** Avisos que se devuelven como mucho (los más recientes). */
+export const NOTIFICATION_LIST_MAX = 50;
+
 /** Lo que llega al service worker en cada aviso. */
 export interface PushPayload {
   title: string;

@@ -1,8 +1,10 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ModuleKey, moduleForPath } from '@hogar/shared';
+import { NotificationsService } from '../core/notifications.service';
 import { SessionService } from '../core/session.service';
 import { HouseholdSwitcher } from './household-switcher';
+import { NotificationsBell } from './notifications-bell';
 
 interface NavItem {
   path: string;
@@ -16,12 +18,13 @@ interface NavItem {
 /** Estructura de la app con sesión: navegación y página actual. */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, HouseholdSwitcher],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, HouseholdSwitcher, NotificationsBell],
   templateUrl: './shell.html',
 })
 export class Shell {
   protected readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly notifications = inject(NotificationsService);
 
   /** Secciones de la app; solo salen las que usa la casa activa. */
   private readonly modules: NavItem[] = [
@@ -55,6 +58,7 @@ export class Shell {
   );
 
   constructor() {
+    this.notifications.start();
     // Al navegar se cierra el menú "Más" y se apunta la página para marcar el botón.
     this.router.events.subscribe((e) => {
       if (e instanceof NavigationEnd) {
@@ -71,6 +75,7 @@ export class Shell {
   }
 
   protected async logout() {
+    this.notifications.stop();
     await this.session.logout();
     this.router.navigate(['/entrar']);
   }

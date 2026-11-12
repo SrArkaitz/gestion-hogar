@@ -77,6 +77,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
   - **Recordatorio diario a las 9:00:** un aviso por casa con las tareas sin hacer que vencen ese día o ya han vencido. Las asignadas le llegan a quien las tiene; las sin asignar, a toda la casa.
   - **Al asignar una tarea:** aviso a quien acaba de entrar en ella, salvo a quien la asigna.
   - Tocar un aviso abre la página en la casa que corresponde (`?casa=`), aunque la activa fuera otra.
+- **Campanita:** cada aviso que manda la app (tareas asignadas, recordatorios de las 9:00, facturas, calendario, mantenimiento y el de prueba) queda guardado para su destinatario, tenga o no push en ese dispositivo. La campanita va arriba (en el móvil, en la barra de la casa; en el PC, junto al nombre de la app) con el número de no leídos. Al tocar un aviso se abre su página y queda leído; también se pueden marcar todos. Son de la persona, de todas sus casas. Se miran al abrir la app, cada minuto y al volver a ella, y se guardan 60 días.
 - **Claves VAPID:** el servidor las genera la primera vez y las guarda en la base de datos; no hay nada que configurar. Al cerrar sesión se quitan los avisos de ese dispositivo.
 
 ### 3.2 Ideas
@@ -253,3 +254,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-30 | Tareas con tres pestañas: Personales (la primera), Del hogar e Ideas. Ideas deja de tener entrada propia en el menú. |
 | 2026-11-12 | Los eventos del calendario pueden ser de una o varias personas; el aviso les llega solo a ellas. |
 | 2026-11-12 | Recetas favoritas por casa: las marca cualquiera y las ve toda la casa. |
+| 2026-11-12 | Campanita de avisos: se guarda cada aviso que se manda (en el mismo sitio que el push), 60 días. |

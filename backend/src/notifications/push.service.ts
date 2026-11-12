@@ -3,6 +3,7 @@ import { PushConfig, PushPayload, PushSubscriptionInput } from '@hogar/shared';
 import webpush, { WebPushError } from 'web-push';
 import { asObject } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
+import { InboxService } from './inbox.service';
 
 const PUBLIC_KEY = 'vapid_public';
 const PRIVATE_KEY = 'vapid_private';
@@ -17,7 +18,10 @@ export class PushService implements OnModuleInit {
   private readonly logger = new Logger(PushService.name);
   private publicKey = '';
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly inbox: InboxService,
+  ) {}
 
   async onModuleInit() {
     let keys = await this.loadKeys();
@@ -63,6 +67,7 @@ export class PushService implements OnModuleInit {
    */
   async send(userIds: string[], payload: PushPayload): Promise<number> {
     if (!userIds.length) return 0;
+    await this.inbox.add(userIds, payload);
     const subs = await this.prisma.pushSubscription.findMany({ where: { userId: { in: userIds } } });
     const body = JSON.stringify(payload);
     const results = await Promise.all(
