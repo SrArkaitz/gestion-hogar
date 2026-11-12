@@ -41,6 +41,8 @@ export interface CalendarItem {
   link: string | null;
   /** Tarea ya hecha (se pinta tachada). */
   done: boolean;
+  /** Personas a las que pertenece (eventos) o asignadas (tareas). Vacío: de toda la casa. */
+  people: string[];
 }
 
 export interface CalendarEvent {
@@ -52,6 +54,8 @@ export interface CalendarEvent {
   /** HH:MM, o null si es de todo el día. */
   time: string | null;
   notes: string;
+  /** Personas a las que pertenece (una o varias); vacío si es de toda la casa. */
+  personIds: string[];
 }
 
 export interface CalendarEventInput {
@@ -60,6 +64,7 @@ export interface CalendarEventInput {
   endDate?: IsoDate | null;
   time?: string | null;
   notes?: string;
+  personIds?: string[];
 }
 
 export interface Birthday {

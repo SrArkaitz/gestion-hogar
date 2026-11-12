@@ -124,9 +124,11 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/households/:householdId/shopping/products` | Productos ya comprados, de los más habituales a los menos |
 | DELETE | `/api/households/:householdId/shopping/products/:key` | Olvida un producto para que no se sugiera |
 | POST   | `/api/households/:householdId/shopping/items/bulk` | Añade varios (`{ "items": [{ "name", "quantity" }] }`); suma cantidades con lo que ya hubiera |
-| GET    | `/api/households/:householdId/recipes` | Recetario de la casa y recetas públicas de otras casas (`mine`, `author`) |
+| GET    | `/api/households/:householdId/recipes` | Recetario de la casa y recetas públicas de otras casas (`mine`, `author`, `favorite`, `favoriteBy`) |
 | GET    | `/api/households/:householdId/recipes/:id` | Una receta |
 | POST   | `/api/households/:householdId/recipes` | Crea una receta (`private: true` para que solo la vea la casa) |
+| PUT    | `/api/households/:householdId/recipes/:id/favorite` | La marca como favorita de la casa (también una pública de otra casa) |
+| DELETE | `/api/households/:householdId/recipes/:id/favorite` | La quita de favoritas de la casa |
 | POST   | `/api/households/:householdId/recipes/:id/copy` | Copia a la casa una receta pública de otra (la copia es privada) |
 | PATCH  | `/api/households/:householdId/recipes/:id` | Edita (solo las de la casa); ingredientes y pasos se sustituyen enteros |
 | DELETE | `/api/households/:householdId/recipes/:id` | Borra la receta, su foto y sus platos del menú |
@@ -152,7 +154,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/bills/:id/pay` | Apunta el pago como gasto y la pasa al siguiente vencimiento |
 | GET    | `/api/households/:householdId/calendar?from=AAAA-MM-DD&to=AAAA-MM-DD` | Todo lo que tiene fecha entre dos días (máximo 62): eventos, cumpleaños, tareas, recurrentes, menú, facturas, revisiones y fin de garantías |
 | GET    | `/api/households/:householdId/calendar/events/:id` | Un evento |
-| POST   | `/api/households/:householdId/calendar/events` | Crea un evento (`title`, `date`, `time` y `endDate` opcionales, `notes`) |
+| POST   | `/api/households/:householdId/calendar/events` | Crea un evento (`title`, `date`, `time` y `endDate` opcionales, `notes`, `personIds`: de quién es; vacío = de toda la casa) |
 | PATCH  | `/api/households/:householdId/calendar/events/:id` | Edita un evento (se envía entero) |
 | DELETE | `/api/households/:householdId/calendar/events/:id` | Borra un evento |
 | GET    | `/api/households/:householdId/calendar/birthdays` | Cumpleaños |

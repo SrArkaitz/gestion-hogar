@@ -89,6 +89,17 @@ export class RecipePage {
     }
   }
 
+  /** Favorita para toda la casa. */
+  protected async toggleFavorite() {
+    const r = this.recipe();
+    if (!r) return;
+    try {
+      await this.store.setFavorite(r, !r.favorite);
+    } catch (err) {
+      this.notice.set(errorMessage(err, 'No se pudo guardar la favorita.'));
+    }
+  }
+
   /** Guarda una copia (privada) en esta casa y la abre. */
   protected async copy() {
     const r = this.recipe();

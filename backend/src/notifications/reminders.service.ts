@@ -77,7 +77,8 @@ export class RemindersService {
 
   /**
    * Calendario: los eventos que empiezan hoy y los cumpleaños de hoy o de dentro de los días de
-   * aviso de cada uno. Un aviso por casa a todos sus miembros (si la casa usa el calendario).
+   * aviso de cada uno. Un aviso por persona y casa (si la casa usa el calendario): los eventos con
+   * personas, solo a ellas; los demás y los cumpleaños, a toda la casa.
    * @returns cuántos dispositivos han recibido algún aviso.
    */
   async sendCalendarReminders(today: IsoDate): Promise<number> {
@@ -87,27 +88,30 @@ export class RemindersService {
         id: true,
         name: true,
         members: { select: { userId: true } },
-        events: { where: { date: today }, orderBy: [{ time: 'asc' }, { title: 'asc' }] },
+        events: { where: { date: today }, orderBy: [{ time: 'asc' }, { title: 'asc' }], include: { people: { select: { userId: true } } } },
         birthdays: true,
       },
     });
     let sent = 0;
     for (const h of households) {
-      const parts: string[] = [];
-      if (h.events.length) parts.push(`Hoy: ${h.events.map((e) => (e.time ? `${e.title} (${e.time})` : e.title)).join(', ')}.`);
+      const birthdays: string[] = [];
       for (const b of h.birthdays) {
         const next = nextBirthday(b, today);
         const days = Math.round((Date.parse(next) - Date.parse(today)) / 86_400_000);
         const age = ageOn(b, next);
         const turns = age !== null ? `, cumple ${age}` : '';
-        if (days === 0) parts.push(`¡Hoy es el cumpleaños de ${b.name}${turns}!`);
-        else if (days === b.notifyDays) parts.push(`Cumpleaños de ${b.name} ${days === 1 ? 'mañana' : `en ${days} días`}${turns}.`);
+        if (days === 0) birthdays.push(`¡Hoy es el cumpleaños de ${b.name}${turns}!`);
+        else if (days === b.notifyDays) birthdays.push(`Cumpleaños de ${b.name} ${days === 1 ? 'mañana' : `en ${days} días`}${turns}.`);
       }
-      if (!parts.length) continue;
-      sent += await this.push.send(
-        h.members.map((m) => m.userId),
-        { title: `Hoy en el calendario · ${h.name}`, body: parts.join(' '), url: `/calendario?casa=${h.id}`, tag: `calendario-${h.id}` },
-      );
+      for (const { userId } of h.members) {
+        const mine = h.events.filter((e) => !e.people.length || e.people.some((p) => p.userId === userId));
+        const parts = [...(mine.length ? [`Hoy: ${mine.map((e) => (e.time ? `${e.title} (${e.time})` : e.title)).join(', ')}.`] : []), ...birthdays];
+        if (!parts.length) continue;
+        sent += await this.push.send(
+          [userId],
+          { title: `Hoy en el calendario · ${h.name}`, body: parts.join(' '), url: `/calendario?casa=${h.id}`, tag: `calendario-${h.id}` },
+        );
+      }
     }
     return sent;
   }

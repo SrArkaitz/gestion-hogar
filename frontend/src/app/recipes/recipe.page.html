@@ -17,8 +17,14 @@
         } @else if (r.private) {
           <p class="origin">Privada: solo la ve esta casa.</p>
         }
+        @if (r.favorite) {
+          <p class="origin">★ Favorita de la casa@if (r.favoriteBy) { (la marcó {{ r.favoriteBy }})}.</p>
+        }
       </div>
       <div class="tools">
+        <button type="button" class="btn ghost fav-btn" [class.on]="r.favorite" [attr.aria-pressed]="r.favorite" (click)="toggleFavorite()">
+          {{ r.favorite ? '★ Favorita' : '☆ Favorita' }}
+        </button>
         @if (r.mine) {
           <button type="button" class="btn ghost" (click)="menuOpen.set(true)">Al menú</button>
           <a class="btn ghost" [routerLink]="['/recetas', r.id, 'editar']">Editar</a>

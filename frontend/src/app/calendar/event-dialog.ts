@@ -1,6 +1,6 @@
 import { Component, OnInit, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CalendarEvent, CalendarEventInput, EVENT_NOTES_MAX, EVENT_TITLE_MAX, IsoDate } from '@hogar/shared';
+import { CalendarEvent, CalendarEventInput, EVENT_NOTES_MAX, EVENT_TITLE_MAX, IsoDate, Member } from '@hogar/shared';
 
 /** Crear o editar un evento del calendario. */
 @Component({
@@ -31,6 +31,18 @@ import { CalendarEvent, CalendarEventInput, EVENT_NOTES_MAX, EVENT_TITLE_MAX, Is
             <input type="date" name="endDate" [min]="date()" [(ngModel)]="endDate" />
           </label>
         }
+        @if (members().length > 1) {
+          <div>
+            <span class="lbl" id="event-people-lbl">De quién es <span class="hint">(si no eliges, de toda la casa)</span></span>
+            <div class="people" role="group" aria-labelledby="event-people-lbl">
+              @for (m of members(); track m.id) {
+                <button type="button" [attr.data-c]="m.color" [attr.aria-pressed]="personIds().includes(m.id)" (click)="togglePerson(m.id)">
+                  <span class="dot"></span>{{ m.name }}
+                </button>
+              }
+            </div>
+          </div>
+        }
         <label>Notas
           <textarea name="notes" [maxlength]="notesMax" [(ngModel)]="notes"></textarea>
         </label>
@@ -54,6 +66,8 @@ export class EventDialog implements OnInit {
   readonly event = input<CalendarEvent | null>(null);
   /** Día con el que empieza un evento nuevo. */
   readonly day = input.required<IsoDate>();
+  /** Miembros de la casa, para elegir de quién es. */
+  readonly members = input<Member[]>([]);
   readonly save = output<CalendarEventInput>();
   readonly delete = output<void>();
   readonly close = output<void>();
@@ -66,6 +80,7 @@ export class EventDialog implements OnInit {
   protected readonly multi = signal(false);
   protected readonly endDate = signal('');
   protected readonly notes = signal('');
+  protected readonly personIds = signal<string[]>([]);
   protected readonly busy = signal(false);
   protected readonly error = signal('');
 
@@ -77,6 +92,11 @@ export class EventDialog implements OnInit {
     this.multi.set(!!e?.endDate);
     this.endDate.set(e?.endDate ?? '');
     this.notes.set(e?.notes ?? '');
+    this.personIds.set(e?.personIds ?? []);
+  }
+
+  protected togglePerson(id: string) {
+    this.personIds.update((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
   }
 
   showError(message: string) {
@@ -93,7 +113,7 @@ export class EventDialog implements OnInit {
     }
     this.busy.set(true);
     this.error.set('');
-    this.save.emit({ title: this.title(), date: this.date(), time: this.time() || null, endDate: end || null, notes: this.notes().trim() });
+    this.save.emit({ title: this.title(), date: this.date(), time: this.time() || null, endDate: end || null, notes: this.notes().trim(), personIds: this.personIds() });
   }
 
   protected askDelete() {

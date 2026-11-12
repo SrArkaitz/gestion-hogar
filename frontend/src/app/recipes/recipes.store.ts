@@ -54,6 +54,22 @@ export class RecipesStore {
     return recipe;
   }
 
+  /** Favorita de la casa (para todos sus miembros). Se ve al momento y se deshace si falla. */
+  async setFavorite(recipe: Recipe, favorite: boolean): Promise<void> {
+    this.upsert({ ...recipe, favorite });
+    try {
+      const saved = await firstValueFrom(
+        favorite
+          ? this.http.put<Recipe>(`${this.api}/recipes/${recipe.id}/favorite`, {})
+          : this.http.delete<Recipe>(`${this.api}/recipes/${recipe.id}/favorite`),
+      );
+      this.upsert(saved);
+    } catch (err) {
+      this.upsert(recipe);
+      throw err;
+    }
+  }
+
   /** Copia a esta casa una receta pública de otra. */
   async copy(id: string): Promise<Recipe> {
     const recipe = await firstValueFrom(this.http.post<Recipe>(`${this.api}/recipes/${id}/copy`, {}));

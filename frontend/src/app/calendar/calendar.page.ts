@@ -7,11 +7,14 @@ import {
   CalendarEventInput,
   CalendarItem,
   IsoDate,
+  Member,
   startOfWeek,
   WEEKDAY_INITIALS,
 } from '@hogar/shared';
 import { monthLabel, monthOf, monthRange, shiftMonth, todayIso } from '../core/dates';
 import { errorMessage } from '../core/errors';
+import { HouseholdsService } from '../core/households.service';
+import { initials } from '../tasks/people';
 import { SessionService } from '../core/session.service';
 import { CalendarTabs } from './calendar-tabs';
 import { CalendarStore } from './calendar.store';
@@ -36,6 +39,7 @@ export class CalendarPage {
   private readonly store = inject(CalendarStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly households = inject(HouseholdsService);
 
   protected readonly kindLabels = CALENDAR_KIND_LABELS;
   protected readonly weekdayInitials = WEEKDAY_INITIALS;
@@ -48,6 +52,9 @@ export class CalendarPage {
   protected readonly selected = signal<IsoDate>(this.today);
 
   protected readonly items = signal<CalendarItem[]>([]);
+  /** Miembros de la casa: para elegir de quién es un evento y pintar sus iniciales. */
+  protected readonly members = signal<Member[]>([]);
+  protected readonly initials = initials;
   protected readonly loading = signal(true);
   protected readonly error = signal('');
 
@@ -87,6 +94,24 @@ export class CalendarPage {
       const days = this.days();
       if (id) void this.load(days[0], days[days.length - 1]);
     });
+    effect(() => {
+      const id = this.session.household()?.id;
+      if (id) void this.loadMembers(id);
+    });
+  }
+
+  /** Personas de una cosa del calendario, en el orden de la casa. */
+  protected peopleOf(item: CalendarItem): Member[] {
+    return this.members().filter((m) => item.people.includes(m.id));
+  }
+
+  private async loadMembers(id: string) {
+    try {
+      const household = await this.households.get(id);
+      if (this.session.household()?.id === id) this.members.set(household.members);
+    } catch {
+      // Sin miembros se puede seguir usando el calendario; solo no se eligen personas.
+    }
   }
 
   protected itemsOn(day: IsoDate): CalendarItem[] {

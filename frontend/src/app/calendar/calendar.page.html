@@ -64,7 +64,16 @@
         @for (it of itemsOn(selected()); track $index) {
           <li>
             <button type="button" class="cal-item" [attr.data-k]="it.kind" (click)="open(it)">
-              <span class="t" [class.done]="it.done">{{ it.title }}</span>
+              <span class="cal-row">
+                <span class="t" [class.done]="it.done">{{ it.title }}</span>
+                @if (peopleOf(it).length) {
+                  <span class="avatars" aria-hidden="true">
+                    @for (m of peopleOf(it); track m.id) {
+                      <span class="avatar" [attr.data-c]="m.color" [title]="m.name">{{ initials(m.name) }}</span>
+                    }
+                  </span>
+                }
+              </span>
               <span class="n">{{ kindLabels[it.kind] }}@if (it.detail) { · {{ it.detail }}}</span>
             </button>
           </li>
@@ -83,7 +92,16 @@
           @for (it of itemsOn(day); track $index) {
             <li>
               <button type="button" class="cal-item" [attr.data-k]="it.kind" (click)="open(it)">
-                <span class="t" [class.done]="it.done">{{ it.title }}</span>
+                <span class="cal-row">
+                  <span class="t" [class.done]="it.done">{{ it.title }}</span>
+                  @if (peopleOf(it).length) {
+                    <span class="avatars" aria-hidden="true">
+                      @for (m of peopleOf(it); track m.id) {
+                        <span class="avatar" [attr.data-c]="m.color" [title]="m.name">{{ initials(m.name) }}</span>
+                      }
+                    </span>
+                  }
+                </span>
                 <span class="n">{{ kindLabels[it.kind] }}@if (it.detail) { · {{ it.detail }}}</span>
               </button>
             </li>
@@ -96,5 +114,5 @@
 }
 
 @if (editing() !== undefined) {
-  <app-event-dialog [event]="editing() ?? null" [day]="selected()" (save)="onSave($event)" (delete)="onDelete()" (close)="editing.set(undefined)" />
+  <app-event-dialog [event]="editing() ?? null" [day]="selected()" [members]="members()" (save)="onSave($event)" (delete)="onDelete()" (close)="editing.set(undefined)" />
 }

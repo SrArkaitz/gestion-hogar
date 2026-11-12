@@ -64,6 +64,10 @@ export interface Recipe {
   mine: boolean;
   /** Quién la apuntó, en las de otras casas. */
   author: string | null;
+  /** Favorita de la casa activa (la ven así todos sus miembros). */
+  favorite: boolean;
+  /** Quién la marcó como favorita. */
+  favoriteBy: string | null;
   createdById: string;
   createdAt: string;
   updatedAt: string;

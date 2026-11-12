@@ -116,6 +116,7 @@ export class HouseholdsService {
       // Deja de estar asignada a las tareas (y recurrentes) de esta casa.
       this.prisma.taskAssignee.deleteMany({ where: { userId: targetId, task: { householdId } } }),
       this.prisma.recurringTaskAssignee.deleteMany({ where: { userId: targetId, recurring: { householdId } } }),
+      this.prisma.calendarEventPerson.deleteMany({ where: { userId: targetId, event: { householdId } } }),
     ]);
     return false;
   }

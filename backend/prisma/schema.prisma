@@ -36,6 +36,7 @@ model Household {
   settlements   Settlement[]
   bills         Bill[]
   events        CalendarEvent[]
+  favorites     RecipeFavorite[]
   birthdays     Birthday[]
   inventory     InventoryItem[]
   equipment     Equipment[]
@@ -68,6 +69,8 @@ model User {
   expenseShares     ExpenseShare[]
   settlementsSent   Settlement[]            @relation("SettlementFrom")
   settlementsGot    Settlement[]            @relation("SettlementTo")
+  eventsJoined      CalendarEventPerson[]
+  favoritesMarked   RecipeFavorite[]
 }
 
 /// Pertenencia de una persona a una casa.
@@ -280,9 +283,9 @@ model ShoppingProduct {
 
 /// Receta del recetario de una casa.
 model Recipe {
-  id          String      @id @default(uuid())
+  id          String           @id @default(uuid())
   householdId String
-  household   Household   @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household   Household        @relation(fields: [householdId], references: [id], onDelete: Cascade)
   name        String
   /// primero | segundo | unico | postre
   kind        String
@@ -292,19 +295,21 @@ model Recipe {
   /// Raciones para las que están pensadas las cantidades
   servings    Int
   /// JSON: Ingredient[] (@hogar/shared). Siempre se leen y se guardan juntos.
-  ingredients String      @default("[]")
+  ingredients String           @default("[]")
   /// JSON: string[] con los pasos en orden
-  steps       String      @default("[]")
-  notes       String      @default("")
+  steps       String           @default("[]")
+  notes       String           @default("")
   /// Archivo de la foto en PHOTOS_DIR, o null
   photo       String?
   /// Privada: solo la ve su casa. Si no, la ven todas las casas (sin poder cambiarla).
-  private     Boolean     @default(false)
+  private     Boolean          @default(false)
   menu        MenuEntry[]
+  /// Casas que la tienen en favoritas (puede ser la suya u otras, si es pública)
+  favorites   RecipeFavorite[]
   createdById String
-  createdBy   User        @relation(fields: [createdById], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdBy   User             @relation(fields: [createdById], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([householdId])
 }
@@ -403,9 +408,9 @@ model Bill {
 
 /// Evento propio del calendario (lo demás que sale en él viene de las otras secciones).
 model CalendarEvent {
-  id          String    @id @default(uuid())
+  id          String                @id @default(uuid())
   householdId String
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  household   Household             @relation(fields: [householdId], references: [id], onDelete: Cascade)
   title       String
   /// AAAA-MM-DD
   date        String
@@ -413,11 +418,23 @@ model CalendarEvent {
   endDate     String?
   /// HH:MM, o null si es de todo el día
   time        String?
-  notes       String    @default("")
+  notes       String                @default("")
+  /// Personas a las que pertenece (ninguna = de toda la casa)
+  people      CalendarEventPerson[]
   createdById String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime              @default(now())
 
   @@index([householdId, date])
+}
+
+model CalendarEventPerson {
+  eventId String
+  event   CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+  @@index([userId])
 }
 
 /// Cumpleaños: se repite cada año. El año de nacimiento es opcional.
@@ -520,4 +537,19 @@ model MaintenanceLog {
   createdAt     DateTime    @default(now())
 
   @@index([maintenanceId, date])
+}
+
+/// Receta favorita de una casa: la marca una persona y la ven así todos sus miembros.
+model RecipeFavorite {
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  recipeId    String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  /// Quién la marcó
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@id([householdId, recipeId])
+  @@index([recipeId])
 }

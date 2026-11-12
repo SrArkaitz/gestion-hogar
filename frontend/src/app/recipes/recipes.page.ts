@@ -7,9 +7,11 @@ import {
   RECIPE_DURATIONS,
   RECIPE_KIND_LABELS,
   RECIPE_KINDS,
+  Recipe,
   RecipeDuration,
   RecipeKind,
 } from '@hogar/shared';
+import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
 import { RecipesTabs } from './recipes-tabs';
 import { RecipesStore } from './recipes.store';
@@ -33,8 +35,8 @@ export class RecipesPage {
   protected readonly search = signal('');
   protected readonly kind = signal<RecipeKind | ''>('');
   protected readonly duration = signal<RecipeDuration | ''>('');
-  /** De quién: todas, las de esta casa o las públicas de otras. */
-  protected readonly origin = signal<'' | 'mine' | 'shared'>('');
+  /** Cuáles: todas, las favoritas de la casa, las que apuntaste tú, las de la casa o las públicas de otras. */
+  protected readonly origin = signal<'' | 'fav' | 'me' | 'mine' | 'shared'>('');
   protected readonly hasShared = computed(() => this.store.recipes().some((r) => !r.mine));
 
   protected readonly filtered = computed(() => {
@@ -44,7 +46,7 @@ export class RecipesPage {
         (!q || productKey(r.name).includes(q) || r.ingredients.some((i) => productKey(i.name).includes(q))) &&
         (!this.kind() || r.kind === this.kind()) &&
         (!this.duration() || r.duration === this.duration()) &&
-        (!this.origin() || r.mine === (this.origin() === 'mine')),
+        this.matchesOrigin(r),
     );
   });
   protected readonly filtering = computed(() => !!this.search().trim() || !!this.kind() || !!this.duration() || !!this.origin());
@@ -54,6 +56,30 @@ export class RecipesPage {
       const id = this.session.household()?.id;
       if (id) this.store.load(id);
     });
+  }
+
+  private matchesOrigin(r: Recipe): boolean {
+    switch (this.origin()) {
+      case 'fav':
+        return r.favorite;
+      case 'me':
+        return r.mine && r.createdById === this.session.user()?.id;
+      case 'mine':
+        return r.mine;
+      case 'shared':
+        return !r.mine;
+      default:
+        return true;
+    }
+  }
+
+  protected async toggleFavorite(r: Recipe, event: Event) {
+    event.preventDefault();
+    try {
+      await this.store.setFavorite(r, !r.favorite);
+    } catch (err) {
+      this.store.error.set(errorMessage(err, 'No se pudo guardar la favorita.'));
+    }
   }
 
   protected clearFilters() {

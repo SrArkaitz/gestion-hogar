@@ -27,19 +27,23 @@ import {
   TIME_RE,
   tidyName,
 } from '@hogar/shared';
+import { parseMemberIds } from '../common/assignees';
 import { asObject, optionalText, requiredText } from '../common/validation';
 import { date } from '../expenses/expenses.service';
 import { Prisma } from '../generated/prisma/client';
 import { parseHidden } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
-const toEvent = (r: Prisma.CalendarEventGetPayload<object>): CalendarEvent => ({
+const withPeople = { people: { select: { userId: true } } } as const;
+
+const toEvent = (r: Prisma.CalendarEventGetPayload<{ include: typeof withPeople }>): CalendarEvent => ({
   id: r.id,
   title: r.title,
   date: r.date,
   endDate: r.endDate,
   time: r.time,
   notes: r.notes,
+  personIds: r.people.map((p) => p.userId),
 });
 
 const toBirthday = (r: Prisma.BirthdayGetPayload<object>): Birthday => ({
@@ -77,15 +81,20 @@ export class CalendarService {
     const inRange = (d: IsoDate) => d >= from && d <= to;
 
     // Eventos: los que se solapan con el rango, uno por cada día que caiga dentro.
-    const events = await this.prisma.calendarEvent.findMany({ where: { householdId, date: { lte: to } } });
+    const events = await this.prisma.calendarEvent.findMany({
+      where: { householdId, date: { lte: to } },
+      include: { people: { include: { user: { select: { name: true } } } } },
+    });
     for (const e of events) {
+      const names = e.people.map((p) => p.user.name.split(' ')[0]).join(', ');
       const end = e.endDate ?? e.date;
       if (end < from) continue;
       for (let d = e.date < from ? from : e.date; d <= end && d <= to; d = addDays(d, 1)) {
         const multi = !!e.endDate && e.endDate !== e.date;
         items.push(item('evento', d, e.title, e.id, null, {
           time: d === e.date ? e.time : null,
-          detail: [d === e.date ? e.time : null, multi ? `hasta el ${shortDate(end)}` : null].filter(Boolean).join(' · ') || null,
+          detail: [d === e.date ? e.time : null, multi ? `hasta el ${shortDate(end)}` : null, names || null].filter(Boolean).join(' · ') || null,
+          people: e.people.map((p) => p.userId),
         }));
       }
     }
@@ -110,6 +119,7 @@ export class CalendarService {
         items.push(item('tarea', t.due!, t.title, t.id, t.personal ? '/tareas' : '/tareas/hogar', {
           detail: [TASK_STATUS_LABELS[t.status as TaskStatus], people].filter(Boolean).join(' · '),
           done: t.status === 'hecho',
+          people: t.personal ? [] : t.assignees.map((a) => a.userId),
         }));
       }
       // Recurrentes: las próximas veces que tocan (las ya creadas salen como tareas).
@@ -187,12 +197,32 @@ export class CalendarService {
 
   async createEvent(householdId: string, userId: string, body: unknown): Promise<CalendarEvent> {
     const data = validateEvent(body);
-    return toEvent(await this.prisma.calendarEvent.create({ data: { householdId, createdById: userId, ...data } }));
+    const people = await this.people(householdId, body);
+    const row = await this.prisma.calendarEvent.create({
+      data: { householdId, createdById: userId, ...data, people: { create: people.map((id) => ({ userId: id })) } },
+      include: withPeople,
+    });
+    return toEvent(row);
   }
 
+  /** Se envía entero; las personas se sustituyen por las enviadas. */
   async updateEvent(householdId: string, id: string, body: unknown): Promise<CalendarEvent> {
     await this.findEvent(householdId, id);
-    return toEvent(await this.prisma.calendarEvent.update({ where: { id }, data: validateEvent(body) }));
+    const data = validateEvent(body);
+    const people = await this.people(householdId, body);
+    const row = await this.prisma.calendarEvent.update({
+      where: { id },
+      data: { ...data, people: { deleteMany: {}, create: people.map((p) => ({ userId: p })) } },
+      include: withPeople,
+    });
+    return toEvent(row);
+  }
+
+  /** Personas del evento: miembros de la casa, sin repetidos (si no se envían, ninguna). */
+  private people(householdId: string, body: unknown): Promise<string[]> {
+    const value = asObject(body)['personIds'];
+    if (value === undefined || value === null) return Promise.resolve([]);
+    return parseMemberIds(this.prisma, householdId, value, 'personIds', 'Solo se puede poner a miembros de la casa');
   }
 
   async getEvent(householdId: string, id: string): Promise<CalendarEvent> {
@@ -226,7 +256,7 @@ export class CalendarService {
   }
 
   private async findEvent(householdId: string, id: string) {
-    const row = await this.prisma.calendarEvent.findFirst({ where: { id, householdId } });
+    const row = await this.prisma.calendarEvent.findFirst({ where: { id, householdId }, include: withPeople });
     if (!row) throw new NotFoundException('Ese evento no existe');
     return row;
   }
@@ -244,9 +274,9 @@ function item(
   title: string,
   refId: string,
   link: string | null,
-  extra: { detail?: string | null; time?: string | null; done?: boolean } = {},
+  extra: { detail?: string | null; time?: string | null; done?: boolean; people?: string[] } = {},
 ): CalendarItem {
-  return { kind, date: d, title, refId, link, detail: extra.detail ?? null, time: extra.time ?? null, done: extra.done ?? false };
+  return { kind, date: d, title, refId, link, detail: extra.detail ?? null, time: extra.time ?? null, done: extra.done ?? false, people: extra.people ?? [] };
 }
 
 /** "3 nov". */

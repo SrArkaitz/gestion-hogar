@@ -29,12 +29,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PHOTO_FILE_RE, PHOTO_MAX_BYTES, photoExtension, photoFileName, photosDir } from './photos';
 
 type Row = Prisma.RecipeGetPayload<object>;
-type RowWithAuthor = Prisma.RecipeGetPayload<{ include: { createdBy: { select: { name: true } } } }>;
-
-const withAuthor = { createdBy: { select: { name: true } } } as const;
+/** Autor y, si la casa la tiene en favoritas, quién la marcó. */
+const extras = (householdId: string) =>
+  ({
+    createdBy: { select: { name: true } },
+    favorites: { where: { householdId }, select: { user: { select: { name: true } } } },
+  }) as const;
+type RowWithExtras = Prisma.RecipeGetPayload<{ include: ReturnType<typeof extras> }>;
 
 /** La receta vista desde una casa: las suyas, completas; las de otras, con quién las apuntó. */
-const toRecipe = (r: Row | RowWithAuthor, householdId: string): Recipe => ({
+const toRecipe = (r: Row | RowWithExtras, householdId: string): Recipe => ({
   id: r.id,
   name: r.name,
   kind: r.kind as RecipeKind,
@@ -48,6 +52,8 @@ const toRecipe = (r: Row | RowWithAuthor, householdId: string): Recipe => ({
   private: r.private,
   mine: r.householdId === householdId,
   author: r.householdId !== householdId && 'createdBy' in r ? r.createdBy.name : null,
+  favorite: 'favorites' in r && r.favorites.length > 0,
+  favoriteBy: 'favorites' in r ? (r.favorites[0]?.user.name ?? null) : null,
   createdById: r.createdById,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
@@ -72,7 +78,7 @@ export class RecipesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list(householdId: string): Promise<Recipe[]> {
-    const rows = await this.prisma.recipe.findMany({ where: visibleFrom(householdId), include: withAuthor, orderBy: { name: 'asc' } });
+    const rows = await this.prisma.recipe.findMany({ where: visibleFrom(householdId), include: extras(householdId), orderBy: { name: 'asc' } });
     return rows.map((r) => toRecipe(r, householdId));
   }
 
@@ -104,15 +110,30 @@ export class RecipesService {
 
   async create(householdId: string, createdById: string, body: unknown): Promise<Recipe> {
     const input = this.validate(body, false) as RecipeInput;
-    const row = await this.prisma.recipe.create({ data: { householdId, createdById, ...stored(input) } });
+    const row = await this.prisma.recipe.create({ data: { householdId, createdById, ...stored(input) }, include: extras(householdId) });
     return toRecipe(row, householdId);
   }
 
   /** Cambia los campos enviados. Ingredientes y pasos se sustituyen enteros. */
   async update(householdId: string, id: string, body: unknown): Promise<Recipe> {
     await this.find(householdId, id);
-    const row = await this.prisma.recipe.update({ where: { id }, data: stored(this.validate(body, true)) });
+    const row = await this.prisma.recipe.update({ where: { id }, data: stored(this.validate(body, true)), include: extras(householdId) });
     return toRecipe(row, householdId);
+  }
+
+  /** La marca (o desmarca) como favorita de la casa. Vale para las propias y las públicas de otras. */
+  async setFavorite(householdId: string, userId: string, id: string, favorite: boolean): Promise<Recipe> {
+    await this.findVisible(householdId, id);
+    if (favorite) {
+      await this.prisma.recipeFavorite.upsert({
+        where: { householdId_recipeId: { householdId, recipeId: id } },
+        create: { householdId, recipeId: id, userId },
+        update: {},
+      });
+    } else {
+      await this.prisma.recipeFavorite.deleteMany({ where: { householdId, recipeId: id } });
+    }
+    return this.get(householdId, id);
   }
 
   /** Borra la receta, su foto y sus platos del menú. */
@@ -130,14 +151,14 @@ export class RecipesService {
     const file = photoFileName(id, photoExtension(data));
     mkdirSync(photosDir(), { recursive: true });
     writeFileSync(join(photosDir(), file), data);
-    const updated = await this.prisma.recipe.update({ where: { id }, data: { photo: file } });
+    const updated = await this.prisma.recipe.update({ where: { id }, data: { photo: file }, include: extras(householdId) });
     this.deleteFile(row.photo);
     return toRecipe(updated, householdId);
   }
 
   async removePhoto(householdId: string, id: string): Promise<Recipe> {
     const row = await this.find(householdId, id);
-    const updated = await this.prisma.recipe.update({ where: { id }, data: { photo: null } });
+    const updated = await this.prisma.recipe.update({ where: { id }, data: { photo: null }, include: extras(householdId) });
     this.deleteFile(row.photo);
     return toRecipe(updated, householdId);
   }
@@ -160,7 +181,7 @@ export class RecipesService {
 
   /** Una receta de esta casa o una pública de otra. */
   private async findVisible(householdId: string, id: string) {
-    const row = await this.prisma.recipe.findFirst({ where: { id, ...visibleFrom(householdId) }, include: withAuthor });
+    const row = await this.prisma.recipe.findFirst({ where: { id, ...visibleFrom(householdId) }, include: extras(householdId) });
     if (!row) throw new NotFoundException('La receta no existe');
     return row;
   }

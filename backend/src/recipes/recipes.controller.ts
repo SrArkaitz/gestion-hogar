@@ -28,6 +28,17 @@ export class RecipesController {
     return this.recipes.create(householdId, user.id, body);
   }
 
+  /** Favorita de la casa: la ven así todos sus miembros. */
+  @Put(':id/favorite')
+  favorite(@Param('householdId') householdId: string, @CurrentUser() user: User, @Param('id') id: string): Promise<Recipe> {
+    return this.recipes.setFavorite(householdId, user.id, id, true);
+  }
+
+  @Delete(':id/favorite')
+  unfavorite(@Param('householdId') householdId: string, @CurrentUser() user: User, @Param('id') id: string): Promise<Recipe> {
+    return this.recipes.setFavorite(householdId, user.id, id, false);
+  }
+
   /** Copia a esta casa una receta pública de otra. */
   @Post(':id/copy')
   copy(@Param('householdId') householdId: string, @CurrentUser() user: User, @Param('id') id: string): Promise<Recipe> {

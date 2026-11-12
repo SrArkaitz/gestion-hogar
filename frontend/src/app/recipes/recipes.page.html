@@ -26,13 +26,15 @@
         <button type="button" [attr.aria-pressed]="duration() === d" (click)="duration.set(d)">{{ durationLabels[d] }}</button>
       }
     </div>
-    @if (hasShared()) {
-      <div class="seg" role="group" aria-label="De quién">
-        <button type="button" [attr.aria-pressed]="origin() === ''" (click)="origin.set('')">Todas</button>
-        <button type="button" [attr.aria-pressed]="origin() === 'mine'" (click)="origin.set('mine')">De esta casa</button>
+    <div class="seg" role="group" aria-label="Cuáles">
+      <button type="button" [attr.aria-pressed]="origin() === ''" (click)="origin.set('')">Todas</button>
+      <button type="button" [attr.aria-pressed]="origin() === 'fav'" (click)="origin.set('fav')">★ Favoritas</button>
+      <button type="button" [attr.aria-pressed]="origin() === 'me'" (click)="origin.set('me')">Mías</button>
+      <button type="button" [attr.aria-pressed]="origin() === 'mine'" (click)="origin.set('mine')">De esta casa</button>
+      @if (hasShared()) {
         <button type="button" [attr.aria-pressed]="origin() === 'shared'" (click)="origin.set('shared')">De otras casas</button>
-      </div>
-    }
+      }
+    </div>
   </div>
 }
 
@@ -42,6 +44,7 @@
 
 <div class="recipes">
   @for (r of filtered(); track r.id) {
+    <div class="recipe-card-wrap">
     <a class="recipe-card" [routerLink]="['/recetas', r.id]">
       @if (store.photoUrl(r); as url) {
         <img [src]="url" alt="" loading="lazy" />
@@ -61,10 +64,13 @@
         }
       </span>
     </a>
+    <button type="button" class="fav-star" [class.on]="r.favorite" [attr.aria-pressed]="r.favorite"
+            [attr.aria-label]="(r.favorite ? 'Quitar de favoritas: ' : 'Añadir a favoritas: ') + r.name" (click)="toggleFavorite(r, $event)">{{ r.favorite ? '★' : '☆' }}</button>
+    </div>
   } @empty {
     @if (!store.loading() && !store.error()) {
       @if (filtering()) {
-        <p class="empty">Ninguna receta con estos filtros. <button type="button" class="link" (click)="clearFilters()">Quitar filtros</button></p>
+        <p class="empty">{{ origin() === 'fav' ? 'Aún no hay favoritas. Marca la estrella de una receta y saldrá aquí para toda la casa.' : 'Ninguna receta con estos filtros.' }} <button type="button" class="link" (click)="clearFilters()">Quitar filtros</button></p>
       } @else {
         <p class="empty">Aún no hay recetas. Apunta la primera: lo que lleva, para cuántos y cómo se hace.</p>
       }

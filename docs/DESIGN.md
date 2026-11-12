@@ -120,6 +120,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Añadir a la compra** (desde una receta o desde la semana): se ve antes la lista de ingredientes para desmarcar lo que ya hay en casa; los que no llevan cantidad ("sal al gusto") salen desmarcados. Las cantidades de la misma magnitud se suman (500 g + 1 kg = 1,5 kg), también con lo que ya estuviera pendiente en la lista; si no se pueden sumar, se juntan ("6 bricks + 1 l").
 - **Fotos:** el navegador las reduce a 1600 px de lado antes de subirlas. Se guardan como archivos en `PHOTOS_DIR` (por defecto, junto a la base de datos) y entran en la copia diaria.
 - Borrar una receta la quita también del menú.
+- **Recetas de la casa:** cualquier miembro puede editar o borrar las recetas de su casa, las apuntara quien las apuntara. Filtros: *Todas*, *Favoritas*, *Mías* (las que apuntaste tú), *De esta casa* y *De otras casas*.
+- **Favoritas de la casa:** la estrella de una receta (también de una pública de otra casa) la marca como favorita para toda la casa; en la ficha se ve quién la marcó. Cualquiera puede quitarla. Cada casa tiene sus favoritas. Si una receta de otra casa se hace privada o se borra, deja de verse, también en favoritas.
 - **Recetas de otras casas:** el recetario enseña también las públicas de las demás casas (de las que usan Recetas), con quién la apuntó y un filtro *De esta casa / De otras casas*. Se pueden ver y pasar a la compra, pero no cambiar ni poner en el menú. *Guardar en mi recetario* hace una copia (con foto) que ya es de la casa: se puede editar y usar en el menú. La copia empieza privada para que no salga repetida en las demás casas. Si la casa de origen la hace privada o la borra, deja de verse fuera, pero las copias se quedan.
 
 ### 3.5 Gastos y facturas
@@ -135,8 +137,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 - **Vista de mes y de semana** con lo que tiene fecha en las secciones que use la casa: tareas con fecha límite, las próximas veces de las tareas recurrentes, platos del menú y vencimientos de facturas (también los de los meses siguientes). Cada cosa lleva a su sección. En el mes, al tocar un día se ve su lista; en el móvil, cada día enseña puntos de colores por tipo.
 - **Cumpleaños:** nombre, día y mes, año si se sabe (para decir cuántos cumple) y con cuántos días de antelación avisar (por defecto 3). Se repiten cada año; el 29 de febrero, los años no bisiestos, cae el 28. Pestaña propia, del más cercano al más lejano.
-- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, y notas.
-- **Avisos** a las 9:00, a toda la casa: los eventos que empiezan ese día y los cumpleaños de ese día o de dentro de sus días de aviso.
+- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna si es de toda la casa. Sus iniciales salen en el calendario con el color de cada uno.
+- **Avisos** a las 9:00: los eventos que empiezan ese día, solo a sus personas (a toda la casa si no tienen), y los cumpleaños de ese día o de dentro de sus días de aviso, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
 - Es una sección más: se puede ocultar en *Casa → Secciones*.
 
 ### 3.7 Inventario
@@ -249,3 +251,5 @@ Cada fase deja algo que ya se puede usar.
 | 2026-10-29 | Tareas personales: viven en la misma casa y el mismo tablero, en su propia pestaña, pero solo las ve quien las crea. |
 | 2026-10-30 | Las tareas hechas se archivan solas a los 7 días (o antes, a mano) y se pueden recuperar. |
 | 2026-10-30 | Tareas con tres pestañas: Personales (la primera), Del hogar e Ideas. Ideas deja de tener entrada propia en el menú. |
+| 2026-11-12 | Los eventos del calendario pueden ser de una o varias personas; el aviso les llega solo a ellas. |
+| 2026-11-12 | Recetas favoritas por casa: las marca cualquiera y las ve toda la casa. |
