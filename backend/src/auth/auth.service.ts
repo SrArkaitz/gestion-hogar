@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginInput, Me, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, RegisterInput, Role } from '@hogar/shared';
+import { LoginInput, Me, MemberColor, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH, RegisterInput, Role } from '@hogar/shared';
 import * as argon2 from 'argon2';
 import { RateLimiter } from '../common/rate-limiter';
 import { asObject, emailField, requiredText } from '../common/validation';
@@ -17,6 +17,8 @@ export class AuthService {
   private readonly loginFailures = new RateLimiter(5, 15 * MINUTE);
   /** 20 fallos en total desde una IP, pruebe el correo que pruebe. */
   private readonly loginFailuresByIp = new RateLimiter(20, 15 * MINUTE);
+  /** 5 contraseñas actuales mal seguidas al cambiarla (por cuenta). */
+  private readonly passwordFailures = new RateLimiter(5, 15 * MINUTE);
   /** 10 cuentas nuevas por hora desde una IP. */
   private readonly registrations = new RateLimiter(10, 60 * MINUTE);
   /** Hash de relleno para que un correo inexistente tarde lo mismo que uno real. */
@@ -95,6 +97,26 @@ export class AuthService {
     return this.me(userId);
   }
 
+  /**
+   * Cambia la contraseña (o pone una, si la cuenta solo tenía Google). Si ya tenía, pide la actual.
+   * No toca la sesión con la que se cambia; las demás las cierra el controlador.
+   */
+  async changePassword(userId: string, body: unknown): Promise<void> {
+    const b = asObject(body);
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    if (user.passwordHash) {
+      this.passwordFailures.check(userId);
+      const current = typeof b['current'] === 'string' ? b['current'] : '';
+      if (!(await argon2.verify(user.passwordHash, current))) {
+        this.passwordFailures.hit(userId);
+        throw new BadRequestException('La contraseña actual no es correcta');
+      }
+      this.passwordFailures.reset(userId);
+    }
+    const password = passwordField(b['password']);
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash: await argon2.hash(password) } });
+  }
+
   async me(userId: string): Promise<Me> {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -116,6 +138,7 @@ export class AuthService {
         name: m.household.name,
         role: m.role as Role,
         hiddenModules: parseHidden(m.household.hiddenModules),
+        color: m.color as MemberColor,
       })),
       account: { password: !!user.passwordHash, google: !!user.googleId },
       notifyOff: readKinds(user.notifyOff),
@@ -124,11 +147,7 @@ export class AuthService {
 
   private validateRegister(body: unknown): RegisterInput {
     const b = asObject(body);
-    const password = typeof b['password'] === 'string' ? b['password'] : '';
-    if (password.length < PASSWORD_MIN_LENGTH) {
-      throw new BadRequestException(`La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`);
-    }
-    if (password.length > 200) throw new BadRequestException('La contraseña es demasiado larga');
+    const password = passwordField(b['password']);
     return {
       name: requiredText(b['name'], 'El nombre', NAME_MAX_LENGTH),
       email: emailField(b['email']),
@@ -139,4 +158,14 @@ export class AuthService {
   private getDummyHash(): Promise<string> {
     return (this.dummyHash ??= argon2.hash('contraseña-de-relleno'));
   }
+}
+
+/** Contraseña nueva: entre PASSWORD_MIN_LENGTH y 200 caracteres. */
+function passwordField(value: unknown): string {
+  const password = typeof value === 'string' ? value : '';
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    throw new BadRequestException(`La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`);
+  }
+  if (password.length > 200) throw new BadRequestException('La contraseña es demasiado larga');
+  return password;
 }

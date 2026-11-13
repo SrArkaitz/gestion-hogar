@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { isIsoDate, Meal, MEALS, MenuEntry, RECIPE_SERVINGS_MAX } from '@hogar/shared';
-import { asObject, oneOf } from '../common/validation';
+import { isIsoDate, Meal, MEALS, MENU_TITLE_MAX, MenuEntry, MenuSettings, RECIPE_SERVINGS_MAX } from '@hogar/shared';
+import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -11,6 +11,7 @@ const toEntry = (r: Row): MenuEntry => ({
   date: r.date,
   meal: r.meal as Meal,
   recipeId: r.recipeId,
+  title: r.title,
   servings: r.servings,
 });
 
@@ -33,8 +34,21 @@ export class MenuService {
     return rows.map(toEntry);
   }
 
+  /** Con recipeId, un plato del recetario; sin él, uno escrito a mano (title). */
   async create(householdId: string, body: unknown): Promise<MenuEntry> {
     const b = asObject(body);
+    if (b['recipeId'] === undefined || b['recipeId'] === null) {
+      const row = await this.prisma.menuEntry.create({
+        data: {
+          householdId,
+          title: requiredText(b['title'], 'El plato', MENU_TITLE_MAX),
+          date: date(b['date'], 'date'),
+          meal: oneOf(b['meal'], MEALS, 'Comida o cena'),
+          servings: b['servings'] === undefined ? 1 : servings(b['servings']),
+        },
+      });
+      return toEntry(row);
+    }
     const recipeId = b['recipeId'];
     const recipe =
       typeof recipeId === 'string' && (await this.prisma.recipe.findFirst({ where: { id: recipeId, householdId } }));
@@ -51,16 +65,31 @@ export class MenuService {
     return toEntry(row);
   }
 
-  /** Cambia las raciones o mueve el plato a otro día o comida. */
+  async settings(householdId: string): Promise<MenuSettings> {
+    const h = await this.prisma.household.findUniqueOrThrow({ where: { id: householdId }, select: { menuInCalendar: true } });
+    return { inCalendar: h.menuInCalendar };
+  }
+
+  /** Cualquiera de la casa puede elegir si el menú sale en el calendario. */
+  async setSettings(householdId: string, body: unknown): Promise<MenuSettings> {
+    const value = asObject(body)['inCalendar'];
+    if (typeof value !== 'boolean') throw new BadRequestException('inCalendar tiene que ser true o false');
+    await this.prisma.household.update({ where: { id: householdId }, data: { menuInCalendar: value } });
+    return { inCalendar: value };
+  }
+
+  /** Cambia las raciones, mueve el plato a otro día o comida o, si no lleva receta, cambia su nombre. */
   async update(householdId: string, id: string, body: unknown): Promise<MenuEntry> {
-    await this.find(householdId, id);
+    const current = await this.find(householdId, id);
     const b = asObject(body);
+    if (b['title'] !== undefined && current.recipeId) throw new BadRequestException('Un plato con receta lleva el nombre de la receta');
     const row = await this.prisma.menuEntry.update({
       where: { id },
       data: {
         ...(b['servings'] !== undefined && { servings: servings(b['servings']) }),
         ...(b['date'] !== undefined && { date: date(b['date'], 'date') }),
         ...(b['meal'] !== undefined && { meal: oneOf(b['meal'], MEALS, 'Comida o cena') }),
+        ...(b['title'] !== undefined && { title: requiredText(b['title'], 'El plato', MENU_TITLE_MAX) }),
       },
     });
     return toEntry(row);

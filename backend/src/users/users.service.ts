@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { randomBytes } from 'crypto';
 import { mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { NotificationKind, User } from '@hogar/shared';
-import { asObject } from '../common/validation';
+import { NAME_MAX_LENGTH, NotificationKind, User } from '@hogar/shared';
+import { asObject, requiredText } from '../common/validation';
 import { parseKinds } from '../notifications/kinds';
 import { PrismaService } from '../prisma/prisma.service';
 import { AVATAR_FILE_RE, avatarUrl, PHOTO_MAX_BYTES, photoExtension, photosDir } from '../recipes/photos';
@@ -27,6 +27,12 @@ export class UsersService {
     const before = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { avatar: true } });
     const user = await this.prisma.user.update({ where: { id: userId }, data: { avatar: file } });
     this.deleteFile(before.avatar);
+    return { id: user.id, name: user.name, email: user.email, avatarUrl: avatarUrl(user.id, user.avatar) };
+  }
+
+  async rename(userId: string, body: unknown): Promise<User> {
+    const name = requiredText(asObject(body)['name'], 'El nombre', NAME_MAX_LENGTH);
+    const user = await this.prisma.user.update({ where: { id: userId }, data: { name } });
     return { id: user.id, name: user.name, email: user.email, avatarUrl: avatarUrl(user.id, user.avatar) };
   }
 

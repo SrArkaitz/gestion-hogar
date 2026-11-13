@@ -40,15 +40,15 @@
           <span class="num">{{ +day.slice(8) }}</span>
           <span class="chips">
             @for (it of itemsOn(day).slice(0, chipsPerDay); track $index) {
-              <span class="chip-k" [attr.data-k]="it.kind" [class.done]="it.done">{{ it.title }}</span>
+              <span class="chip-k" [attr.data-k]="it.kind" [style]="paint(it)" [class.done]="it.done">{{ it.title }}</span>
             }
             @if (itemsOn(day).length > chipsPerDay) {
               <span class="more">+{{ itemsOn(day).length - chipsPerDay }}</span>
             }
           </span>
           <span class="dots" aria-hidden="true">
-            @for (k of kindsOn(day); track k) {
-              <span class="dot-k" [attr.data-k]="k"></span>
+            @for (d of dotsOn(day); track d.key) {
+              <span class="dot-k" [attr.data-k]="d.kind" [style.background]="d.color"></span>
             }
           </span>
         </button>
@@ -63,7 +63,7 @@
       <ul class="cal-items">
         @for (it of itemsOn(selected()); track $index) {
           <li>
-            <button type="button" class="cal-item" [attr.data-k]="it.kind" (click)="open(it)">
+            <button type="button" class="cal-item" [attr.data-k]="it.kind" [style]="paint(it)" (click)="open(it)">
               <span class="cal-row">
                 <span class="t" [class.done]="it.done">{{ it.title }}</span>
                 @if (peopleOf(it).length) {
@@ -91,7 +91,7 @@
         <ul class="cal-items">
           @for (it of itemsOn(day); track $index) {
             <li>
-              <button type="button" class="cal-item" [attr.data-k]="it.kind" (click)="open(it)">
+              <button type="button" class="cal-item" [attr.data-k]="it.kind" [style]="paint(it)" (click)="open(it)">
                 <span class="cal-row">
                   <span class="t" [class.done]="it.done">{{ it.title }}</span>
                   @if (peopleOf(it).length) {

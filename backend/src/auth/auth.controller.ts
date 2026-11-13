@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { AuthProviders, Me, User } from '@hogar/shared';
 import type { Response } from 'express';
 import { AppRequest, clientIp, CurrentUser } from '../common/request';
@@ -53,6 +53,20 @@ export class AuthController {
     return this.auth.me(user.id);
   }
 
+  /** Cambia la contraseña ({ current, password }) y cierra la sesión en los demás dispositivos. */
+  @Put('password')
+  async changePassword(@CurrentUser() user: User, @Body() body: unknown, @Req() req: AppRequest): Promise<{ closed: number }> {
+    await this.auth.changePassword(user.id, body);
+    return { closed: await this.sessions.destroyOthers(user.id, req.cookies?.[SESSION_COOKIE] as string | undefined) };
+  }
+
+  /** Cierra la sesión en todos los dispositivos menos en este. */
+  @Post('logout-others')
+  @HttpCode(200)
+  async logoutOthers(@CurrentUser() user: User, @Req() req: AppRequest): Promise<{ closed: number }> {
+    return { closed: await this.sessions.destroyOthers(user.id, req.cookies?.[SESSION_COOKIE] as string | undefined) };
+  }
+
   /**
    * Lleva a la pantalla de Google. Con ?modo=conectar conecta Google a la cuenta con sesión;
    * si no, entra o crea la cuenta. ?volver=… es la ruta a la que ir al terminar.
@@ -77,7 +91,7 @@ export class AuthController {
   async googleCallback(@Query() query: Record<string, unknown>, @Req() req: AppRequest, @Res() res: Response) {
     const pending = this.google.takePending(req.cookies?.[GOOGLE_COOKIE], res);
     const mode = pending?.mode ?? 'entrar';
-    const errorPage = mode === 'conectar' ? '/casa' : '/entrar';
+    const errorPage = mode === 'conectar' ? '/cuenta' : '/entrar';
     try {
       if (!pending) throw new GoogleLoginError('fallo');
       const profile = await this.google.profile(pending, query);

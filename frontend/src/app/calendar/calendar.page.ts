@@ -101,9 +101,32 @@ export class CalendarPage {
     });
   }
 
-  /** Personas de una cosa del calendario, en el orden de la casa. */
+  /**
+   * Personas de una cosa del calendario, en el orden de la casa. Un evento sin nadie elegido
+   * es de toda la casa: salen todos.
+   */
   protected peopleOf(item: CalendarItem): Member[] {
+    if (item.kind === 'evento' && !item.people.length) return this.members();
     return this.members().filter((m) => item.people.includes(m.id));
+  }
+
+  /**
+   * Colores de un evento: el de su persona o, si es de varias, los de todas (en franjas).
+   * Lo demás (tareas, menú, facturas…) lleva el color de su tipo.
+   */
+  protected paint(item: CalendarItem): Record<string, string> | null {
+    if (item.kind !== 'evento') return null;
+    const colors = this.peopleOf(item).map((m) => `var(--c-${m.color})`);
+    if (!colors.length) return null;
+    if (colors.length === 1) return { '--kc': colors[0] };
+    const step = 100 / colors.length;
+    const bands = colors.map((c, i) => `${c} ${(i * step).toFixed(2)}% ${((i + 1) * step).toFixed(2)}%`).join(', ');
+    const tints = colors.map((c) => `color-mix(in srgb, ${c} 16%, var(--card))`).join(', ');
+    return {
+      '--kc': colors[0],
+      '--stripe': `linear-gradient(to bottom, ${bands})`,
+      '--tint': `linear-gradient(90deg, ${tints})`,
+    };
   }
 
   private async loadMembers(id: string) {
@@ -119,9 +142,15 @@ export class CalendarPage {
     return this.byDay().get(day) ?? [];
   }
 
-  /** Tipos distintos de un día, para los puntos del móvil. */
-  protected kindsOn(day: IsoDate): string[] {
-    return [...new Set(this.itemsOn(day).map((i) => i.kind))];
+  /** Puntos de un día en el móvil: uno por tipo y, en los eventos, uno por cada persona. */
+  protected dotsOn(day: IsoDate): { key: string; kind: string; color: string | null }[] {
+    const dots = new Map<string, { key: string; kind: string; color: string | null }>();
+    for (const it of this.itemsOn(day)) {
+      const people = it.kind === 'evento' ? this.peopleOf(it) : [];
+      if (!people.length) dots.set(it.kind, { key: it.kind, kind: it.kind, color: null });
+      for (const m of people) dots.set('p' + m.color, { key: 'p' + m.color, kind: it.kind, color: `var(--c-${m.color})` });
+    }
+    return [...dots.values()];
   }
 
   protected inMonth(day: IsoDate): boolean {

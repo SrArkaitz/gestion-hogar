@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Put, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { NotificationKind, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
@@ -7,6 +7,12 @@ import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
   constructor(private readonly users: UsersService) {}
+
+  /** Cambia tu nombre ({ "name": "…" }). */
+  @Patch('me')
+  rename(@CurrentUser() user: User, @Body() body: unknown): Promise<User> {
+    return this.users.rename(user.id, body);
+  }
 
   /** La foto llega tal cual en el cuerpo (image/jpeg, image/png o image/webp). */
   @Put('me/avatar')

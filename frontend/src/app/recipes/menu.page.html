@@ -4,7 +4,7 @@
     <p class="sub">Qué se come cada día. Es opcional: el recetario funciona sin él.</p>
   </div>
   @if (usesShopping()) {
-    <button type="button" class="btn" [disabled]="!entries().length" (click)="openPreview()">Añadir la semana a la compra</button>
+    <button type="button" class="btn" [disabled]="!hasRecipes()" (click)="openPreview()">Añadir la semana a la compra</button>
   }
 </header>
 
@@ -16,6 +16,12 @@
   <button type="button" class="btn ghost sm" aria-label="Semana siguiente" (click)="moveWeek(1)">›</button>
   @if (!isThisWeek()) {
     <button type="button" class="link" (click)="goToday()">Esta semana</button>
+  }
+  @if (usesCalendar() && inCalendar() !== null) {
+    <label class="switch-inline">
+      <input type="checkbox" [checked]="inCalendar()" (change)="setInCalendar($any($event.target).checked)" />
+      <span>Mostrar en el calendario</span>
+    </label>
   }
 </div>
 
@@ -32,7 +38,7 @@
 }
 
 @if (!store.loading() && !store.own().length) {
-  <p class="empty">Para hacer el menú, primero <a routerLink="/recetas/nueva">apunta alguna receta</a> o guarda en vuestro recetario una de otra casa.</p>
+  <p class="empty">Puedes escribir los platos a mano o, para sacar sus ingredientes, <a routerLink="/recetas/nueva">apuntar alguna receta</a> o guardar en vuestro recetario una de otra casa.</p>
 }
 
 <div class="week">
@@ -44,17 +50,19 @@
           <h3>{{ mealLabels[meal] }}</h3>
           <ul>
             @for (e of entriesFor(day, meal); track e.id) {
-              @if (recipesById().get(e.recipeId); as r) {
+              @if (visible(e)) {
                 <li>
-                  <button type="button" class="dish" (click)="editing.set(e)">
-                    <span class="t">{{ r.name }}</span>
-                    <span class="q">{{ e.servings }} rac.</span>
+                  <button type="button" class="dish" [class.free]="!e.recipeId" (click)="openEditor(e)">
+                    <span class="t">{{ dishName(e) }}</span>
+                    @if (e.recipeId) {
+                      <span class="q">{{ e.servings }} rac.</span>
+                    }
                   </button>
                 </li>
               }
             }
           </ul>
-          <button type="button" class="add" [disabled]="!store.own().length" (click)="openPicker({ date: day, meal })">+ Añadir</button>
+          <button type="button" class="add" (click)="openPicker({ date: day, meal })">+ Añadir</button>
         </div>
       }
     </section>
@@ -65,6 +73,14 @@
   <div class="veil" (click)="picking.set(null)">
     <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pick-title" (click)="$event.stopPropagation()" (keydown.escape)="picking.set(null)">
       <h3 id="pick-title">{{ mealLabels[slot.meal] }} del {{ dayText(slot.date).toLowerCase() }}</h3>
+      <form class="inline" (ngSubmit)="pickFree()">
+        <label class="grow">
+          <span class="sr-only">Plato sin receta</span>
+          <input name="free-title" [maxlength]="titleMax" placeholder="Escribe un plato: pizza fuera, sobras…" [(ngModel)]="freeTitle" />
+        </label>
+        <button type="submit" class="btn" [disabled]="!freeTitle().trim()">Añadir</button>
+      </form>
+      <p class="or"><span>o elige una receta</span></p>
       <input type="search" name="pick-search" placeholder="Buscar receta" [(ngModel)]="search" aria-label="Buscar receta" />
       <div class="seg" role="group" aria-label="Tipo de plato">
         <button type="button" [attr.aria-pressed]="kind() === ''" (click)="kind.set('')">Todos</button>
@@ -92,7 +108,25 @@
 }
 
 @if (editing(); as e) {
-  @if (recipesById().get(e.recipeId); as r) {
+  @if (!e.recipeId) {
+    <div class="veil" (click)="editing.set(null)">
+      <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dish-title" (click)="$event.stopPropagation()" (keydown.escape)="editing.set(null)">
+        <h3 id="dish-title">{{ e.title }}</h3>
+        <p class="n">{{ mealLabels[e.meal] }} del {{ dayText(e.date).toLowerCase() }} · sin receta</p>
+        <form class="inline" (ngSubmit)="renameEntry(e)">
+          <label class="grow">
+            <span class="sr-only">Nombre del plato</span>
+            <input name="edit-title" required [maxlength]="titleMax" [(ngModel)]="editTitle" />
+          </label>
+          <button type="submit" class="btn ghost" [disabled]="!editTitle().trim() || editTitle().trim() === e.title">Cambiar</button>
+        </form>
+        <div class="acts">
+          <button type="button" class="btn danger" (click)="removeEntry(e)">Quitar del menú</button>
+          <div class="r"><button type="button" class="btn" (click)="editing.set(null)">Listo</button></div>
+        </div>
+      </div>
+    </div>
+  } @else if (recipesById().get(e.recipeId!); as r) {
     <div class="veil" (click)="editing.set(null)">
       <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dish-title" (click)="$event.stopPropagation()" (keydown.escape)="editing.set(null)">
         <h3 id="dish-title">{{ r.name }}</h3>

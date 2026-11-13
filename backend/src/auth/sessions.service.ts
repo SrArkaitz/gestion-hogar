@@ -52,6 +52,13 @@ export class SessionsService {
     return { ...user, avatarUrl: avatarUrl(user.id, avatar) };
   }
 
+  /** Cierra las demás sesiones de la persona (todas menos la de este token). Devuelve cuántas. */
+  async destroyOthers(userId: string, token: string | undefined): Promise<number> {
+    const keep = token ? hashToken(token) : '';
+    const { count } = await this.prisma.session.deleteMany({ where: { userId, NOT: { tokenHash: keep } } });
+    return count;
+  }
+
   async destroy(token: string | undefined, res: Response): Promise<void> {
     if (token) await this.prisma.session.deleteMany({ where: { tokenHash: hashToken(token) } });
     res.clearCookie(SESSION_COOKIE, cookieOptions());

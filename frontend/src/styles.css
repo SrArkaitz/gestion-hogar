@@ -431,7 +431,10 @@ label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; wi
 .cal-day .num { align-self: flex-start; min-width: 24px; height: 24px; display: grid; place-items: center; border-radius: 999px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .cal-day.today .num { background: var(--accent); color: var(--accent-fg); }
 .cal-day .chips { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.chip-k { font-size: 11px; line-height: 1.35; padding: 1px 4px; border-radius: 4px; border-left: 3px solid var(--kc); background: color-mix(in srgb, var(--kc) 14%, var(--card)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* La franja de la izquierda es un fondo para poder llevar varios colores (eventos de varias personas: --stripe y --tint) */
+.chip-k { font-size: 11px; line-height: 1.35; padding: 1px 4px 1px 7px; border-radius: 4px;
+  background: var(--stripe, linear-gradient(var(--kc), var(--kc))) left / 3px 100% no-repeat, var(--tint, color-mix(in srgb, var(--kc) 14%, var(--card)));
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip-k.done { text-decoration: line-through; opacity: .7; }
 .cal-day .more { font-size: 11px; color: var(--muted); padding-left: 4px; }
 .cal-day .dots { display: none; gap: 3px; flex-wrap: wrap; justify-content: center; }
@@ -446,7 +449,8 @@ label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; wi
 .cal-day-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .cal-day-head h2 { font-size: 17px; }
 .cal-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.cal-item { width: 100%; display: flex; flex-direction: column; gap: 1px; text-align: left; font: inherit; color: var(--fg); background: var(--card); border: 0; border-left: 4px solid var(--kc); border-radius: 8px; box-shadow: var(--shadow); padding: 8px 10px; cursor: pointer; }
+.cal-item { width: 100%; display: flex; flex-direction: column; gap: 1px; text-align: left; font: inherit; color: var(--fg); border: 0; border-radius: 8px; box-shadow: var(--shadow); padding: 8px 10px 8px 14px; cursor: pointer;
+  background: var(--stripe, linear-gradient(var(--kc), var(--kc))) left / 4px 100% no-repeat, var(--card); }
 .cal-item .t { font-weight: 700; overflow-wrap: anywhere; }
 .cal-item .t.done { text-decoration: line-through; color: var(--muted); }
 .cal-items .empty { padding: 4px 2px; }
@@ -619,6 +623,19 @@ app-notifications-bell { position: relative; flex: none; }
 .profile-acts .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .me-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .me-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Tu nombre (PC) y tu foto (móvil) llevan a tu cuenta */
+a.me-who { color: var(--fg); text-decoration: none; border-radius: 10px; padding: 4px 6px; margin: 0 -6px; flex: 1; }
+a.me-who:hover, a.me-who.active { background: var(--bg); }
+a.me-who.active .me-name { color: var(--accent); font-weight: 700; }
+.me-btn { flex: none; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; }
+.me-btn.active .avatar { box-shadow: 0 0 0 2px var(--nav), 0 0 0 4px var(--accent); }
+/* Formularios de una columna dentro de un panel (contraseña) */
+.stack-form { display: flex; flex-direction: column; gap: 12px; }
+/* Menú: interruptor de "Mostrar en el calendario" y platos escritos a mano (sin receta) */
+.switch-inline { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; font-size: 14px; color: var(--muted); cursor: pointer; }
+.switch-inline input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+.dish.free .t { font-style: italic; }
+.stack-form label { display: flex; flex-direction: column; gap: 4px; }
 .me-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
 /* Botón de Casa (ajustes): junto a la campanita en el móvil y junto a tu nombre en el PC */
 .house-btn { flex: none; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--muted); }

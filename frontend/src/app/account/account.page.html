@@ -1,0 +1,123 @@
+<header class="top">
+  <div>
+    <h1>Tu cuenta</h1>
+    <p class="sub">Tu perfil y tus ajustes: son tuyos, valen para todas tus casas.</p>
+  </div>
+</header>
+
+@if (error() || status()) {
+  <div class="status" [class.err]="!!error()" role="status">{{ error() || status() }}</div>
+}
+
+@if (session.user(); as u) {
+  <div class="house-cols">
+    <div class="house-col">
+      <section class="panel">
+        <h2>Perfil</h2>
+        <div class="profile">
+          <span class="avatar lg" [attr.data-c]="session.household()?.color" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+          <div class="profile-who">
+            <span class="t">{{ u.name }}</span>
+            <span class="n">{{ u.email }}</span>
+            <span class="profile-acts">
+              <label class="link file">{{ u.avatarUrl ? 'Cambiar foto' : 'Poner foto' }}
+                <input type="file" accept="image/*" aria-label="Foto de perfil" (change)="pickAvatar($event)" />
+              </label>
+              @if (u.avatarUrl) {
+                <button type="button" class="link danger" (click)="removeAvatar()">Quitar</button>
+              }
+            </span>
+          </div>
+        </div>
+        @if (avatarBusy()) {
+          <p class="hint">Subiendo la foto…</p>
+        }
+        <form class="inline" (ngSubmit)="saveName()">
+          <label class="grow">
+            <span class="sr-only">Tu nombre</span>
+            <input name="name" required autocomplete="given-name" [maxlength]="nameMax" placeholder="Tu nombre" [(ngModel)]="name" />
+          </label>
+          <button type="submit" class="btn ghost" [disabled]="!name().trim() || name().trim() === u.name">Cambiar nombre</button>
+        </form>
+        <p class="n">Así te ven en todas tus casas.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Contraseña</h2>
+        @if (account(); as a) {
+          <form class="stack-form" #pwForm="ngForm" (ngSubmit)="pwForm.valid && savePassword(pwForm)">
+            @if (!a.password) {
+              <p class="n">Ahora entras solo con Google. Pon una contraseña para poder entrar también con tu correo.</p>
+            } @else {
+              <label><span>Contraseña actual <span class="req" aria-hidden="true">*</span></span>
+                <input type="password" name="current" autocomplete="current-password" required [(ngModel)]="current" />
+              </label>
+            }
+            <label><span>Contraseña nueva <span class="req" aria-hidden="true">*</span></span>
+              <input type="password" name="password" autocomplete="new-password" required [minlength]="passwordMin" [(ngModel)]="password" />
+              <span class="hint">Al menos {{ passwordMin }} caracteres.</span>
+            </label>
+            <label><span>Repite la nueva <span class="req" aria-hidden="true">*</span></span>
+              <input type="password" name="repeat" autocomplete="new-password" required [class.ng-invalid]="mismatch()" [(ngModel)]="repeat" />
+              @if (mismatch()) {
+                <span class="form-err">No coincide con la nueva.</span>
+              }
+            </label>
+            @if (pwError()) {
+              <p class="form-err" role="alert">{{ pwError() }}</p>
+            }
+            <div class="acts">
+              <span class="n">Se cerrará la sesión en tus otros dispositivos.</span>
+              <button type="submit" class="btn" [disabled]="pwBusy()">{{ a.password ? 'Cambiar contraseña' : 'Poner contraseña' }}</button>
+            </div>
+          </form>
+        }
+      </section>
+
+      <section class="panel">
+        <h2>Sesión</h2>
+        @if (googleError()) {
+          <p class="form-err" role="alert">{{ googleError() }}</p>
+        }
+        @if (account(); as a) {
+          @if (a.google) {
+            <div class="google-row">
+              <span class="n">Google conectado: puedes entrar con tu cuenta de Google.</span>
+              @if (a.password) {
+                <button type="button" class="link danger" (click)="unlinkGoogle()">Desconectar</button>
+              }
+            </div>
+          } @else {
+            <app-google-button mode="conectar" volver="/cuenta" label="Conectar con Google" />
+          }
+        }
+        <p class="n">¿Has entrado en un móvil u ordenador que ya no usas? Ciérrala allí desde aquí.</p>
+        <div class="acts">
+          <button type="button" class="btn ghost" (click)="logoutOthers()">Cerrar en los demás dispositivos</button>
+          <button type="button" class="btn ghost" (click)="logout()">Cerrar sesión</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="house-col">
+      <details class="panel fold" id="avisos">
+        <summary>
+          <h2>Qué avisos recibes</h2>
+          <span class="n">{{ kindsOn() }} de {{ kinds.length }}</span>
+        </summary>
+        <p class="n">Para ti, en todos tus dispositivos y en la campanita. Lo que desactives no te llegará.</p>
+        @for (k of kinds; track k) {
+          <label class="switch-row">
+            <input type="checkbox" [checked]="!notifyOff().includes(k)" (change)="setKind(k, $any($event.target).checked)" />
+            <span>
+              <span class="t">{{ kindLabels[k] }}</span>
+              <span class="n">{{ kindDescriptions[k] }}</span>
+            </span>
+          </label>
+        }
+      </details>
+
+      <section appDevicePanel></section>
+    </div>
+  </div>
+}

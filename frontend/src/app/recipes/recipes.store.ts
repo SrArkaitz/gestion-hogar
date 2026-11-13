@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { IsoDate, MenuEntry, MenuEntryInput, Recipe, RecipeInput, ShoppingItem, ShoppingLine } from '@hogar/shared';
+import { IsoDate, MenuEntry, MenuEntryInput, MenuSettings, Recipe, RecipeInput, ShoppingItem, ShoppingLine } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
 import { errorMessage } from '../core/errors';
 
@@ -106,6 +106,14 @@ export class RecipesStore {
 
   updateMenuEntry(id: string, patch: Partial<MenuEntryInput>): Promise<MenuEntry> {
     return firstValueFrom(this.http.patch<MenuEntry>(`${this.api}/menu/${id}`, patch));
+  }
+
+  menuSettings(): Promise<MenuSettings> {
+    return firstValueFrom(this.http.get<MenuSettings>(`${this.api}/menu/settings`));
+  }
+
+  setMenuSettings(settings: MenuSettings): Promise<MenuSettings> {
+    return firstValueFrom(this.http.put<MenuSettings>(`${this.api}/menu/settings`, settings));
   }
 
   async removeMenuEntry(id: string): Promise<void> {

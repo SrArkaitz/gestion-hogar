@@ -6,6 +6,11 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="houseIcon" /></svg>
     </a>
     <app-notifications-bell />
+    @if (session.user(); as u) {
+      <a class="me-btn" routerLink="/cuenta" routerLinkActive="active" ariaCurrentWhenActive="page" aria-label="Tu cuenta" title="Tu cuenta">
+        <span class="avatar md" [attr.data-c]="session.household()?.color" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+      </a>
+    }
   </header>
 
   <nav class="nav" aria-label="Módulos">
@@ -35,12 +40,12 @@
     </ul>
     <div class="me">
       <div class="me-row">
-        <span class="me-who">
+        <a class="me-who" routerLink="/cuenta" routerLinkActive="active" ariaCurrentWhenActive="page" title="Tu cuenta">
           @if (session.user(); as u) {
-            <span class="avatar" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+            <span class="avatar" [attr.data-c]="session.household()?.color" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
           }
           <span class="me-name">{{ session.user()?.name }}</span>
-        </span>
+        </a>
         <a class="house-btn" routerLink="/casa" routerLinkActive="active" ariaCurrentWhenActive="page" aria-label="Casa" title="Casa">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="houseIcon" /></svg>
         </a>

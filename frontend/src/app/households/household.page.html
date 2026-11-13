@@ -93,8 +93,6 @@
         </section>
       }
 
-      <section appDevicePanel></section>
-
     </div>
 
     <div class="house-col">
@@ -139,67 +137,13 @@
           </label>
           <button type="submit" class="btn ghost" [disabled]="!anotherName().trim()">Crear casa</button>
         </form>
-      </section>
-
-      <section class="panel">
-        <h2>Cuenta</h2>
-        @if (session.user(); as u) {
-          <div class="profile">
-            <span class="avatar lg" [attr.data-c]="myColor()" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
-            <div class="profile-who">
-              <span class="t">{{ u.name }}</span>
-              <span class="n">{{ u.email }}</span>
-              <span class="profile-acts">
-                <label class="link file">{{ u.avatarUrl ? 'Cambiar foto' : 'Poner foto' }}
-                  <input type="file" accept="image/*" aria-label="Foto de perfil" (change)="pickAvatar($event)" />
-                </label>
-                @if (u.avatarUrl) {
-                  <button type="button" class="link danger" (click)="removeAvatar()">Quitar</button>
-                }
-              </span>
-            </div>
-          </div>
-          @if (avatarBusy()) {
-            <p class="hint">Subiendo la foto…</p>
-          }
-        }
-        @if (googleError()) {
-          <p class="form-err" role="alert">{{ googleError() }}</p>
-        }
-        @if (session.me()?.account; as account) {
-          @if (account.google) {
-            <div class="google-row">
-              <span class="n">Google conectado: puedes entrar con tu cuenta de Google.</span>
-              @if (account.password) {
-                <button type="button" class="link danger" (click)="unlinkGoogle()">Desconectar</button>
-              }
-            </div>
-          } @else {
-            <app-google-button mode="conectar" volver="/casa" label="Conectar con Google" />
-          }
-        }
         <div class="acts">
-          <button type="button" class="btn ghost" (click)="logout()">Cerrar sesión</button>
+          <a class="link" routerLink="/cuenta">Tu cuenta, contraseña y avisos</a>
           <button type="button" class="btn danger" (click)="leave()">Salir de esta casa</button>
         </div>
       </section>
 
-      <details class="panel fold" id="avisos">
-        <summary>
-          <h2>Qué avisos recibes</h2>
-          <span class="n">{{ kindsOn() }} de {{ kinds.length }}</span>
-        </summary>
-        <p class="n">Para ti, en todos tus dispositivos y en la campanita. Lo que desactives no te llegará.</p>
-        @for (k of kinds; track k) {
-          <label class="switch-row">
-            <input type="checkbox" [checked]="!notifyOff().includes(k)" (change)="setKind(k, $any($event.target).checked)" />
-            <span>
-              <span class="t">{{ kindLabels[k] }}</span>
-              <span class="n">{{ kindDescriptions[k] }}</span>
-            </span>
-          </label>
-        }
-      </details>
+
     </div>
   </div>
 }

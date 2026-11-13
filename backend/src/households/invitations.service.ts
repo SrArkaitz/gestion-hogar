@@ -5,6 +5,7 @@ import {
   Invitation,
   INVITATION_DAYS,
   InvitationPreview,
+  MemberColor,
   nextMemberColor,
   Role,
 } from '@hogar/shared';
@@ -64,17 +65,18 @@ export class InvitationsService {
       where: { householdId_userId: { householdId: inv.householdId, userId } },
     });
     const summary = { id: inv.household.id, name: inv.household.name, hiddenModules: parseHidden(inv.household.hiddenModules) };
-    if (existing) return { ...summary, role: existing.role as Role };
+    if (existing) return { ...summary, role: existing.role as Role, color: existing.color as MemberColor };
 
-    await this.prisma.$transaction(async (tx) => {
+    const color = await this.prisma.$transaction(async (tx) => {
       // Se marca como usada solo si nadie la ha usado entre medias.
       const used = await tx.invitation.updateMany({ where: { id: inv.id, usedAt: null }, data: { usedAt: new Date() } });
       if (used.count === 0) throw new NotFoundException(INVALID);
       const members = await tx.householdMember.findMany({ where: { householdId: inv.householdId }, select: { color: true } });
       const color = nextMemberColor(members.map((m) => m.color));
       await tx.householdMember.create({ data: { householdId: inv.householdId, userId, role: 'miembro', color } });
+      return color;
     });
-    return { ...summary, role: 'miembro' };
+    return { ...summary, role: 'miembro', color };
   }
 
   private async findValid(token: string) {

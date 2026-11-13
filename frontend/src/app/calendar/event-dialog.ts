@@ -33,7 +33,7 @@ import { CalendarEvent, CalendarEventInput, EVENT_NOTES_MAX, EVENT_TITLE_MAX, Is
         }
         @if (members().length > 1) {
           <div>
-            <span class="lbl" id="event-people-lbl">De quién es <span class="hint">(si no eliges, de toda la casa)</span></span>
+            <span class="lbl" id="event-people-lbl">De quién es <span class="hint">(si no eliges a nadie, es para todos)</span></span>
             <div class="people" role="group" aria-labelledby="event-people-lbl">
               @for (m of members(); track m.id) {
                 <button type="button" [attr.data-c]="m.color" [attr.aria-pressed]="personIds().includes(m.id)" (click)="togglePerson(m.id)">

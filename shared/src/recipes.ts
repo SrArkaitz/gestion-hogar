@@ -85,20 +85,35 @@ export interface RecipeInput {
   private?: boolean;
 }
 
-/** Un plato en el menú: un día, comida o cena, y para cuántas raciones. */
+/** Largo máximo de un plato del menú escrito a mano (sin receta). */
+export const MENU_TITLE_MAX = 100;
+
+/**
+ * Un plato en el menú: un día, comida o cena, y para cuántas raciones. O lleva una receta del
+ * recetario (recipeId) o es un plato escrito a mano (title: "Pizza fuera", "Sobras").
+ */
 export interface MenuEntry {
   id: string;
   date: IsoDate;
   meal: Meal;
-  recipeId: string;
+  recipeId: string | null;
+  title: string | null;
   servings: number;
 }
 
 export interface MenuEntryInput {
   date: IsoDate;
   meal: Meal;
-  recipeId: string;
-  servings: number;
+  /** Una de las dos: la receta o el nombre del plato. */
+  recipeId?: string;
+  title?: string;
+  servings?: number;
+}
+
+/** Ajustes del menú de la casa. */
+export interface MenuSettings {
+  /** Los platos salen en el calendario (por defecto, sí). */
+  inCalendar: boolean;
 }
 
 /** Línea para la lista de la compra: nombre y cantidad ya sumada. */

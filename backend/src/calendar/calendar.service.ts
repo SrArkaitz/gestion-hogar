@@ -72,7 +72,7 @@ export class CalendarService {
     const from = date(fromValue, 'Fecha inicial'), to = date(toValue, 'Fecha final');
     const days = (Date.parse(to) - Date.parse(from)) / 86_400_000;
     if (days < 0 || days > CALENDAR_RANGE_MAX) throw new BadRequestException(`Rango de fechas no válido (máximo ${CALENDAR_RANGE_MAX} días)`);
-    const household = await this.prisma.household.findUniqueOrThrow({ where: { id: householdId }, select: { hiddenModules: true } });
+    const household = await this.prisma.household.findUniqueOrThrow({ where: { id: householdId }, select: { hiddenModules: true, menuInCalendar: true } });
     const hidden = parseHidden(household.hiddenModules);
     const uses = (key: ModuleKey) => !hidden.includes(key);
     const items: CalendarItem[] = [];
@@ -136,14 +136,17 @@ export class CalendarService {
       }
     }
 
-    if (uses('recetas')) {
+    if (uses('recetas') && household.menuInCalendar) {
       const menu = await this.prisma.menuEntry.findMany({
         where: { householdId, date: { gte: from, lte: to } },
         include: { recipe: { select: { name: true } } },
       });
       for (const m of menu) {
-        items.push(item('menu', m.date, m.recipe.name, m.recipeId, `/recetas/${m.recipeId}`, {
-          detail: `${MEAL_LABELS[m.meal as Meal]} · ${m.servings} rac.`,
+        // Los platos escritos a mano (sin receta) llevan al menú.
+        const title = m.recipe?.name ?? m.title ?? '';
+        const link = m.recipeId ? `/recetas/${m.recipeId}` : '/recetas/menu';
+        items.push(item('menu', m.date, title, m.recipeId ?? m.id, link, {
+          detail: m.recipeId ? `${MEAL_LABELS[m.meal as Meal]} · ${m.servings} rac.` : MEAL_LABELS[m.meal as Meal],
           // Que la comida vaya antes que la cena.
           time: m.meal === 'comida' ? '14:00' : '21:00',
         }));

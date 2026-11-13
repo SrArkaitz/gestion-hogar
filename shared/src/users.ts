@@ -63,6 +63,8 @@ export interface HouseholdSummary {
   role: Role;
   /** Secciones que la casa no usa (las eligen los administradores). */
   hiddenModules: ModuleKey[];
+  /** Tu color en esta casa. */
+  color: MemberColor;
 }
 
 /** Respuesta de /api/auth/me: quién soy y en qué casas estoy. */

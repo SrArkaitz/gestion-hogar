@@ -27,6 +27,7 @@ export const routes: Routes = [
       { path: 'inventario', canActivate: [sectionGuard('inventario')], loadChildren: () => import('./inventory/inventory.routes').then((m) => m.INVENTORY_ROUTES) },
       { path: 'mantenimiento', canActivate: [sectionGuard('mantenimiento')], title: 'Mantenimiento · Hogar', loadComponent: () => import('./maintenance/maintenance.page').then((m) => m.MaintenancePage) },
       { path: 'compra', canActivate: [sectionGuard('compra')], title: 'Compra · Hogar', loadComponent: () => import('./shopping/shopping.page').then((m) => m.ShoppingPage) },
+      { path: 'cuenta', title: 'Tu cuenta · Hogar', loadComponent: () => import('./account/account.page').then((m) => m.AccountPage) },
       { path: 'casa', title: 'Casa · Hogar', loadComponent: () => import('./households/household.page').then((m) => m.HouseholdPage) },
     ],
   },

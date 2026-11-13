@@ -17,31 +17,33 @@ datasource db {
 
 /// Una casa. Cada persona puede estar en varias.
 model Household {
-  id            String            @id @default(uuid())
-  name          String
+  id             String            @id @default(uuid())
+  name           String
   /// Secciones que la casa no usa, separadas por comas (claves de MODULES en @hogar/shared).
   /// Se ocultan pero no se borra nada. Vacío: se ven todas.
-  hiddenModules String            @default("")
-  createdAt     DateTime          @default(now())
-  members       HouseholdMember[]
-  invitations   Invitation[]
-  tasks         Task[]
-  ideas         Idea[]
-  recurring     RecurringTask[]
-  shopping      ShoppingItem[]
-  products      ShoppingProduct[]
-  recipes       Recipe[]
-  menu          MenuEntry[]
-  expenses      Expense[]
-  settlements   Settlement[]
-  bills         Bill[]
-  events        CalendarEvent[]
-  favorites     RecipeFavorite[]
-  comments      Comment[]
-  birthdays     Birthday[]
-  inventory     InventoryItem[]
-  equipment     Equipment[]
-  maintenance   Maintenance[]
+  hiddenModules  String            @default("")
+  /// Los platos del menú semanal salen en el calendario
+  menuInCalendar Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  members        HouseholdMember[]
+  invitations    Invitation[]
+  tasks          Task[]
+  ideas          Idea[]
+  recurring      RecurringTask[]
+  shopping       ShoppingItem[]
+  products       ShoppingProduct[]
+  recipes        Recipe[]
+  menu           MenuEntry[]
+  expenses       Expense[]
+  settlements    Settlement[]
+  bills          Bill[]
+  events         CalendarEvent[]
+  favorites      RecipeFavorite[]
+  comments       Comment[]
+  birthdays      Birthday[]
+  inventory      InventoryItem[]
+  equipment      Equipment[]
+  maintenance    Maintenance[]
 }
 
 model User {
@@ -336,8 +338,11 @@ model MenuEntry {
   date        String
   /// comida | cena
   meal        String
-  recipeId    String
-  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  /// Receta del recetario, o null si es un plato escrito a mano (title)
+  recipeId    String?
+  recipe      Recipe?   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  /// Plato sin receta ("Pizza fuera", "Sobras"); null si lleva receta
+  title       String?
   servings    Int
   createdAt   DateTime  @default(now())
 

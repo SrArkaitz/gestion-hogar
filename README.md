@@ -94,6 +94,8 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/auth/google` | Redirige a Google para entrar o registrarse; `?modo=conectar` lo conecta a la cuenta con sesión; `?volver=/ruta` (pública) |
 | GET    | `/api/auth/google/callback` | Vuelta desde Google; redirige a la app, con `?error=…` si algo falla (pública) |
 | DELETE | `/api/auth/google` | Desconecta Google (solo si la cuenta tiene contraseña) |
+| PUT    | `/api/auth/password` | Cambia la contraseña (`{ "current", "password" }`; sin `current` si la cuenta aún no tenía) y cierra las demás sesiones (`{ "closed": n }`) |
+| POST   | `/api/auth/logout-others` | Cierra la sesión en los demás dispositivos (`{ "closed": n }`) |
 | POST   | `/api/households` | Crea una casa; quien la crea es administrador |
 | GET    | `/api/households/:householdId` | Casa con sus miembros |
 | PATCH  | `/api/households/:householdId` | Cambia el nombre (`name`) o las secciones ocultas (`hiddenModules`: `tareas`, `calendario`, `ideas`, `compra`, `recetas`, `gastos`, `inventario`, `mantenimiento`) (admin) |
@@ -140,8 +142,10 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/households/:householdId/recipes/:id/photo` | Descarga la foto |
 | DELETE | `/api/households/:householdId/recipes/:id/photo` | Quita la foto |
 | GET    | `/api/households/:householdId/menu?from=AAAA-MM-DD&to=AAAA-MM-DD` | Platos del menú entre dos fechas |
-| POST   | `/api/households/:householdId/menu` | Pone un plato (`date`, `meal`: `comida` o `cena`, `recipeId`, `servings`) |
-| PATCH  | `/api/households/:householdId/menu/:id` | Cambia raciones, día o comida |
+| POST   | `/api/households/:householdId/menu` | Pone un plato (`date`, `meal`: `comida` o `cena`, y `recipeId` con `servings`, o `title` si es un plato sin receta) |
+| GET    | `/api/households/:householdId/menu/settings` | Ajustes del menú (`{ "inCalendar": true }`) |
+| PUT    | `/api/households/:householdId/menu/settings` | Si los platos salen en el calendario (`{ "inCalendar": false }`) |
+| PATCH  | `/api/households/:householdId/menu/:id` | Cambia raciones, día, comida o el nombre (`title`, solo si no lleva receta) |
 | DELETE | `/api/households/:householdId/menu/:id` | Quita un plato |
 | GET    | `/api/households/:householdId/expenses?from=AAAA-MM-DD&to=AAAA-MM-DD` | Gastos entre dos fechas |
 | GET    | `/api/households/:householdId/expenses/balances` | Saldo de cada persona y pagos para quedar en paz |
@@ -186,6 +190,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
+| PATCH  | `/api/users/me` | Cambia tu nombre (`{ "name" }`) |
 | PUT    | `/api/users/me/avatar` | Pone tu foto de perfil (la imagen tal cual en el cuerpo, JPG, PNG o WebP; hasta 2 MB) |
 | DELETE | `/api/users/me/avatar` | Quita tu foto de perfil |
 | PUT    | `/api/users/me/notifications` | Tipos de aviso que desactivas (`{ "off": ["comentarios", …] }`: `asignadas`, `comentarios`, `tareas`, `calendario`, `facturas`, `mantenimiento`); salen en `notifyOff` de `/api/auth/me` |

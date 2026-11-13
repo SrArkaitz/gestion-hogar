@@ -7,6 +7,7 @@ import {
   Meal,
   MEAL_LABELS,
   MEALS,
+  MENU_TITLE_MAX,
   MenuEntry,
   productKey,
   Recipe,
@@ -42,6 +43,15 @@ export class MenuPage {
   private readonly session = inject(SessionService);
   /** Sin la sección de Compra no se ofrece pasar ingredientes a la lista. */
   protected readonly usesShopping = computed(() => this.session.uses('compra'));
+  /** El interruptor de "salen en el calendario" solo tiene sentido si la casa lo usa. */
+  protected readonly usesCalendar = computed(() => this.session.uses('calendario'));
+  /** Los platos salen en el calendario (de la casa; por defecto, sí). null mientras carga. */
+  protected readonly inCalendar = signal<boolean | null>(null);
+  protected readonly titleMax = MENU_TITLE_MAX;
+  /** Plato escrito a mano en el diálogo de elegir. */
+  protected readonly freeTitle = signal('');
+  /** Nombre del plato sin receta que se está editando. */
+  protected readonly editTitle = signal('');
 
   protected readonly meals = MEALS;
   protected readonly mealLabels = MEAL_LABELS;
@@ -56,6 +66,9 @@ export class MenuPage {
   protected readonly loading = signal(true);
   protected readonly error = signal('');
   protected readonly notice = signal('');
+
+  /** Hay algún plato con receta (los escritos a mano no tienen ingredientes que pasar a la compra). */
+  protected readonly hasRecipes = computed(() => this.entries().some((e) => e.recipeId));
 
   protected readonly recipesById = computed(() => new Map(this.store.recipes().map((r) => [r.id, r])));
 
@@ -87,6 +100,10 @@ export class MenuPage {
     });
     effect(() => {
       const id = this.session.household()?.id;
+      if (id) void this.loadSettings(id);
+    });
+    effect(() => {
+      const id = this.session.household()?.id;
       const from = this.weekStart();
       if (id) void this.loadWeek(from);
     });
@@ -112,7 +129,66 @@ export class MenuPage {
     this.weekStart.set(startOfWeek(this.today));
   }
 
+  /** Nombre que se ve de un plato: el de su receta o el escrito a mano. */
+  protected dishName(e: MenuEntry): string {
+    return (e.recipeId ? this.recipesById().get(e.recipeId)?.name : e.title) ?? '';
+  }
+
+  /** Los platos con receta que ya no está en el recetario no se enseñan. */
+  protected visible(e: MenuEntry): boolean {
+    return !e.recipeId || this.recipesById().has(e.recipeId);
+  }
+
+  protected openEditor(e: MenuEntry) {
+    this.editTitle.set(e.title ?? '');
+    this.editing.set(e);
+  }
+
+  protected async pickFree() {
+    const slot = this.picking();
+    const title = this.freeTitle().trim();
+    if (!slot || !title) return;
+    await this.run(async () => {
+      const entry = await this.store.addToMenu({ ...slot, title });
+      this.entries.update((list) => [...list, entry]);
+      this.picking.set(null);
+    });
+  }
+
+  protected async renameEntry(entry: MenuEntry) {
+    const title = this.editTitle().trim();
+    if (!title || title === entry.title) return;
+    await this.run(async () => {
+      const updated = await this.store.updateMenuEntry(entry.id, { title });
+      this.entries.update((list) => list.map((e) => (e.id === entry.id ? updated : e)));
+      this.editing.set(null);
+    });
+  }
+
+  protected async setInCalendar(value: boolean) {
+    const before = this.inCalendar();
+    this.inCalendar.set(value);
+    await this.run(async () => {
+      try {
+        this.inCalendar.set((await this.store.setMenuSettings({ inCalendar: value })).inCalendar);
+      } catch (err) {
+        this.inCalendar.set(before);
+        throw err;
+      }
+    });
+  }
+
+  private async loadSettings(id: string) {
+    try {
+      const settings = await this.store.menuSettings();
+      if (this.session.household()?.id === id) this.inCalendar.set(settings.inCalendar);
+    } catch {
+      // Sin el ajuste se puede seguir usando el menú; solo no se enseña el interruptor.
+    }
+  }
+
   protected openPicker(slot: Slot) {
+    this.freeTitle.set('');
     this.search.set('');
     this.kind.set('');
     this.picking.set(slot);
@@ -148,7 +224,7 @@ export class MenuPage {
 
   protected openPreview() {
     const dishes = this.entries()
-      .map((e) => ({ e, r: this.recipesById().get(e.recipeId) }))
+      .map((e) => ({ e, r: e.recipeId ? this.recipesById().get(e.recipeId) : undefined }))
       .filter((x): x is { e: MenuEntry; r: Recipe } => !!x.r)
       .map(({ e, r }) => ({ ingredients: r.ingredients, factor: e.servings / r.servings }));
     this.preview.set(shoppingLines(dishes));

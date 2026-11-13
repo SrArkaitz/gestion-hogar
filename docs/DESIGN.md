@@ -43,8 +43,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 ### 3.0 Usuarios y casas
 
 - **Cuenta:** nombre, correo y contraseña (mínimo 8 caracteres), o con Google. El registro está abierto a cualquiera.
-- **Foto de perfil:** cada uno pone la suya en *Casa → Cuenta* (y la cambia o la quita). El navegador la recorta en cuadrado y la reduce a 256 px antes de subirla. Sale en el círculo donde estaban sus iniciales: tarjetas, calendario, comentarios, gastos, miembros y el menú. Sin foto siguen las iniciales con su color. Solo la ven las personas con las que comparte casa. Se guarda con las fotos de las recetas, así que entra en la copia diaria.
-- **Con Google:** entrar con Google crea la cuenta si no existe (sin contraseña). Si ya hay una cuenta con contraseña y el mismo correo, no se une sola, porque el registro no verifica correos y otra persona podría haberla creado. Se conecta desde *Casa → Cuenta* con la sesión iniciada. Se puede desconectar si la cuenta tiene contraseña.
+- **Foto de perfil:** cada uno pone la suya en *Tu cuenta* (y la cambia o la quita). El navegador la recorta en cuadrado y la reduce a 256 px antes de subirla. Sale en el círculo donde estaban sus iniciales: tarjetas, calendario, comentarios, gastos, miembros y el menú. Sin foto siguen las iniciales con su color. Solo la ven las personas con las que comparte casa. Se guarda con las fotos de las recetas, así que entra en la copia diaria.
+- **Con Google:** entrar con Google crea la cuenta si no existe (sin contraseña). Si ya hay una cuenta con contraseña y el mismo correo, no se une sola, porque el registro no verifica correos y otra persona podría haberla creado. Se conecta desde *Tu cuenta* con la sesión iniciada. Se puede desconectar si la cuenta tiene contraseña.
 - **Casas:** cualquiera puede crear las que quiera. Al registrarse sin invitación se pide crear la primera.
 - **Color de cada persona:** cada miembro tiene un color en cada casa, de una paleta de 10 (la de las etiquetas de Trello). Al entrar recibe el primero libre. Cada uno cambia el suyo desde *Casa → Miembros*; los administradores, el de cualquiera.
 - **Roles por casa:** *administrador* o *miembro*. Una misma persona puede ser administradora en una casa y miembro en otra.
@@ -52,10 +52,11 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Invitaciones:** enlace de un solo uso que caduca en 7 días y se puede anular. Quien lo abre sin cuenta puede registrarse y vuelve a la invitación para aceptarla.
 - **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, deja de estar asignado a las tareas de esa casa.
 - **Secciones de cada casa:** en *Casa → Secciones* los administradores eligen qué usa la casa (Tareas, Ideas, Compra, Gastos y facturas, Recetas…). Lo que se desmarca se oculta para todos: sale de la navegación, sus rutas de la API responden como si no existieran y se dejan de enviar sus avisos (y, en Tareas, de crear las recurrentes). No se borra nada, por si se vuelve a mostrar. Una casa nueva trae Inventario y Mantenimiento desactivados (se activan aquí cuando se quieran); el resto, activado. *Casa* siempre se ve. Al entrar se va a la primera sección que use la casa. Para no dejar nada a medias, sin Tareas no se puede aceptar una idea y sin Compra las recetas no ofrecen "Añadir a la compra".
-- **Tema:** claro, oscuro o el del sistema, desde *Casa → Cuenta*. Se guarda en cada dispositivo (no en la cuenta), así el móvil y el PC pueden tener uno distinto.
+- **Tema:** claro, oscuro o el del sistema, desde *Tu cuenta → Este dispositivo*. Se guarda en cada dispositivo (no en la cuenta), así el móvil y el PC pueden tener uno distinto.
 - **Formularios:** los campos obligatorios llevan un * rojo junto a su etiqueta; los opcionales no llevan nada. Un campo mal rellenado (obligatorio vacío, un número fuera de rango, un correo sin @…) se pone en rojo, también con el foco, en cuanto se toca o se intenta guardar; al abrir el formulario no sale nada en rojo.
 - **Casa activa:** se elige en un selector (barra lateral en PC, barra superior en móvil) y se recuerda en el navegador.
 - **Botón de Casa** (los ajustes): no va con las secciones. En el móvil está en la barra de arriba, a la izquierda de la campanita; en el PC, abajo, junto a tu nombre.
+- **Tu cuenta** (`/cuenta`): se abre tocando tu nombre abajo (PC) o tu foto arriba a la derecha (móvil). Lleva lo que es de la persona y vale para todas sus casas: foto y nombre; contraseña (pide la actual; si la cuenta solo tenía Google, se pone una nueva) y, al cambiarla, se cierra la sesión en los demás dispositivos; conectar o desconectar Google; cerrar la sesión en los demás dispositivos o en este; qué avisos recibes; y *Este dispositivo* (tema, avisos push, instalar). En *Casa* queda solo lo de la casa. Tu foto sin imagen lleva tu color en la casa activa.
 
 ### 3.1 Tareas
 
@@ -77,12 +78,12 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.1b Avisos y app instalable
 
-- **App instalable (PWA):** manifiesto, iconos y un service worker. Se instala desde el menú del navegador o desde *Casa → Este dispositivo*; en iPhone, con Compartir → Añadir a pantalla de inicio. El service worker guarda la app y lo que necesita la compra para usarla sin conexión (ver 3.3), pero siempre pide primero a la red: lo guardado solo se usa cuando no hay conexión, así nunca se queda una versión vieja. Al arrancar se descargan todas las secciones para que también se puedan abrir sin conexión.
-- **Avisos push:** cada persona los activa en cada dispositivo desde *Casa → Este dispositivo*, donde también puede mandarse uno de prueba. En iPhone y iPad solo funcionan con la app instalada (iOS 16.4 o posterior).
+- **App instalable (PWA):** manifiesto, iconos y un service worker. Se instala desde el menú del navegador o desde *Tu cuenta → Este dispositivo*; en iPhone, con Compartir → Añadir a pantalla de inicio. El service worker guarda la app y lo que necesita la compra para usarla sin conexión (ver 3.3), pero siempre pide primero a la red: lo guardado solo se usa cuando no hay conexión, así nunca se queda una versión vieja. Al arrancar se descargan todas las secciones para que también se puedan abrir sin conexión.
+- **Avisos push:** cada persona los activa en cada dispositivo desde *Tu cuenta → Este dispositivo*, donde también puede mandarse uno de prueba. En iPhone y iPad solo funcionan con la app instalada (iOS 16.4 o posterior).
   - **Recordatorio diario a las 9:00:** un aviso por casa con las tareas sin hacer que vencen ese día o ya han vencido. Las asignadas le llegan a quien las tiene; las sin asignar, a toda la casa.
   - **Al asignar una tarea:** aviso a quien acaba de entrar en ella, salvo a quien la asigna.
   - Tocar un aviso abre la página en la casa que corresponde (`?casa=`), aunque la activa fuera otra.
-- **Qué avisos recibes** (*Casa*): cada persona activa o desactiva cada tipo: tareas que te asignan, comentarios, tareas pendientes, calendario y cumpleaños, facturas y revisiones. Es de la persona, para todos sus dispositivos y la campanita: lo desactivado no le llega por ningún sitio. Por defecto, todos activados. El aviso de prueba llega siempre.
+- **Qué avisos recibes** (*Tu cuenta*): cada persona activa o desactiva cada tipo: tareas que te asignan, comentarios, tareas pendientes, calendario y cumpleaños, facturas y revisiones. Es de la persona, para todos sus dispositivos y la campanita: lo desactivado no le llega por ningún sitio. Por defecto, todos activados. El aviso de prueba llega siempre.
 - **Campanita:** cada aviso que manda la app (tareas asignadas, recordatorios de las 9:00, facturas, calendario, mantenimiento y el de prueba) queda guardado para su destinatario, tenga o no push en ese dispositivo. La campanita va arriba (en el móvil, en la barra de la casa; en el PC, junto al nombre de la app) con el número de no leídos. Al tocar un aviso se abre su página y queda leído; también se pueden marcar todos. Son de la persona, de todas sus casas. Se miran al abrir la app, cada minuto y al volver a ella, y se guardan 60 días.
 - **Claves VAPID:** el servidor las genera la primera vez y las guarda en la base de datos; no hay nada que configurar. Al cerrar sesión se quitan los avisos de ese dispositivo.
 
@@ -118,9 +119,10 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 **Menú semanal (opcional)**
 
-- Vista de la semana con comida y cena por día para elegir platos.
+- Vista de la semana con comida y cena por día para elegir platos: una receta del recetario o un plato escrito a mano ("Pizza fuera", "Sobras"), que no necesita receta (se le puede cambiar el nombre; no lleva raciones ni ingredientes).
+- **Mostrar en el calendario** (interruptor del menú, de la casa, lo cambia cualquiera): los platos salen en el calendario. Por defecto, sí. Los escritos a mano llevan al menú al tocarlos.
 - No es obligatorio usarlo: el recetario funciona por sí solo.
-- Botón "Añadir a la compra": suma los ingredientes de los platos de la semana (una sola línea por ingrediente repetido) y los pasa a la lista.
+- Botón "Añadir a la compra": suma los ingredientes de los platos con receta de la semana (una sola línea por ingrediente repetido) y los pasa a la lista.
 
 **Cómo funciona**
 
@@ -146,7 +148,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 - **Vista de mes y de semana** con lo que tiene fecha en las secciones que use la casa: tareas con fecha límite, las próximas veces de las tareas recurrentes, platos del menú y vencimientos de facturas (también los de los meses siguientes). Cada cosa lleva a su sección. En el mes, al tocar un día se ve su lista; en el móvil, cada día enseña puntos de colores por tipo.
 - **Cumpleaños:** nombre, día y mes, y año si se sabe (para decir cuántos cumple). El aviso llega a todos el mismo día del cumpleaños, sin antelación que elegir. Se repiten cada año; el 29 de febrero, los años no bisiestos, cae el 28. Pestaña propia, del más cercano al más lejano.
-- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna si es de toda la casa. Sus iniciales salen en el calendario con el color de cada uno.
+- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna: entonces es para todos. Se pinta con el color de su persona; si es de varias (o de todos), con los colores de todas en franjas, y salen sus iconos. En el móvil, los puntos de cada día llevan esos colores. Lo demás (tareas, menú, facturas…) va con el color de su tipo.
 - **Avisos** a las 9:00: los eventos que empiezan ese día, solo a sus personas (a toda la casa si no tienen), y los cumpleaños de ese día, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
 - Es una sección más: se puede ocultar en *Casa → Secciones*.
 
@@ -272,3 +274,6 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-13 | Cada persona elige qué tipos de aviso recibe; lo desactivado no llega ni al móvil ni a la campanita. |
 | 2026-11-13 | Compra sin conexión: el service worker guarda la app y la última lista; lo tachado se envía al volver la conexión. |
 | 2026-11-13 | Casas nuevas con Inventario y Mantenimiento desactivados; el botón de Casa pasa junto a la campanita (móvil) o junto a tu nombre (PC); los ingredientes nuevos van en unidades. |
+| 2026-11-13 | *Tu cuenta* sale de *Casa* a su propia página, desde tu nombre (PC) o tu foto (móvil): foto, nombre, contraseña, Google, cerrar sesión en los demás dispositivos, avisos y este dispositivo. |
+| 2026-11-13 | Calendario: cada evento con el color de su persona (varias: todos sus colores; nadie: de toda la casa). |
+| 2026-11-13 | Menú: platos escritos a mano sin receta, e interruptor para que el menú salga o no en el calendario. |

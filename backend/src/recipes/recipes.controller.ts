@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { MenuEntry, Recipe, User } from '@hogar/shared';
+import { MenuEntry, MenuSettings, Recipe, User } from '@hogar/shared';
 import type { Response } from 'express';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
@@ -89,6 +89,17 @@ export class MenuController {
   @Post()
   create(@Param('householdId') householdId: string, @Body() body: unknown): Promise<MenuEntry> {
     return this.menu.create(householdId, body);
+  }
+
+  /** Si los platos salen en el calendario (lo cambia cualquiera de la casa). */
+  @Get('settings')
+  settings(@Param('householdId') householdId: string): Promise<MenuSettings> {
+    return this.menu.settings(householdId);
+  }
+
+  @Put('settings')
+  setSettings(@Param('householdId') householdId: string, @Body() body: unknown): Promise<MenuSettings> {
+    return this.menu.setSettings(householdId, body);
   }
 
   @Patch(':id')
