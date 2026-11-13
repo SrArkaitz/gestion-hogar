@@ -10,3 +10,4 @@ export * from './expenses';
 export * from './modules';
 export * from './calendar';
 export * from './inventory';
+export * from './comments';

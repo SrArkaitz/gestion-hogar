@@ -42,6 +42,16 @@ export class TasksStore {
     }
   }
 
+  /** API de los comentarios de una tarea. */
+  commentsApi(id: string): string {
+    return `${this.api}/${id}/comments`;
+  }
+
+  /** Actualiza el contador de comentarios de la tarjeta. */
+  setCommentCount(id: string, commentCount: number) {
+    this.tasks.update((list) => list.map((t) => (t.id === id && t.commentCount !== commentCount ? { ...t, commentCount } : t)));
+  }
+
   async create(input: TaskInput): Promise<void> {
     const task = await firstValueFrom(this.http.post<Task>(this.api, input));
     this.tasks.update((list) => [...list, task]);

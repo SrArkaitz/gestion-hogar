@@ -111,6 +111,9 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/households/:householdId/tasks/:id` | Borra una tarea |
 | POST   | `/api/households/:householdId/tasks/:id/archive` | Archiva una tarea hecha (las hechas se archivan solas a los 7 días) |
 | POST   | `/api/households/:householdId/tasks/:id/unarchive` | La devuelve al tablero, en Hecho |
+| GET    | `/api/households/:householdId/tasks/:id/comments` | Comentarios de una tarea, del más antiguo al más reciente (también `ideas/:id/comments`) |
+| POST   | `/api/households/:householdId/tasks/:id/comments` | Comenta (`{ "text": "…" }`, hasta 1000 caracteres); avisa a quien está en la tarea |
+| DELETE | `/api/households/:householdId/tasks/:id/comments/:commentId` | Borra un comentario (el tuyo, o cualquiera si eres administrador) |
 | POST   | `/api/households/:householdId/tasks/archive-done` | Archiva todas las hechas de un tablero (`{ "personal": true }` para el de personales) |
 | GET    | `/api/households/:householdId/recurring` | Tareas recurrentes de la casa |
 | POST   | `/api/households/:householdId/recurring` | Crea una; si empieza hoy, crea ya su tarea |
@@ -190,7 +193,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/ideas` | Propone una idea (`title`, `description`, `category`) |
 | PATCH  | `/api/households/:householdId/ideas/:id` | Edita una idea o cambia su `status` a `nueva`, `en_valoracion` o `descartada` |
 | DELETE | `/api/households/:householdId/ideas/:id` | Borra una idea (quien la propuso o un administrador) |
-| POST   | `/api/households/:householdId/ideas/:id/accept` | Acepta la idea y crea su tarea (`{ "priority": "alta" }`) |
+| POST   | `/api/households/:householdId/ideas/:id/accept` | Acepta la idea y crea su tarea (`{ "priority": "alta", "personal": false }`; con `personal: true`, a tus tareas personales) |
 
 Cuerpo de una tarea (solo `title` y `priority` son obligatorios al crearla):
 

@@ -102,6 +102,9 @@
               @if (task.category) {
                 <span class="tag">{{ task.category }}</span>
               }
+              @if (task.commentCount) {
+                <span class="c-count" [attr.aria-label]="commentsLabel(task.commentCount)">💬 {{ task.commentCount }}</span>
+              }
               @if (task.assigneeIds.length && !personal()) {
                 <span class="avatars" role="img" [attr.aria-label]="assigneesLabel(task)">
                   @for (m of assignees(task); track m.id) {
@@ -139,6 +142,8 @@
     [usedCategories]="categories()"
     [initialStatus]="newStatus()"
     [personal]="personal()"
+    [commentsApi]="editing() ? store.commentsApi(editing()!.id) : null"
+    (commentCount)="onCommentCount($event)"
     (save)="onSave($event)"
     (delete)="onDelete()"
     (archive)="onArchive()"

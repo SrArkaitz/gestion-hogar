@@ -52,10 +52,20 @@ export class IdeasStore {
     this.replace(idea);
   }
 
-  /** Acepta la idea y crea su tarea en el tablero. */
-  async accept(id: string, priority: Priority): Promise<void> {
-    const { idea } = await firstValueFrom(this.http.post<AcceptIdeaResult>(`${this.api}/${id}/accept`, { priority }));
+  /** Acepta la idea y crea su tarea, en el tablero del hogar o en tus personales. */
+  async accept(id: string, priority: Priority, personal: boolean): Promise<void> {
+    const { idea } = await firstValueFrom(this.http.post<AcceptIdeaResult>(`${this.api}/${id}/accept`, { priority, personal }));
     this.replace(idea);
+  }
+
+  /** API de los comentarios de una idea. */
+  commentsApi(id: string): string {
+    return `${this.api}/${id}/comments`;
+  }
+
+  /** Actualiza el contador de comentarios de la tarjeta. */
+  setCommentCount(id: string, commentCount: number) {
+    this.ideas.update((list) => list.map((i) => (i.id === id && i.commentCount !== commentCount ? { ...i, commentCount } : i)));
   }
 
   async remove(id: string): Promise<void> {

@@ -61,6 +61,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Columnas:** Por hacer, En curso y Hecho. Se mueven arrastrando, también en el móvil.
 - **Campos:** título, notas, prioridad, fecha límite (opcional), personas asignadas (ninguna, una o varias) y categoría (por ejemplo Casa, Recados o Papeleo) para filtrar.
 - **Tarjetas:** el lateral lleva el color de la persona asignada; si hay varias, se reparte a partes iguales entre sus colores (con dos, mitad y mitad). Sin nadie asignado, el lateral es gris. La prioridad se ve en su etiqueta.
+- **Comentarios:** al abrir una tarea o una idea, debajo de sus campos sale la conversación (del más antiguo al más reciente) y una caja para escribir (Ctrl+Intro también envía). La tarjeta enseña 💬 con cuántos tiene. Cada uno borra los suyos; un administrador, cualquiera. Al comentar se avisa a quien la creó o propuso, a sus personas asignadas y a quien ya había comentado (salvo a quien escribe y a quien ya no está en la casa); el aviso abre la tarea o la idea con sus comentarios. En una tarea personal solo comenta su dueño y no avisa a nadie.
 - **Orden:** dentro de cada columna, primero por prioridad y luego por antigüedad. Las tareas vencidas se marcan.
 - **Archivar:** al pasar a Hecho se apunta cuándo. A los 7 días en Hecho se archivan solas (cada noche a las 00:05 y al arrancar el servidor), para que el tablero no se llene. Se pueden archivar antes a mano: una desde su diálogo o todas las hechas del tablero con *Archivar todas*. En *Ver archivadas* (al pie de Hecho) se recuperan, y vuelven a Hecho con la semana de nuevo, o se borran. Sacar una tarea de Hecho la deja sin fecha de hecha.
 - **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Del hogar → Recurrentes*.
@@ -85,7 +86,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - Es la tercera pestaña de *Tareas*. Se puede ocultar por separado en *Casa → Secciones*.
 - **Campos:** título, descripción, categoría (casa, viaje, compra grande, proyecto…), quién la propone y fecha.
 - **Estados:** Nueva, En valoración, Aceptada y Descartada.
-- **Aceptar:** se elige la prioridad y se crea una tarea en «Por hacer» con el título, la descripción (como notas) y la categoría de la idea, que queda enlazada a ella. Una idea aceptada ya no cambia de estado; si su tarea se borra, la idea sigue como aceptada.
+- **Aceptar:** se elige la prioridad y a qué tareas va: *Del hogar* (la opción de siempre) o *Personales*, las de quien la acepta, que solo verá esa persona (los demás ven «En las tareas personales de…»). Se crea una tarea en «Por hacer» con el título, la descripción (como notas) y la categoría de la idea, que queda enlazada a ella. Una idea aceptada ya no cambia de estado; si su tarea se borra, la idea sigue como aceptada.
+- **Comentarios:** como en las tareas (ver 3.1). Se quedan en la idea al aceptarla.
 - **Descartar:** las descartadas se archivan en su pestaña y se pueden recuperar. Borrar una idea solo pueden hacerlo quien la propuso o un administrador.
 
 ### 3.3 Lista de la compra
@@ -255,3 +257,5 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-12 | Los eventos del calendario pueden ser de una o varias personas; el aviso les llega solo a ellas. |
 | 2026-11-12 | Recetas favoritas por casa: las marca cualquiera y las ve toda la casa. |
 | 2026-11-12 | Campanita de avisos: se guarda cada aviso que se manda (en el mismo sitio que el push), 60 días. |
+| 2026-11-13 | Comentarios en tareas e ideas, con aviso a quien está metido en la tarjeta. |
+| 2026-11-13 | Al aceptar una idea se elige si la tarea va al hogar o a las personales de quien la acepta. |

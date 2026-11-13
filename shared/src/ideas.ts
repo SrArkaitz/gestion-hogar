@@ -23,6 +23,11 @@ export interface Idea {
   proposedById: string;
   /** Tarea creada al aceptarla. */
   taskId: string | null;
+  /** Si esa tarea es personal (solo la ve quien aceptó la idea, taskOwnerId). */
+  taskPersonal: boolean;
+  taskOwnerId: string | null;
+  /** Cuántos comentarios tiene. */
+  commentCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +43,8 @@ export interface IdeaInput {
 /** Datos para convertir una idea aceptada en tarea. */
 export interface AcceptIdeaInput {
   priority: Priority;
+  /** A las tareas personales de quien la acepta, en vez de a las del hogar. */
+  personal?: boolean;
 }
 
 export interface AcceptIdeaResult {

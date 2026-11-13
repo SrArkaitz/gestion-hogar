@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { AcceptIdeaResult, Idea, IdeaInput, IdeaStatus, IDEA_STATUSES, PRIORITIES, Role } from '@hogar/shared';
 import { asObject, oneOf, requiredText } from '../common/validation';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TasksService } from '../tasks/tasks.service';
 
@@ -9,17 +10,11 @@ const CATEGORY_MAX = 40;
 /** Estados que se pueden poner a mano; "aceptada" solo al aceptarla. */
 const EDITABLE_STATUSES = IDEA_STATUSES.filter((s) => s !== 'aceptada') as Exclude<IdeaStatus, 'aceptada'>[];
 
-interface Row {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  category: string | null;
-  proposedById: string;
-  taskId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+const include = {
+  task: { select: { personal: true, createdById: true } },
+  _count: { select: { comments: true } },
+} as const;
+type Row = Prisma.IdeaGetPayload<{ include: typeof include }>;
 
 const toIdea = (r: Row): Idea => ({
   id: r.id,
@@ -29,6 +24,9 @@ const toIdea = (r: Row): Idea => ({
   category: r.category,
   proposedById: r.proposedById,
   taskId: r.taskId,
+  taskPersonal: !!r.task?.personal,
+  taskOwnerId: r.task?.createdById ?? null,
+  commentCount: r._count.comments,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
 });
@@ -42,7 +40,7 @@ export class IdeasService {
   ) {}
 
   async list(householdId: string): Promise<Idea[]> {
-    const rows = await this.prisma.idea.findMany({ where: { householdId }, orderBy: { createdAt: 'desc' } });
+    const rows = await this.prisma.idea.findMany({ where: { householdId }, include, orderBy: { createdAt: 'desc' } });
     return rows.map(toIdea);
   }
 
@@ -57,6 +55,7 @@ export class IdeasService {
         category: input.category ?? null,
         status: input.status ?? 'nueva',
       },
+      include,
     });
     return toIdea(row);
   }
@@ -67,7 +66,7 @@ export class IdeasService {
     if (patch.status && idea.status === 'aceptada') {
       throw new BadRequestException('La idea ya está aceptada y tiene su tarea');
     }
-    return toIdea(await this.prisma.idea.update({ where: { id }, data: patch }));
+    return toIdea(await this.prisma.idea.update({ where: { id }, data: patch, include }));
   }
 
   /** Solo quien la propuso o un administrador. Lo normal es descartarla, que la deja archivada. */
@@ -79,11 +78,17 @@ export class IdeasService {
     await this.prisma.idea.delete({ where: { id } });
   }
 
-  /** Crea la tarea con el título, la descripción y la categoría de la idea, y las enlaza. */
+  /**
+   * Crea la tarea con el título, la descripción y la categoría de la idea, y las enlaza.
+   * Con personal: true va a las tareas personales de quien la acepta.
+   */
   async accept(householdId: string, id: string, userId: string, body: unknown): Promise<AcceptIdeaResult> {
     const idea = await this.find(householdId, id);
     if (idea.status === 'aceptada') throw new BadRequestException('La idea ya está aceptada');
-    const priority = oneOf(asObject(body)['priority'], PRIORITIES, 'Prioridad');
+    const b = asObject(body);
+    const priority = oneOf(b['priority'], PRIORITIES, 'Prioridad');
+    if (b['personal'] !== undefined && typeof b['personal'] !== 'boolean') throw new BadRequestException('«Personal» tiene que ser sí o no');
+    const personal = b['personal'] === true;
 
     return this.prisma.$transaction(async (tx) => {
       // Se marca primero para que dos aceptaciones a la vez no creen dos tareas.
@@ -92,10 +97,10 @@ export class IdeasService {
       const task = await this.tasks.create(
         householdId,
         userId,
-        { title: idea.title, notes: idea.description, category: idea.category, priority },
+        { title: idea.title, notes: idea.description, category: idea.category, priority, personal },
         tx,
       );
-      const updated = await tx.idea.update({ where: { id }, data: { taskId: task.id } });
+      const updated = await tx.idea.update({ where: { id }, data: { taskId: task.id }, include });
       return { idea: toIdea(updated), task: { ...task, ideaId: id } };
     });
   }

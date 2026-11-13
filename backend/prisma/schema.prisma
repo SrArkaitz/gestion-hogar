@@ -37,6 +37,7 @@ model Household {
   bills         Bill[]
   events        CalendarEvent[]
   favorites     RecipeFavorite[]
+  comments      Comment[]
   birthdays     Birthday[]
   inventory     InventoryItem[]
   equipment     Equipment[]
@@ -72,6 +73,7 @@ model User {
   eventsJoined      CalendarEventPerson[]
   favoritesMarked   RecipeFavorite[]
   notifications     UserNotification[]
+  comments          Comment[]
 }
 
 /// Pertenencia de una persona a una casa.
@@ -149,6 +151,7 @@ model Task {
   createdById String
   createdBy   User           @relation("TaskCreatedBy", fields: [createdById], references: [id])
   idea        Idea?
+  comments    Comment[]
   /// Plantilla que la creó, si es una tarea recurrente
   recurringId String?
   recurring   RecurringTask? @relation(fields: [recurringId], references: [id], onDelete: SetNull)
@@ -239,6 +242,7 @@ model Idea {
   proposedBy   User      @relation(fields: [proposedById], references: [id])
   taskId       String?   @unique
   task         Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  comments     Comment[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -568,4 +572,22 @@ model UserNotification {
   createdAt DateTime  @default(now())
 
   @@index([userId, createdAt])
+}
+
+/// Comentario en una tarea o en una idea (uno de los dos).
+model Comment {
+  id          String    @id @default(uuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  ideaId      String?
+  idea        Idea?     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  text        String
+  createdAt   DateTime  @default(now())
+
+  @@index([taskId, createdAt])
+  @@index([ideaId, createdAt])
 }

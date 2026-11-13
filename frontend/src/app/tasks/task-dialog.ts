@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Comments } from './comments';
 import {
   Member,
   PRIORITIES,
@@ -16,7 +17,7 @@ import {
 /** Formulario para crear o editar una tarea. */
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, Comments],
   template: `
     <div class="veil" (click)="close.emit()">
       <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="task() ? 'Editar tarea' : 'Nueva tarea'"
@@ -80,6 +81,10 @@ import {
           </label>
         }
 
+        @if (task() && commentsApi()) {
+          <app-comments [api]="commentsApi()!" [members]="members()" (countChange)="commentCount.emit($event)" />
+        }
+
         @if (error()) {
           <p class="form-err" role="alert">{{ error() }}</p>
         }
@@ -109,12 +114,16 @@ export class TaskDialog implements OnInit {
   readonly initialStatus = input<TaskStatus>('por_hacer');
   /** Tarea personal: no se asigna a nadie (es de quien la crea). */
   readonly personal = input(false);
+  /** API de sus comentarios (solo al editar). */
+  readonly commentsApi = input<string | null>(null);
 
   readonly save = output<TaskInput>();
   readonly delete = output<void>();
   /** Quitarla del tablero (solo si ya está hecha). */
   readonly archive = output<void>();
   readonly close = output<void>();
+  /** Cuántos comentarios tiene ahora. */
+  readonly commentCount = output<number>();
 
   protected readonly priorities = PRIORITIES;
   protected readonly priorityLabels = PRIORITY_LABELS;

@@ -1,5 +1,5 @@
-import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { Idea, IDEA_STATUS_LABELS, IdeaInput, IdeaStatus, PRIORITIES, PRIORITY_LABELS, Priority } from '@hogar/shared';
 import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
@@ -42,6 +42,14 @@ export class IdeasPage {
   /** Idea que se está aceptando (diálogo de prioridad). */
   protected readonly accepting = signal<Idea | null>(null);
   protected readonly acceptPriority = signal<Priority>('media');
+  /** Aceptarla a las tareas personales de quien la acepta. */
+  protected readonly acceptPersonal = signal(false);
+  /** Tablero al que lleva el aviso tras aceptar. */
+  protected readonly noticeLink = signal('/tareas/hogar');
+  protected readonly me = computed(() => this.session.user()?.id);
+  /** ?idea=<id> (los avisos de comentarios enlazan así): abre esa idea al cargar. */
+  readonly idea = input<string>();
+  private readonly router = inject(Router);
   protected readonly acceptError = signal('');
   protected readonly busy = signal(false);
   /** Aviso tras aceptar, con enlace al tablero. */
@@ -75,6 +83,31 @@ export class IdeasPage {
         this.store.load(id);
       }
     });
+    effect(() => {
+      const id = this.idea();
+      if (!id || this.store.loading()) return;
+      const idea = this.store.ideas().find((i) => i.id === id);
+      untracked(() => {
+        if (idea) {
+          this.tab.set((Object.keys(TAB_STATUSES) as Tab[]).find((t) => TAB_STATUSES[t].includes(idea.status)) ?? 'abiertas');
+          this.editing.set(idea);
+        }
+        void this.router.navigate([], { queryParams: { idea: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      });
+    });
+  }
+
+  protected ownerName(idea: Idea): string {
+    return this.memberNames().get(idea.taskOwnerId ?? '') ?? 'alguien que ya no está';
+  }
+
+  protected commentsLabel(n: number): string {
+    return n === 1 ? '1 comentario' : `${n} comentarios`;
+  }
+
+  protected onCommentCount(n: number) {
+    const idea = this.editing();
+    if (idea) this.store.setCommentCount(idea.id, n);
   }
 
   protected canDelete(idea: Idea): boolean {
@@ -98,6 +131,7 @@ export class IdeasPage {
 
   protected startAccept(idea: Idea) {
     this.acceptPriority.set('media');
+    this.acceptPersonal.set(false);
     this.acceptError.set('');
     this.accepting.set(idea);
   }
@@ -107,9 +141,11 @@ export class IdeasPage {
     if (!idea || this.busy()) return;
     this.busy.set(true);
     try {
-      await this.store.accept(idea.id, this.acceptPriority());
+      const personal = this.acceptPersonal();
+      await this.store.accept(idea.id, this.acceptPriority(), personal);
       this.accepting.set(null);
-      this.notice.set(`«${idea.title}» ya está en el tablero de tareas.`);
+      this.noticeLink.set(personal ? '/tareas' : '/tareas/hogar');
+      this.notice.set(personal ? `«${idea.title}» ya está en tus tareas personales.` : `«${idea.title}» ya está en las tareas del hogar.`);
     } catch (err) {
       this.acceptError.set(errorMessage(err, 'No se pudo aceptar. Vuelve a intentarlo.'));
     } finally {

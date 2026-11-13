@@ -1,11 +1,12 @@
 import { Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Idea, IDEA_CATEGORIES, IdeaInput } from '@hogar/shared';
+import { Idea, IDEA_CATEGORIES, IdeaInput, Member } from '@hogar/shared';
+import { Comments } from '../tasks/comments';
 
 /** Formulario para proponer o editar una idea. */
 @Component({
   selector: 'app-idea-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, Comments],
   template: `
     <div class="veil" (click)="close.emit()">
       <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="idea() ? 'Editar idea' : 'Nueva idea'"
@@ -26,6 +27,10 @@ import { Idea, IDEA_CATEGORIES, IdeaInput } from '@hogar/shared';
             }
           </datalist>
         </label>
+
+        @if (idea() && commentsApi()) {
+          <app-comments [api]="commentsApi()!" [members]="members()" (countChange)="commentCount.emit($event)" />
+        }
 
         @if (error()) {
           <p class="form-err" role="alert">{{ error() }}</p>
@@ -50,10 +55,15 @@ export class IdeaDialog implements OnInit {
   readonly usedCategories = input<string[]>([]);
   /** Solo quien la propuso o un administrador pueden borrarla. */
   readonly canDelete = input(false);
+  /** API de sus comentarios (solo al editar). */
+  readonly commentsApi = input<string | null>(null);
+  readonly members = input<Member[]>([]);
 
   readonly save = output<IdeaInput>();
   readonly delete = output<void>();
   readonly close = output<void>();
+  /** Cuántos comentarios tiene ahora. */
+  readonly commentCount = output<number>();
 
   protected readonly title = signal('');
   protected readonly description = signal('');

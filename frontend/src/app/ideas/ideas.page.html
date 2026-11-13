@@ -21,7 +21,7 @@
 }
 @if (notice()) {
   <div class="notice" role="status">
-    {{ notice() }} @if (usesTasks()) { <a routerLink="/tareas/hogar">Ir a tareas</a> }
+    {{ notice() }} @if (usesTasks()) { <a [routerLink]="noticeLink()">Ir a tareas</a> }
     <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
   </div>
 }
@@ -42,6 +42,9 @@
         @if (idea.category) {
           <span class="tag">{{ idea.category }}</span>
         }
+        @if (idea.commentCount) {
+          <span class="c-count" [attr.aria-label]="commentsLabel(idea.commentCount)">💬 {{ idea.commentCount }}</span>
+        }
         <span class="by">{{ proposedBy(idea) }}</span>
       </div>
       <div class="idea-acts">
@@ -61,8 +64,14 @@
           }
           @case ('aceptada') {
             @if (idea.taskId) {
-              @if (usesTasks()) {
-                <a class="link" routerLink="/tareas/hogar">Ver en tareas</a>
+              @if (!idea.taskPersonal) {
+                @if (usesTasks()) {
+                  <a class="link" routerLink="/tareas/hogar">Ver en tareas del hogar</a>
+                }
+              } @else if (idea.taskOwnerId === me()) {
+                <a class="link" routerLink="/tareas">Ver en mis tareas</a>
+              } @else {
+                <span class="n">En las tareas personales de {{ ownerName(idea) }}</span>
               }
             } @else {
               <span class="n">Su tarea se ha borrado</span>
@@ -92,6 +101,9 @@
     [idea]="editing() ?? null"
     [usedCategories]="categories()"
     [canDelete]="!!editing() && canDelete(editing()!)"
+    [members]="store.members()"
+    [commentsApi]="editing() ? store.commentsApi(editing()!.id) : null"
+    (commentCount)="onCommentCount($event)"
     (save)="onSave($event)"
     (delete)="onDelete()"
     (close)="close()" />
@@ -103,6 +115,13 @@
           (click)="$event.stopPropagation()" (keydown.escape)="accepting.set(null)" (submit)="$event.preventDefault(); confirmAccept()">
       <h3>Aceptar «{{ idea.title }}»</h3>
       <p class="n">Se creará una tarea en «Por hacer» con su título, descripción y categoría.</p>
+      <div>
+        <span class="lbl" id="accept-where">A qué tareas va</span>
+        <div class="seg" role="group" aria-labelledby="accept-where">
+          <button type="button" [attr.aria-pressed]="!acceptPersonal()" (click)="acceptPersonal.set(false)">Del hogar</button>
+          <button type="button" [attr.aria-pressed]="acceptPersonal()" (click)="acceptPersonal.set(true)">Personales (solo tú)</button>
+        </div>
+      </div>
       <div>
         <span class="lbl" id="accept-prio">Prioridad de la tarea</span>
         <div class="prio" role="group" aria-labelledby="accept-prio">

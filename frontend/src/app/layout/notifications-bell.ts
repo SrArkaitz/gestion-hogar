@@ -1,18 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppNotification } from '@hogar/shared';
+import { agoText } from '../core/dates';
 import { NotificationsService } from '../core/notifications.service';
-
-/** "ahora", "hace 5 min", "hace 3 h", "ayer" o "5 nov". */
-function whenText(iso: string): string {
-  const minutes = Math.round((Date.now() - Date.parse(iso)) / 60_000);
-  if (minutes < 1) return 'ahora';
-  if (minutes < 60) return `hace ${minutes} min`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `hace ${hours} h`;
-  if (hours < 48) return 'ayer';
-  return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-}
 
 /** Campanita con los avisos: cuántos hay sin leer y la lista al pulsarla. */
 @Component({
@@ -55,7 +45,7 @@ export class NotificationsBell {
   protected readonly service = inject(NotificationsService);
   private readonly router = inject(Router);
   protected readonly open = signal(false);
-  protected readonly when = whenText;
+  protected readonly when = agoText;
 
   protected toggle() {
     this.open.update((o) => !o);

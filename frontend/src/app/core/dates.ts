@@ -44,3 +44,14 @@ export function monthLabel(month: string): string {
   const text = new Date(month + '-01T00:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/** Cuánto hace de un momento: "ahora", "hace 5 min", "hace 3 h", "ayer" o "5 nov". */
+export function agoText(iso: string): string {
+  const minutes = Math.round((Date.now() - Date.parse(iso)) / 60_000);
+  if (minutes < 1) return 'ahora';
+  if (minutes < 60) return `hace ${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `hace ${hours} h`;
+  if (hours < 48) return 'ayer';
+  return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}

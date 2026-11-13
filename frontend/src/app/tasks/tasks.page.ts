@@ -1,6 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   Member,
   Priority,
@@ -37,6 +37,9 @@ export class TasksPage {
 
   /** Tablero de tareas personales (de la ruta): solo las tuyas, sin asignar a nadie. */
   readonly personal = input(false, { transform: (v: boolean | undefined) => !!v });
+  /** ?tarea=<id> (los avisos de comentarios enlazan así): abre esa tarea al cargar. */
+  readonly tarea = input<string>();
+  private readonly router = inject(Router);
 
   protected readonly statuses = TASK_STATUSES;
   protected readonly statusLabels = TASK_STATUS_LABELS;
@@ -109,6 +112,15 @@ export class TasksPage {
         this.store.load(id);
       }
     });
+    effect(() => {
+      const id = this.tarea();
+      if (!id || this.store.loading()) return;
+      const task = this.store.tasks().find((t) => t.id === id);
+      untracked(() => {
+        if (task) this.editing.set(task);
+        void this.router.navigate([], { queryParams: { tarea: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      });
+    });
     // Al pasar de un tablero a otro, los filtros empiezan de cero.
     effect(() => {
       this.personal();
@@ -140,6 +152,15 @@ export class TasksPage {
   }
 
   protected readonly initials = initials;
+
+  protected commentsLabel(n: number): string {
+    return n === 1 ? '1 comentario' : `${n} comentarios`;
+  }
+
+  protected onCommentCount(n: number) {
+    const task = this.editing();
+    if (task) this.store.setCommentCount(task.id, n);
+  }
 
   protected clearFilters() {
     this.person.set('todas');

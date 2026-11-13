@@ -6,6 +6,7 @@ import { join, resolve } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { BackupModule } from './backup/backup.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { CommentsModule } from './comments/comments.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { HealthController } from './health/health.controller';
 import { HouseholdsModule } from './households/households.module';
@@ -31,6 +32,7 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
     HouseholdsModule,
     TasksModule,
     IdeasModule,
+    CommentsModule,
     RecurringModule,
     ShoppingModule,
     RecipesModule,

@@ -11,7 +11,11 @@ import { PrismaService } from '../prisma/prisma.service';
 const CATEGORY_MAX = 40;
 const NOTES_MAX = 2000;
 
-const include = { idea: { select: { id: true } }, assignees: { select: { userId: true } } } as const;
+const include = {
+  idea: { select: { id: true } },
+  assignees: { select: { userId: true } },
+  _count: { select: { comments: true } },
+} as const;
 type Row = Prisma.TaskGetPayload<{ include: typeof include }>;
 
 const toTask = (r: Row): Task => ({
@@ -29,6 +33,7 @@ const toTask = (r: Row): Task => ({
   recurringId: r.recurringId,
   doneAt: r.doneAt?.toISOString() ?? null,
   archivedAt: r.archivedAt?.toISOString() ?? null,
+  commentCount: r._count.comments,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
 });

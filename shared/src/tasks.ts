@@ -36,6 +36,8 @@ export interface Task {
   doneAt: string | null;
   /** Si está archivada (no sale en el tablero), cuándo se archivó. */
   archivedAt: string | null;
+  /** Cuántos comentarios tiene. */
+  commentCount: number;
   createdAt: string;
   updatedAt: string;
 }

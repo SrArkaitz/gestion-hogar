@@ -86,7 +86,7 @@ export class CalendarService {
       include: { people: { include: { user: { select: { name: true } } } } },
     });
     for (const e of events) {
-      const names = e.people.map((p) => p.user.name.split(' ')[0]).join(', ');
+      const names = e.people.map((p) => p.user.name.split(' ')[0]).sort((a, b) => a.localeCompare(b, 'es')).join(', ');
       const end = e.endDate ?? e.date;
       if (end < from) continue;
       for (let d = e.date < from ? from : e.date; d <= end && d <= to; d = addDays(d, 1)) {
