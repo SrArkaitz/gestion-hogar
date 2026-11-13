@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ISO_DATE_RE, Meal, MEALS, MenuEntry, RECIPE_SERVINGS_MAX } from '@hogar/shared';
+import { isIsoDate, Meal, MEALS, MenuEntry, RECIPE_SERVINGS_MAX } from '@hogar/shared';
 import { asObject, oneOf } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -79,7 +79,7 @@ export class MenuService {
 }
 
 function date(value: unknown, label: string): string {
-  if (typeof value !== 'string' || !ISO_DATE_RE.test(value) || Number.isNaN(Date.parse(value))) {
+  if (!isIsoDate(value)) {
     throw new BadRequestException(`Fecha no válida en ${label} (AAAA-MM-DD)`);
   }
   return value;

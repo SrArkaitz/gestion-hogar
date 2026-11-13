@@ -8,7 +8,7 @@ import {
 import { Cron } from '@nestjs/schedule';
 import {
   addDays,
-  ISO_DATE_RE,
+  isIsoDate,
   IsoDate,
   occurrenceOnOrAfter,
   PRIORITIES,
@@ -246,7 +246,7 @@ export class RecurringService implements OnApplicationBootstrap {
     }
     if (has('startDate')) {
       const date = b['startDate'];
-      if (typeof date !== 'string' || !ISO_DATE_RE.test(date) || Number.isNaN(Date.parse(date))) {
+      if (!isIsoDate(date)) {
         throw new BadRequestException('Fecha de inicio no válida (AAAA-MM-DD)');
       }
       out.startDate = date;

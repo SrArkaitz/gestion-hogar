@@ -1,4 +1,6 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { unlinkSync } from 'fs';
+import { join } from 'path';
 import {
   Household,
   HouseholdSummary,
@@ -11,11 +13,14 @@ import {
 } from '@hogar/shared';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
-import { avatarUrl } from '../recipes/photos';
+import { filesDir, STORED_RE } from '../inventory/files';
+import { avatarUrl, PHOTO_FILE_RE, photosDir } from '../recipes/photos';
 import { parseHidden } from './section.guard';
 
 @Injectable()
 export class HouseholdsService {
+  private readonly logger = new Logger(HouseholdsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   /** Crea una casa con quien la crea como administrador. */
@@ -94,6 +99,25 @@ export class HouseholdsService {
    * hay que ser administrador. Si sale el último miembro, la casa se borra.
    * @returns true si la casa se ha borrado.
    */
+  /** Borra la casa con todo, también los archivos que tenía en disco (fotos de recetas y de equipos). */
+  private async deleteHousehold(householdId: string) {
+    const [recipes, files] = await Promise.all([
+      this.prisma.recipe.findMany({ where: { householdId, photo: { not: null } }, select: { photo: true } }),
+      this.prisma.equipmentFile.findMany({ where: { equipment: { householdId } }, select: { file: true } }),
+    ]);
+    await this.prisma.household.delete({ where: { id: householdId } });
+    const remove = (dir: string, file: string, re: RegExp) => {
+      if (!re.test(file)) return;
+      try {
+        unlinkSync(join(dir, file));
+      } catch (err) {
+        this.logger.warn(`No se pudo borrar ${file}: ${(err as Error).message}`);
+      }
+    };
+    for (const r of recipes) remove(photosDir(), r.photo!, PHOTO_FILE_RE);
+    for (const f of files) remove(filesDir(), f.file, STORED_RE);
+  }
+
   async removeMember(householdId: string, actor: { id: string; role: Role }, targetId: string): Promise<boolean> {
     const leaving = actor.id === targetId;
     if (!leaving && actor.role !== 'admin') {
@@ -102,7 +126,7 @@ export class HouseholdsService {
     const target = await this.findMember(householdId, targetId);
     const count = await this.prisma.householdMember.count({ where: { householdId } });
     if (count === 1) {
-      await this.prisma.household.delete({ where: { id: householdId } });
+      await this.deleteHousehold(householdId);
       return true;
     }
     if (target.role === 'admin') {

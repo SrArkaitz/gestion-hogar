@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { ISO_DATE_RE, PRIORITIES, Priority, Task, TASK_ARCHIVE_DAYS, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
+import { isIsoDate, PRIORITIES, Priority, Task, TASK_ARCHIVE_DAYS, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
 import { TIME_ZONE } from '../common/dates';
 import { parseAssigneeIds } from '../common/assignees';
 import { asObject, oneOf, requiredText } from '../common/validation';
@@ -211,7 +211,7 @@ export class TasksService implements OnApplicationBootstrap {
     if (has('priority')) out.priority = oneOf(b['priority'], PRIORITIES, 'Prioridad');
     if (b['due'] !== undefined) {
       const due = b['due'] === null || b['due'] === '' ? null : b['due'];
-      if (due !== null && (typeof due !== 'string' || !ISO_DATE_RE.test(due))) {
+      if (due !== null && !isIsoDate(due)) {
         throw new BadRequestException('Fecha no válida (AAAA-MM-DD)');
       }
       out.due = due;

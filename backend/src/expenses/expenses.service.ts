@@ -8,7 +8,7 @@ import {
   EXPENSE_CONCEPT_MAX,
   EXPENSE_NOTES_MAX,
   ExpenseInput,
-  ISO_DATE_RE,
+  isIsoDate,
   IsoDate,
   Settlement,
   settleUp,
@@ -228,7 +228,7 @@ export function cents(value: unknown): Cents {
 }
 
 export function date(value: unknown, label = 'Fecha'): IsoDate {
-  if (typeof value !== 'string' || !ISO_DATE_RE.test(value) || Number.isNaN(Date.parse(value))) {
+  if (!isIsoDate(value)) {
     throw new BadRequestException(`${label} no válida (AAAA-MM-DD)`);
   }
   return value;
