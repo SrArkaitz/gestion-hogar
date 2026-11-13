@@ -103,7 +103,7 @@
     <form class="dlg" role="dialog" aria-modal="true" aria-label="Añadir al menú" (click)="$event.stopPropagation()"
           (keydown.escape)="menuOpen.set(false)" (ngSubmit)="addToMenu()">
       <h3>Añadir al menú</h3>
-      <label>Día
+      <label><span>Día <span class="req" aria-hidden="true">*</span></span>
         <input type="date" name="menuDate" required [(ngModel)]="menuDate" />
       </label>
       <div>

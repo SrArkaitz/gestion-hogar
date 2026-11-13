@@ -9,7 +9,7 @@
 } @else {
   <form class="recipe-form" (ngSubmit)="save()" autocomplete="off">
     <section class="panel">
-      <label>Nombre
+      <label><span>Nombre <span class="req" aria-hidden="true">*</span></span>
         <input name="name" required [maxlength]="max.name" placeholder="Tortilla de patatas" [(ngModel)]="name" />
       </label>
 
@@ -48,10 +48,10 @@
             }
           </div>
         </div>
-        <label class="small"><span>Minutos <span class="hint">(opcional)</span></span>
+        <label class="small"><span>Minutos</span>
           <input type="number" name="minutes" min="1" [max]="max.minutes" inputmode="numeric" [(ngModel)]="minutes" />
         </label>
-        <label class="small">Raciones
+        <label class="small"><span>Raciones <span class="req" aria-hidden="true">*</span></span>
           <input type="number" name="servings" required min="1" [max]="max.servings" inputmode="numeric" [(ngModel)]="servings" />
         </label>
       </div>
@@ -105,7 +105,7 @@
       @if (steps().length < max.steps) {
         <button type="button" class="add" (click)="addStep()">+ Añadir paso</button>
       }
-      <label><span>Notas <span class="hint">(opcional)</span></span>
+      <label><span>Notas</span>
         <textarea name="notes" [maxlength]="max.notes" placeholder="Trucos, variantes, de dónde salió…" [(ngModel)]="notes"></textarea>
       </label>
       <label class="switch-row">

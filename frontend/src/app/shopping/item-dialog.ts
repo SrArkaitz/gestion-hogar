@@ -19,7 +19,7 @@ import {
       <form class="dlg" role="dialog" aria-modal="true" aria-label="Editar artículo"
             (click)="$event.stopPropagation()" (keydown.escape)="close.emit()" (ngSubmit)="submit()">
         <h3>Editar artículo</h3>
-        <label>Nombre
+        <label><span>Nombre <span class="req" aria-hidden="true">*</span></span>
           <input name="name" required [maxlength]="nameMax" autocomplete="off" [(ngModel)]="name" />
         </label>
         <div class="row two">

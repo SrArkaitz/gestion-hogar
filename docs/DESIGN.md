@@ -53,6 +53,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, deja de estar asignado a las tareas de esa casa.
 - **Secciones de cada casa:** en *Casa → Secciones* los administradores eligen qué usa la casa (Tareas, Ideas, Compra, Gastos y facturas, Recetas…). Lo que se desmarca se oculta para todos: sale de la navegación, sus rutas de la API responden como si no existieran y se dejan de enviar sus avisos (y, en Tareas, de crear las recurrentes). No se borra nada, por si se vuelve a mostrar. *Casa* siempre se ve. Al entrar se va a la primera sección que use la casa. Para no dejar nada a medias, sin Tareas no se puede aceptar una idea y sin Compra las recetas no ofrecen "Añadir a la compra".
 - **Tema:** claro, oscuro o el del sistema, desde *Casa → Cuenta*. Se guarda en cada dispositivo (no en la cuenta), así el móvil y el PC pueden tener uno distinto.
+- **Formularios:** los campos obligatorios llevan un * rojo junto a su etiqueta; los opcionales no llevan nada. Un campo mal rellenado (obligatorio vacío, un número fuera de rango, un correo sin @…) se pone en rojo, también con el foco, en cuanto se toca o se intenta guardar; al abrir el formulario no sale nada en rojo.
 - **Casa activa:** se elige en un selector (barra lateral en PC, barra superior en móvil) y se recuerda en el navegador.
 
 ### 3.1 Tareas
@@ -262,3 +263,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-13 | Al aceptar una idea se elige si la tarea va al hogar o a las personales de quien la acepta. |
 | 2026-11-13 | Cumpleaños: el aviso llega a todos el mismo día; se quita elegir la antelación. |
 | 2026-11-13 | Foto de perfil de cada persona, en el mismo círculo que sus iniciales. |
+| 2026-11-13 | Formularios: * en los obligatorios (sin «opcional») y en rojo lo que está mal. |

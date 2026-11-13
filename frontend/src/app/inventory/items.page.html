@@ -64,7 +64,7 @@
     <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar' : 'Añadir al inventario'"
           (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
       <h3>{{ editing() ? 'Editar' : 'Añadir al inventario' }}</h3>
-      <label>Qué
+      <label><span>Qué <span class="req" aria-hidden="true">*</span></span>
         <input name="name" required [maxlength]="max.name" placeholder="Arroz" [(ngModel)]="name" />
       </label>
       <label>Dónde
@@ -76,13 +76,13 @@
         </datalist>
       </label>
       <div class="row">
-        <label>Cantidad
+        <label><span>Cantidad <span class="req" aria-hidden="true">*</span></span>
           <input name="quantity" inputmode="decimal" required [(ngModel)]="quantity" />
         </label>
-        <label>Unidad <span class="hint">(opcional)</span>
+        <label>Unidad
           <input name="unit" [maxlength]="max.unit" placeholder="paquetes" [(ngModel)]="unit" />
         </label>
-        <label>Mínimo <span class="hint">(opcional)</span>
+        <label>Mínimo
           <input name="minimum" inputmode="decimal" placeholder="1" [(ngModel)]="minimum" />
         </label>
       </div>

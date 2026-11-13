@@ -27,15 +27,15 @@ import { todayIso } from '../core/dates';
             (keydown.escape)="close.emit()" (ngSubmit)="submit()" autocomplete="off">
         <h3>{{ heading() }}</h3>
         @if (!fixedConcept()) {
-          <label>Concepto
+          <label><span>Concepto <span class="req" aria-hidden="true">*</span></span>
             <input name="concept" required [maxlength]="max.concept" placeholder="Compra del súper" [(ngModel)]="concept" />
           </label>
         }
         <div class="row two">
-          <label>Importe (€)
+          <label><span>Importe (€) <span class="req" aria-hidden="true">*</span></span>
             <input name="amount" required inputmode="decimal" placeholder="0,00" [(ngModel)]="amountText" />
           </label>
-          <label>Fecha
+          <label><span>Fecha <span class="req" aria-hidden="true">*</span></span>
             <input type="date" name="date" required [(ngModel)]="date" />
           </label>
         </div>

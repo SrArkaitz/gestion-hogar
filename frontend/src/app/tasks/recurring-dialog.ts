@@ -35,7 +35,7 @@ const UNITS: Record<Exclude<RecurrenceFrequency, 'dias_semana'>, [string, string
             (click)="$event.stopPropagation()" (keydown.escape)="close.emit()" (ngSubmit)="submit()">
         <h3>{{ heading() }}</h3>
 
-        <label>Título
+        <label><span>Título <span class="req" aria-hidden="true">*</span></span>
           <input name="title" required maxlength="120" autocomplete="off" [(ngModel)]="title" />
         </label>
         <label>Notas
@@ -70,7 +70,7 @@ const UNITS: Record<Exclude<RecurrenceFrequency, 'dias_semana'>, [string, string
               }
             </div>
           }
-          <label>{{ frequency() === 'dias_semana' ? 'Desde' : 'Empieza' }}
+          <label><span>{{ frequency() === 'dias_semana' ? 'Desde' : 'Empieza' }} <span class="req" aria-hidden="true">*</span></span>
             <input type="date" name="startDate" required [(ngModel)]="startDate" />
           </label>
           <p class="hint">{{ startHint() }}</p>

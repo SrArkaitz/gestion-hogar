@@ -63,10 +63,10 @@
           (keydown.escape)="doing.set(null)" (ngSubmit)="saveDone()" autocomplete="off">
       <h3>{{ m.name }}: hecha</h3>
       <div class="row two">
-        <label>Cuándo
+        <label><span>Cuándo <span class="req" aria-hidden="true">*</span></span>
           <input type="date" name="doneDate" required [(ngModel)]="doneDate" />
         </label>
-        <label>Coste (€) <span class="hint">(opcional)</span>
+        <label>Coste (€)
           <input name="doneCost" inputmode="decimal" placeholder="0,00" [(ngModel)]="doneCost" />
         </label>
       </div>
@@ -94,7 +94,7 @@
     <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar revisión' : 'Nueva revisión'"
           (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
       <h3>{{ editing() ? 'Editar revisión' : 'Nueva revisión' }}</h3>
-      <label>Qué
+      <label><span>Qué <span class="req" aria-hidden="true">*</span></span>
         <input name="name" required [maxlength]="max.name" placeholder="ITV" [(ngModel)]="name" />
       </label>
       <label>Grupo

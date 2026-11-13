@@ -11,14 +11,14 @@ import { CalendarEvent, CalendarEventInput, EVENT_NOTES_MAX, EVENT_TITLE_MAX, Is
       <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="event() ? 'Editar evento' : 'Nuevo evento'"
             (click)="$event.stopPropagation()" (keydown.escape)="close.emit()" (ngSubmit)="submit()" autocomplete="off">
         <h3>{{ event() ? 'Editar evento' : 'Nuevo evento' }}</h3>
-        <label>Qué
+        <label><span>Qué <span class="req" aria-hidden="true">*</span></span>
           <input name="title" required [maxlength]="titleMax" placeholder="Cena con amigos" [(ngModel)]="title" />
         </label>
         <div class="row two">
-          <label>Día
+          <label><span>Día <span class="req" aria-hidden="true">*</span></span>
             <input type="date" name="date" required [(ngModel)]="date" />
           </label>
-          <label>Hora <span class="hint">(opcional)</span>
+          <label>Hora
             <input type="time" name="time" [(ngModel)]="time" />
           </label>
         </div>

@@ -52,7 +52,7 @@
     <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar equipo' : 'Nuevo equipo'"
           (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="save()" autocomplete="off">
       <h3>{{ editing() ? 'Editar equipo' : 'Nuevo equipo' }}</h3>
-      <label>Qué es
+      <label><span>Qué es <span class="req" aria-hidden="true">*</span></span>
         <input name="name" required [maxlength]="max.name" placeholder="Lavadora" [(ngModel)]="name" />
       </label>
       <div class="row two">

@@ -18,13 +18,13 @@ import { GoogleButton } from './google-button';
       @if (session.providers()?.google) {
         <p class="or"><span>o con tu correo</span></p>
       }
-      <label>Nombre
+      <label><span>Nombre <span class="req" aria-hidden="true">*</span></span>
         <input name="name" autocomplete="given-name" required [maxlength]="nameMax" [(ngModel)]="name" />
       </label>
-      <label>Correo
-        <input type="email" name="email" autocomplete="email" required [(ngModel)]="email" />
+      <label><span>Correo <span class="req" aria-hidden="true">*</span></span>
+        <input type="email" name="email" email autocomplete="email" required [(ngModel)]="email" />
       </label>
-      <label>Contraseña
+      <label><span>Contraseña <span class="req" aria-hidden="true">*</span></span>
         <input type="password" name="password" autocomplete="new-password" required [minlength]="passwordMin" [(ngModel)]="password" />
         <span class="hint">Al menos {{ passwordMin }} caracteres.</span>
       </label>

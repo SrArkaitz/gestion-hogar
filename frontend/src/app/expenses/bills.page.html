@@ -53,7 +53,7 @@
     <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="editing() ? 'Editar factura' : 'Nueva factura'"
           (click)="$event.stopPropagation()" (keydown.escape)="editing.set(undefined)" (ngSubmit)="saveBill()" autocomplete="off">
       <h3>{{ editing() ? 'Editar factura' : 'Nueva factura' }}</h3>
-      <label>Nombre
+      <label><span>Nombre <span class="req" aria-hidden="true">*</span></span>
         <input name="billName" required [maxlength]="nameMax" placeholder="Luz" [(ngModel)]="name" />
       </label>
       <div class="row two">
@@ -64,7 +64,7 @@
           <input type="number" name="billInterval" min="1" [max]="intervalMax" inputmode="numeric" [(ngModel)]="interval" />
         </label>
       </div>
-      <label>Próximo vencimiento
+      <label><span>Próximo vencimiento <span class="req" aria-hidden="true">*</span></span>
         <input type="date" name="billDue" required [(ngModel)]="nextDue" />
       </label>
       @if (editing()) {

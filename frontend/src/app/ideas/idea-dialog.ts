@@ -13,7 +13,7 @@ import { Comments } from '../tasks/comments';
             (click)="$event.stopPropagation()" (keydown.escape)="close.emit()" (ngSubmit)="submit()">
         <h3>{{ idea() ? 'Editar idea' : 'Nueva idea' }}</h3>
 
-        <label>Título
+        <label><span>Título <span class="req" aria-hidden="true">*</span></span>
           <input name="title" required maxlength="120" autocomplete="off" [(ngModel)]="title" />
         </label>
         <label>Descripción

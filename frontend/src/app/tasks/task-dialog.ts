@@ -24,7 +24,7 @@ import {
             (click)="$event.stopPropagation()" (keydown.escape)="close.emit()" (ngSubmit)="submit()">
         <h3>{{ task() ? 'Editar tarea' : 'Nueva tarea' }}</h3>
 
-        <label>Título
+        <label><span>Título <span class="req" aria-hidden="true">*</span></span>
           <input name="title" required maxlength="120" autocomplete="off" [(ngModel)]="title" />
         </label>
         <label>Notas

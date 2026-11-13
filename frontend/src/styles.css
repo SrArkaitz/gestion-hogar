@@ -618,3 +618,13 @@ app-notifications-bell { position: relative; flex: none; }
 .profile-acts .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .me-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .me-who .avatar { flex: none; }
+
+/* Campos obligatorios: * junto a la etiqueta (los opcionales no llevan nada) */
+.req { color: var(--alta); font-weight: 700; margin-left: 1px; }
+
+/* Campos mal rellenados (vacíos siendo obligatorios, fuera de rango…): en rojo, también con el foco.
+   Solo cuando ya se han tocado, se ha escrito en ellos o se ha intentado guardar, no al abrir el formulario. */
+:is(input, select, textarea).ng-invalid:is(.ng-touched, .ng-dirty),
+form.ng-submitted :is(input, select, textarea).ng-invalid { border-color: var(--alta); }
+:is(input, select, textarea).ng-invalid:is(.ng-touched, .ng-dirty):focus-visible,
+form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outline-color: var(--alta); }
