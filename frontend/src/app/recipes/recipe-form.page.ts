@@ -87,7 +87,7 @@ export class RecipeFormPage implements OnDestroy {
   protected readonly duration = signal<RecipeDuration>('medio');
   protected readonly minutes = signal<number | null>(null);
   protected readonly servings = signal<number | null>(2);
-  protected readonly rows = signal<IngredientRow[]>([{ name: '', qty: '', unit: 'g' }]);
+  protected readonly rows = signal<IngredientRow[]>([{ name: '', qty: '', unit: 'ud' }]);
   protected readonly steps = signal<string[]>(['']);
   protected readonly notes = signal('');
   protected readonly isPrivate = signal(false);
@@ -127,9 +127,9 @@ export class RecipeFormPage implements OnDestroy {
             ? r.ingredients.map((i) => ({
                 name: i.name,
                 qty: i.amount !== null ? String(+i.amount.toFixed(3)).replace('.', ',') : (i.text ?? ''),
-                unit: i.unit ?? '',
+                unit: i.unit ?? (i.amount === null ? 'ud' : ''),
               }))
-            : [{ name: '', qty: '', unit: 'g' }],
+            : [{ name: '', qty: '', unit: 'ud' }],
         );
         this.steps.set(r.steps.length ? [...r.steps] : ['']);
         this.notes.set(r.notes);
@@ -149,7 +149,7 @@ export class RecipeFormPage implements OnDestroy {
 
   // --- Ingredientes ---
   protected addRow() {
-    this.rows.update((rows) => [...rows, { name: '', qty: '', unit: 'g' }]);
+    this.rows.update((rows) => [...rows, { name: '', qty: '', unit: 'ud' }]);
     setTimeout(() => document.querySelector<HTMLInputElement>('.ing-row:last-child .ing-name')?.focus());
   }
 

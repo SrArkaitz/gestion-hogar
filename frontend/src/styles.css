@@ -42,7 +42,8 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font
 /* Móvil: barra superior con la casa activa */
 .mbar { position: sticky; top: 0; z-index: 10; background: var(--nav); border-bottom: 1px solid var(--nav-line);
   padding: calc(8px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
-.mbar { display: flex; align-items: center; gap: 10px; }
+.mbar { display: flex; align-items: center; gap: 4px; }
+.mbar .switcher { margin-right: 6px; }
 .mbar .switcher { flex: 1; }
 .brand-row { display: none; }
 .switcher { display: block; min-width: 0; }
@@ -617,6 +618,13 @@ app-notifications-bell { position: relative; flex: none; }
 .profile-acts .file { position: relative; overflow: hidden; cursor: pointer; display: inline; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--accent); text-decoration: underline; }
 .profile-acts .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .me-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.me-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.me-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+/* Botón de Casa (ajustes): junto a la campanita en el móvil y junto a tu nombre en el PC */
+.house-btn { flex: none; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--muted); }
+.house-btn:hover { background: var(--bg); color: var(--fg); }
+.house-btn.active { color: var(--accent); background: var(--bg); }
+.house-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .me-who .avatar { flex: none; }
 
 /* Campos obligatorios: * junto a la etiqueta (los opcionales no llevan nada) */

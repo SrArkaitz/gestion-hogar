@@ -47,7 +47,10 @@ export function moduleForPath(url: string): ModuleKey | null {
   return best;
 }
 
-/** Si una casa usa una sección (por defecto, todas). */
+/** Secciones que una casa nueva trae desactivadas (se activan en Casa → Secciones). */
+export const DEFAULT_HIDDEN_MODULES: readonly ModuleKey[] = ['inventario', 'mantenimiento'];
+
+/** Si una casa usa una sección. */
 export function moduleVisible(household: { hiddenModules: readonly ModuleKey[] } | null | undefined, key: ModuleKey): boolean {
   return !!household && !household.hiddenModules.includes(key);
 }

@@ -5,6 +5,7 @@ import {
   Household,
   HouseholdSummary,
   MEMBER_COLORS,
+  DEFAULT_HIDDEN_MODULES,
   MODULES,
   MemberColor,
   NAME_MAX_LENGTH,
@@ -27,9 +28,9 @@ export class HouseholdsService {
   async create(userId: string, body: unknown): Promise<HouseholdSummary> {
     const name = requiredText(asObject(body)['name'], 'El nombre de la casa', NAME_MAX_LENGTH);
     const household = await this.prisma.household.create({
-      data: { name, members: { create: { userId, role: 'admin', color: MEMBER_COLORS[0] } } },
+      data: { name, hiddenModules: DEFAULT_HIDDEN_MODULES.join(','), members: { create: { userId, role: 'admin', color: MEMBER_COLORS[0] } } },
     });
-    return { id: household.id, name: household.name, role: 'admin', hiddenModules: [] };
+    return { id: household.id, name: household.name, role: 'admin', hiddenModules: [...DEFAULT_HIDDEN_MODULES] };
   }
 
   async get(householdId: string): Promise<Household> {

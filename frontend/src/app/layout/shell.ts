@@ -10,8 +10,8 @@ import { initials } from '../tasks/people';
 
 interface NavItem {
   path: string;
-  /** Secciones que la casa puede ocultar y que van dentro (los ajustes de Casa no tienen). */
-  modules?: ModuleKey[];
+  /** Secciones que la casa puede ocultar y que van dentro. */
+  modules: ModuleKey[];
   label: string;
   /** Trazado SVG del icono (24×24, solo contorno). */
   icon: string;
@@ -29,6 +29,9 @@ export class Shell {
   private readonly notifications = inject(NotificationsService);
   protected readonly initials = initials;
 
+  /** Icono de Casa (los ajustes): va junto a la campanita en el móvil y junto a tu nombre en el PC. */
+  protected readonly houseIcon = 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
+
   /** Secciones de la app; solo salen las que usa la casa activa. */
   private readonly modules: NavItem[] = [
     // Tareas lleva dentro las Ideas: sale si la casa usa cualquiera de las dos.
@@ -39,12 +42,11 @@ export class Shell {
     { path: '/recetas', modules: ['recetas'], label: 'Recetas', icon: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 5v16M19 19v2H6M9 7h6' },
     { path: '/inventario', modules: ['inventario'], label: 'Inventario', icon: 'M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8' },
     { path: '/mantenimiento', modules: ['mantenimiento'], label: 'Mantenimiento', icon: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z' },
-    { path: '/casa', label: 'Casa', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z' },
   ];
 
   protected readonly nav = computed(() =>
     this.modules
-      .filter((m) => !m.modules || m.modules.some((k) => this.session.uses(k)))
+      .filter((m) => m.modules.some((k) => this.session.uses(k)))
       // Sin tareas pero con ideas, "Tareas" lleva directamente a las ideas.
       .map((m) => (m.path === '/tareas' && !this.session.uses('tareas') ? { ...m, path: '/tareas/ideas' } : m)),
   );

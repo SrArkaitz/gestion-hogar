@@ -51,10 +51,11 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Administradores:** cambian el nombre de la casa, invitan, sacan a miembros y nombran o quitan administradores.
 - **Invitaciones:** enlace de un solo uso que caduca en 7 días y se puede anular. Quien lo abre sin cuenta puede registrarse y vuelve a la invitación para aceptarla.
 - **Salir de una casa:** cualquiera puede salir. El último administrador no puede salir mientras queden otros miembros; antes tiene que nombrar a otro. Si sale el último miembro, la casa se borra. Al salir o ser expulsado, deja de estar asignado a las tareas de esa casa.
-- **Secciones de cada casa:** en *Casa → Secciones* los administradores eligen qué usa la casa (Tareas, Ideas, Compra, Gastos y facturas, Recetas…). Lo que se desmarca se oculta para todos: sale de la navegación, sus rutas de la API responden como si no existieran y se dejan de enviar sus avisos (y, en Tareas, de crear las recurrentes). No se borra nada, por si se vuelve a mostrar. *Casa* siempre se ve. Al entrar se va a la primera sección que use la casa. Para no dejar nada a medias, sin Tareas no se puede aceptar una idea y sin Compra las recetas no ofrecen "Añadir a la compra".
+- **Secciones de cada casa:** en *Casa → Secciones* los administradores eligen qué usa la casa (Tareas, Ideas, Compra, Gastos y facturas, Recetas…). Lo que se desmarca se oculta para todos: sale de la navegación, sus rutas de la API responden como si no existieran y se dejan de enviar sus avisos (y, en Tareas, de crear las recurrentes). No se borra nada, por si se vuelve a mostrar. Una casa nueva trae Inventario y Mantenimiento desactivados (se activan aquí cuando se quieran); el resto, activado. *Casa* siempre se ve. Al entrar se va a la primera sección que use la casa. Para no dejar nada a medias, sin Tareas no se puede aceptar una idea y sin Compra las recetas no ofrecen "Añadir a la compra".
 - **Tema:** claro, oscuro o el del sistema, desde *Casa → Cuenta*. Se guarda en cada dispositivo (no en la cuenta), así el móvil y el PC pueden tener uno distinto.
 - **Formularios:** los campos obligatorios llevan un * rojo junto a su etiqueta; los opcionales no llevan nada. Un campo mal rellenado (obligatorio vacío, un número fuera de rango, un correo sin @…) se pone en rojo, también con el foco, en cuanto se toca o se intenta guardar; al abrir el formulario no sale nada en rojo.
 - **Casa activa:** se elige en un selector (barra lateral en PC, barra superior en móvil) y se recuerda en el navegador.
+- **Botón de Casa** (los ajustes): no va con las secciones. En el móvil está en la barra de arriba, a la izquierda de la campanita; en el PC, abajo, junto a tu nombre.
 
 ### 3.1 Tareas
 
@@ -111,7 +112,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Tipo:** primer plato, segundo plato, plato único o postre.
 - **Duración:** rápido, medio o largo, siempre presente. Además, **minutos exactos** opcionales.
 - **Raciones** para las que está pensada; las cantidades se escalan al cambiarlas.
-- **Ingredientes:** nombre, cantidad y unidad (g, kg, ml, l, unidades) o texto libre ("al gusto").
+- **Ingredientes:** nombre, cantidad y unidad (g, kg, ml, l, unidades; por defecto, unidades) o texto libre ("al gusto").
 - **Pasos** ordenados.
 - **Privada** (casilla, sin marcar por defecto). Si no es privada, es pública: la ven todas las casas de la app.
 
@@ -270,3 +271,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-13 | Listas dentro de las tareas (y en las plantillas de las recurrentes); tachar se guarda al momento, cosa a cosa. |
 | 2026-11-13 | Cada persona elige qué tipos de aviso recibe; lo desactivado no llega ni al móvil ni a la campanita. |
 | 2026-11-13 | Compra sin conexión: el service worker guarda la app y la última lista; lo tachado se envía al volver la conexión. |
+| 2026-11-13 | Casas nuevas con Inventario y Mantenimiento desactivados; el botón de Casa pasa junto a la campanita (móvil) o junto a tu nombre (PC); los ingredientes nuevos van en unidades. |

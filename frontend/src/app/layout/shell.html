@@ -1,7 +1,10 @@
 <div class="shell">
-  <!-- Móvil: casa activa arriba. En escritorio va en la barra lateral. -->
+  <!-- Móvil: casa activa arriba, con los ajustes de Casa y la campanita. En escritorio va en la barra lateral. -->
   <header class="mbar">
     <app-household-switcher />
+    <a class="house-btn" routerLink="/casa" routerLinkActive="active" ariaCurrentWhenActive="page" aria-label="Casa" title="Casa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="houseIcon" /></svg>
+    </a>
     <app-notifications-bell />
   </header>
 
@@ -31,12 +34,17 @@
       }
     </ul>
     <div class="me">
-      <span class="me-who">
-        @if (session.user(); as u) {
-          <span class="avatar" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
-        }
-        <span>{{ session.user()?.name }}</span>
-      </span>
+      <div class="me-row">
+        <span class="me-who">
+          @if (session.user(); as u) {
+            <span class="avatar" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+          }
+          <span class="me-name">{{ session.user()?.name }}</span>
+        </span>
+        <a class="house-btn" routerLink="/casa" routerLinkActive="active" ariaCurrentWhenActive="page" aria-label="Casa" title="Casa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="houseIcon" /></svg>
+        </a>
+      </div>
       <button type="button" class="link" (click)="logout()">Cerrar sesión</button>
     </div>
   </nav>
