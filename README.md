@@ -115,8 +115,9 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/households/:householdId/tasks/:id/comments` | Comenta (`{ "text": "…" }`, hasta 1000 caracteres); avisa a quien está en la tarea |
 | DELETE | `/api/households/:householdId/tasks/:id/comments/:commentId` | Borra un comentario (el tuyo, o cualquiera si eres administrador) |
 | POST   | `/api/households/:householdId/tasks/archive-done` | Archiva todas las hechas de un tablero (`{ "personal": true }` para el de personales) |
+| POST   | `/api/households/:householdId/tasks/:id/checklist/:itemId` | Tacha o destacha una cosa de su lista (`{ "done": true }`); la lista entera se cambia con PATCH (`checklist`: `[{ "id"?, "text", "done" }]`, hasta 30) |
 | GET    | `/api/households/:householdId/recurring` | Tareas recurrentes de la casa |
-| POST   | `/api/households/:householdId/recurring` | Crea una; si empieza hoy, crea ya su tarea |
+| POST   | `/api/households/:householdId/recurring` | Crea una (`checklist`: textos de la lista que llevará cada tarea); si empieza hoy, crea ya su tarea |
 | PATCH  | `/api/households/:householdId/recurring/:id` | Edita, pausa (`{ "active": false }`) o reactiva |
 | DELETE | `/api/households/:householdId/recurring/:id` | Borra la plantilla; las tareas que creó se quedan |
 | GET    | `/api/households/:householdId/shopping/items` | Lista de la compra |
@@ -187,6 +188,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
 | PUT    | `/api/users/me/avatar` | Pone tu foto de perfil (la imagen tal cual en el cuerpo, JPG, PNG o WebP; hasta 2 MB) |
 | DELETE | `/api/users/me/avatar` | Quita tu foto de perfil |
+| PUT    | `/api/users/me/notifications` | Tipos de aviso que desactivas (`{ "off": ["comentarios", …] }`: `asignadas`, `comentarios`, `tareas`, `calendario`, `facturas`, `mantenimiento`); salen en `notifyOff` de `/api/auth/me` |
 | GET    | `/api/users/:id/avatar` | Foto de perfil de alguien con quien compartes casa (`avatarUrl` en el usuario y en los miembros) |
 | POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
 | GET    | `/api/notifications` | Tus últimos avisos de la campanita (`items`) y cuántos hay sin leer (`unread`) |

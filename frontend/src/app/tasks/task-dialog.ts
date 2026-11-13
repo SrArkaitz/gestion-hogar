@@ -1,7 +1,9 @@
 import { Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ChecklistEditor } from './checklist-editor';
 import { Comments } from './comments';
 import {
+  ChecklistItemInput,
   Member,
   PRIORITIES,
   PRIORITY_LABELS,
@@ -17,7 +19,7 @@ import {
 /** Formulario para crear o editar una tarea. */
 @Component({
   selector: 'app-task-dialog',
-  imports: [FormsModule, Comments],
+  imports: [FormsModule, Comments, ChecklistEditor],
   template: `
     <div class="veil" (click)="close.emit()">
       <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="task() ? 'Editar tarea' : 'Nueva tarea'"
@@ -30,6 +32,8 @@ import {
         <label>Notas
           <textarea name="notes" maxlength="2000" [(ngModel)]="notes"></textarea>
         </label>
+
+        <app-checklist-editor [(items)]="checklist" (checked)="onChecked($event)" />
 
         <div>
           <span class="lbl" id="prio-lbl">Prioridad</span>
@@ -124,6 +128,8 @@ export class TaskDialog implements OnInit {
   readonly close = output<void>();
   /** Cuántos comentarios tiene ahora. */
   readonly commentCount = output<number>();
+  /** Se ha tachado una cosa de la lista de una tarea ya guardada: se guarda al momento. */
+  readonly checkItem = output<{ itemId: string; done: boolean }>();
 
   protected readonly priorities = PRIORITIES;
   protected readonly priorityLabels = PRIORITY_LABELS;
@@ -137,6 +143,9 @@ export class TaskDialog implements OnInit {
   protected readonly assigneeIds = signal<string[]>([]);
   protected readonly category = signal('');
   protected readonly status = signal<TaskStatus>('por_hacer');
+  protected readonly checklist = signal<ChecklistItemInput[]>([]);
+  /** Ids y textos al abrir: si solo cambia lo tachado (que ya se ha guardado), no se reenvía la lista. */
+  private checklistShape = '[]';
   protected readonly busy = signal(false);
   protected readonly error = signal('');
 
@@ -153,6 +162,16 @@ export class TaskDialog implements OnInit {
     this.assigneeIds.set(t?.assigneeIds ?? []);
     this.category.set(t?.category ?? '');
     this.status.set(t?.status ?? this.initialStatus());
+    this.checklist.set(t?.checklist.map((i) => ({ ...i })) ?? []);
+    this.checklistShape = this.shape();
+  }
+
+  private shape(): string {
+    return JSON.stringify(this.checklist().map((i) => [i.id ?? null, i.text.trim()]));
+  }
+
+  protected onChecked(item: ChecklistItemInput) {
+    if (this.task() && item.id) this.checkItem.emit({ itemId: item.id, done: !!item.done });
   }
 
   /** Lo llama el tablero cuando falla el guardado. */
@@ -173,6 +192,7 @@ export class TaskDialog implements OnInit {
       due: this.due() || null,
       assigneeIds: this.assigneeIds(),
       category: this.category().trim() || null,
+      ...(this.shape() !== this.checklistShape && { checklist: this.checklist().filter((i) => i.text.trim()) }),
     });
   }
 

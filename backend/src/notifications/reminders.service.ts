@@ -70,6 +70,7 @@ export class RemindersService {
           url: `/gastos/facturas?casa=${householdId}`,
           tag: `facturas-${householdId}`,
         },
+        'facturas',
       );
     }
     return sent;
@@ -110,6 +111,7 @@ export class RemindersService {
         sent += await this.push.send(
           [userId],
           { title: `Hoy en el calendario · ${h.name}`, body: parts.join(' '), url: `/calendario?casa=${h.id}`, tag: `calendario-${h.id}` },
+          'calendario',
         );
       }
     }
@@ -144,6 +146,7 @@ export class RemindersService {
           url: `/mantenimiento?casa=${householdId}`,
           tag: `mantenimiento-${householdId}`,
         },
+        'mantenimiento',
       );
     }
     return sent;
@@ -189,7 +192,7 @@ export class RemindersService {
         body: parts.join(' '),
         url: `${d.house ? '/tareas/hogar' : '/tareas'}?casa=${d.householdId}`,
         tag: `recordatorio-${d.householdId}`,
-      });
+      }, 'tareas');
     }
     return sent;
   }

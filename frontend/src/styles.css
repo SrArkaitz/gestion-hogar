@@ -628,3 +628,22 @@ app-notifications-bell { position: relative; flex: none; }
 form.ng-submitted :is(input, select, textarea).ng-invalid { border-color: var(--alta); }
 :is(input, select, textarea).ng-invalid:is(.ng-touched, .ng-dirty):focus-visible,
 form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outline-color: var(--alta); }
+
+/* Lista dentro de una tarea */
+.dlg .checklist { display: flex; flex-direction: column; gap: 6px; }
+.dlg .checklist .lbl { display: flex; align-items: center; gap: 8px; margin: 0; }
+.dlg .checklist .ck-progress { text-transform: none; letter-spacing: 0; font-weight: 700; color: var(--fg); }
+.dlg .checklist ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.dlg .checklist li { display: flex; align-items: center; gap: 8px; }
+.dlg .checklist li input[type=checkbox] { width: 20px; height: 20px; flex: none; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.dlg .checklist .ck-text { flex: 1; min-width: 0; padding: 6px 8px; border-color: transparent; background: transparent; }
+.dlg .checklist .ck-text:hover, .dlg .checklist .ck-text:focus { border-color: var(--line); background: var(--bg); }
+.dlg .checklist li.done .ck-text { text-decoration: line-through; color: var(--muted); }
+.dlg .checklist .ck-add { display: flex; gap: 8px; }
+.dlg .checklist .ck-add input { flex: 1; min-width: 0; }
+.ck-count { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.ck-count.all { color: var(--baja); font-weight: 700; }
+
+/* Compra sin conexión */
+.offline { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--media-bg); color: var(--media); font-size: 14px; }
+.offline .n { color: inherit; opacity: .85; }

@@ -2,6 +2,10 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  NOTIFICATION_KIND_DESCRIPTIONS,
+  NOTIFICATION_KIND_LABELS,
+  NOTIFICATION_KINDS,
+  NotificationKind,
   CreatedInvitation,
   Household,
   Invitation,
@@ -202,6 +206,25 @@ export class HouseholdPage {
   }
 
   protected readonly initials = initials;
+  protected readonly kinds = NOTIFICATION_KINDS;
+  protected readonly kindLabels = NOTIFICATION_KIND_LABELS;
+  protected readonly kindDescriptions = NOTIFICATION_KIND_DESCRIPTIONS;
+  protected readonly notifyOff = computed(() => this.session.me()?.notifyOff ?? []);
+  protected readonly kindsOn = computed(() => this.kinds.length - this.notifyOff().length);
+
+  /** Activa o desactiva un tipo de aviso (para la persona, no para la casa). */
+  protected async setKind(kind: NotificationKind, on: boolean) {
+    const off = on ? this.notifyOff().filter((k) => k !== kind) : [...new Set([...this.notifyOff(), kind])];
+    this.error.set('');
+    try {
+      await firstValueFrom(this.http.put('/api/users/me/notifications', { off }));
+      await this.session.refresh();
+      this.status.set(on ? `Te llegarán: ${this.kindLabels[kind].toLowerCase()}.` : `Ya no te llegarán: ${this.kindLabels[kind].toLowerCase()}.`);
+    } catch (err) {
+      this.error.set(errorMessage(err, 'No se pudo guardar. Vuelve a intentarlo.'));
+      await this.session.refresh();
+    }
+  }
   protected readonly avatarBusy = signal(false);
   /** Tu color en esta casa (el círculo sin foto). */
   protected readonly myColor = computed(() => this.household()?.members.find((m) => m.id === this.me())?.color ?? null);

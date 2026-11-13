@@ -12,6 +12,23 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
 /** Días que una tarea se queda en Hecho antes de archivarse sola. */
 export const TASK_ARCHIVE_DAYS = 7;
 
+/** Una cosa de la lista de una tarea ("Limpiar la cocina": horno, nevera…). */
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+/** Al guardar la lista: las que ya existían llevan su id; las nuevas, no. */
+export interface ChecklistItemInput {
+  id?: string;
+  text: string;
+  done?: boolean;
+}
+
+export const CHECKLIST_MAX_ITEMS = 30;
+export const CHECKLIST_TEXT_MAX = 200;
+
 /** Categorías que se ofrecen al crear una tarea. Se puede escribir otra. */
 export const TASK_CATEGORIES = ['Casa', 'Recados', 'Papeleo'] as const;
 
@@ -36,6 +53,8 @@ export interface Task {
   doneAt: string | null;
   /** Si está archivada (no sale en el tablero), cuándo se archivó. */
   archivedAt: string | null;
+  /** Lista de cosas que hacer dentro de la tarea (puede estar vacía). */
+  checklist: ChecklistItem[];
   /** Cuántos comentarios tiene. */
   commentCount: number;
   createdAt: string;
@@ -52,4 +71,6 @@ export interface TaskInput {
   assigneeIds?: string[];
   /** Solo al crearla: después no se cambia. */
   personal?: boolean;
+  /** La lista entera (sustituye a la anterior). Para tachar una sola, mejor POST …/checklist/:itemId. */
+  checklist?: ChecklistItemInput[];
 }

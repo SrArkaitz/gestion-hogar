@@ -25,6 +25,7 @@ import { TIME_ZONE, todayIso } from '../common/dates';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
 import { householdUses } from '../households/section.guard';
+import { fromTemplate, parseTemplate, readTemplate } from '../common/checklist';
 import { PrismaService } from '../prisma/prisma.service';
 
 const CATEGORY_MAX = 40;
@@ -47,6 +48,7 @@ const toRecurring = (r: Row): RecurringTask => ({
   priority: r.priority as Priority,
   category: r.category,
   assigneeIds: r.assignees.map((a) => a.userId),
+  checklist: readTemplate(r.checklist),
   ...toRecurrence(r),
   nextDate: r.nextDate,
   active: r.active,
@@ -111,6 +113,7 @@ export class RecurringService implements OnApplicationBootstrap {
         priority: f.priority!,
         category: f.category ?? null,
         assignees: { create: (f.assigneeIds ?? []).map((userId) => ({ userId })) },
+        checklist: JSON.stringify(f.checklist ?? []),
         ...stored(recurrence),
         nextDate: occurrenceOnOrAfter(recurrence, today),
         active: f.active ?? true,
@@ -137,6 +140,7 @@ export class RecurringService implements OnApplicationBootstrap {
       priority: f.priority,
       category: f.category,
       active: f.active,
+      checklist: f.checklist && JSON.stringify(f.checklist),
       assignees: f.assigneeIds && { deleteMany: {}, create: f.assigneeIds.map((userId) => ({ userId })) },
     };
     if (scheduleChanged || reactivated) {
@@ -194,6 +198,7 @@ export class RecurringService implements OnApplicationBootstrap {
           priority: row.priority,
           category: row.category,
           due: date,
+          checklist: JSON.stringify(fromTemplate(readTemplate(row.checklist))),
           assignees: { create: row.assignees.map(({ userId }) => ({ userId })) },
         },
       });
@@ -255,6 +260,7 @@ export class RecurringService implements OnApplicationBootstrap {
       if (typeof b['active'] !== 'boolean') throw new BadRequestException('active tiene que ser true o false');
       out.active = b['active'];
     }
+    if (b['checklist'] !== undefined) out.checklist = parseTemplate(b['checklist']);
     return out;
   }
 }

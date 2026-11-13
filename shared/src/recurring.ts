@@ -40,6 +40,8 @@ export interface RecurringTask extends Recurrence {
   priority: Priority;
   category: string | null;
   assigneeIds: string[];
+  /** Lista que llevará cada tarea que cree (sin tachar). */
+  checklist: string[];
   /** Fecha en la que se creará la próxima tarea. */
   nextDate: IsoDate;
   /** Pausada: no crea tareas hasta que se reactive. */
@@ -59,6 +61,7 @@ export interface RecurringTaskInput {
   weekdays?: number[];
   startDate: IsoDate;
   active?: boolean;
+  checklist?: string[];
 }
 
 /** Primera fecha en la que toca la tarea que sea igual o posterior a `from`. */

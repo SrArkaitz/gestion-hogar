@@ -42,6 +42,12 @@ export class TasksStore {
     }
   }
 
+  /** Tacha o destacha una cosa de la lista (se guarda al momento). */
+  async checkItem(id: string, itemId: string, done: boolean): Promise<void> {
+    const task = await firstValueFrom(this.http.post<Task>(`${this.api}/${id}/checklist/${itemId}`, { done }));
+    this.tasks.update((list) => list.map((t) => (t.id === id ? task : t)));
+  }
+
   /** API de los comentarios de una tarea. */
   commentsApi(id: string): string {
     return `${this.api}/${id}/comments`;

@@ -102,6 +102,10 @@
               @if (task.category) {
                 <span class="tag">{{ task.category }}</span>
               }
+              @if (task.checklist.length) {
+                <span class="ck-count" [class.all]="checkDone(task) === task.checklist.length"
+                      [attr.aria-label]="'Lista: ' + checkDone(task) + ' de ' + task.checklist.length + ' hechas'">☑ {{ checkDone(task) }}/{{ task.checklist.length }}</span>
+              }
               @if (task.commentCount) {
                 <span class="c-count" [attr.aria-label]="commentsLabel(task.commentCount)">💬 {{ task.commentCount }}</span>
               }
@@ -144,6 +148,7 @@
     [personal]="personal()"
     [commentsApi]="editing() ? store.commentsApi(editing()!.id) : null"
     (commentCount)="onCommentCount($event)"
+    (checkItem)="onCheckItem($event)"
     (save)="onSave($event)"
     (delete)="onDelete()"
     (archive)="onArchive()"

@@ -1,4 +1,5 @@
 import { ModuleKey } from './modules';
+import { NotificationKind } from './notifications';
 
 export const ROLES = ['admin', 'miembro'] as const;
 export type Role = (typeof ROLES)[number];
@@ -70,6 +71,8 @@ export interface Me {
   households: HouseholdSummary[];
   /** Formas de entrar que tiene la cuenta. */
   account: { password: boolean; google: boolean };
+  /** Tipos de aviso que ha desactivado (no le llegan ni al móvil ni a la campanita). */
+  notifyOff: NotificationKind[];
 }
 
 /** Respuesta de /api/auth/providers: formas de entrar disponibles en el servidor. */

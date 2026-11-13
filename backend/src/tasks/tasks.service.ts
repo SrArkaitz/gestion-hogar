@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { isIsoDate, PRIORITIES, Priority, Task, TASK_ARCHIVE_DAYS, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
+import { ChecklistItemInput, isIsoDate, PRIORITIES, Priority, Task, TASK_ARCHIVE_DAYS, TASK_STATUSES, TaskInput, TaskStatus } from '@hogar/shared';
 import { TIME_ZONE } from '../common/dates';
 import { parseAssigneeIds } from '../common/assignees';
+import { parseChecklist, readChecklist } from '../common/checklist';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
 import { PushService } from '../notifications/push.service';
@@ -33,6 +34,7 @@ const toTask = (r: Row): Task => ({
   recurringId: r.recurringId,
   doneAt: r.doneAt?.toISOString() ?? null,
   archivedAt: r.archivedAt?.toISOString() ?? null,
+  checklist: readChecklist(r.checklist),
   commentCount: r._count.comments,
   createdAt: r.createdAt.toISOString(),
   updatedAt: r.updatedAt.toISOString(),
@@ -136,6 +138,7 @@ export class TasksService implements OnApplicationBootstrap {
         category: input.category ?? null,
         personal: !!personal,
         doneAt: input.status === 'hecho' ? new Date() : null,
+        checklist: JSON.stringify(input.checklist ? parseChecklist(input.checklist) : []),
         assignees: { create: people.map((userId) => ({ userId })) },
       },
       include,
@@ -150,7 +153,7 @@ export class TasksService implements OnApplicationBootstrap {
   async update(householdId: string, id: string, actorId: string, body: unknown): Promise<Task> {
     const current = await this.find(householdId, id, actorId);
     // En las personales no se cambia ni la persona ni el tipo.
-    const { assigneeIds: requested, personal: _personal, ...patch } = await this.validate(householdId, body, true);
+    const { assigneeIds: requested, personal: _personal, checklist, ...patch } = await this.validate(householdId, body, true);
     const assigneeIds = current.personal ? undefined : requested;
     // Al pasar a Hecho empieza a contar la semana; al salir de Hecho deja de estar hecha (y archivada).
     const done =
@@ -161,10 +164,26 @@ export class TasksService implements OnApplicationBootstrap {
           : { doneAt: null, archivedAt: null };
     const before = assigneeIds ? await this.prisma.taskAssignee.findMany({ where: { taskId: id } }) : [];
     const assignees = assigneeIds && { deleteMany: {}, create: assigneeIds.map((userId) => ({ userId })) };
-    const row = await this.prisma.task.update({ where: { id }, data: { ...patch, ...done, assignees }, include });
+    const list = checklist && JSON.stringify(parseChecklist(checklist, readChecklist(current.checklist)));
+    const row = await this.prisma.task.update({ where: { id }, data: { ...patch, ...done, assignees, ...(list && { checklist: list }) }, include });
     const task = toTask(row);
     if (assigneeIds) void this.notifyAssigned(householdId, task, before.map((a) => a.userId), actorId);
     return task;
+  }
+
+  /** Tacha o destacha una cosa de la lista sin tocar las demás (dos personas pueden ir tachando a la vez). */
+  async checkItem(householdId: string, id: string, userId: string, itemId: string, body: unknown): Promise<Task> {
+    const done = asObject(body)['done'];
+    if (typeof done !== 'boolean') throw new BadRequestException('«done» tiene que ser true o false');
+    await this.find(householdId, id, userId);
+    return this.prisma.$transaction(async (tx) => {
+      const row = await tx.task.findUniqueOrThrow({ where: { id } });
+      const list = readChecklist(row.checklist);
+      const item = list.find((i) => i.id === itemId);
+      if (!item) throw new NotFoundException('Esa cosa ya no está en la lista');
+      item.done = done;
+      return toTask(await tx.task.update({ where: { id }, data: { checklist: JSON.stringify(list) }, include }));
+    });
   }
 
   async remove(householdId: string, id: string, userId: string): Promise<void> {
@@ -183,7 +202,7 @@ export class TasksService implements OnApplicationBootstrap {
         body: task.title,
         url: `/tareas/hogar?casa=${householdId}`,
         tag: `asignada-${task.id}`,
-      });
+      }, 'asignadas');
     } catch (err) {
       this.logger.warn(`No se pudo avisar de la tarea asignada: ${(err as Error).message}`);
     }
@@ -226,6 +245,11 @@ export class TasksService implements OnApplicationBootstrap {
       out.personal = b['personal'];
     }
     if (b['assigneeIds'] !== undefined) out.assigneeIds = await parseAssigneeIds(this.prisma, householdId, b['assigneeIds']);
+    // Aquí solo se comprueba; los ids se resuelven al guardar, contra la lista actual de la tarea.
+    if (b['checklist'] !== undefined) {
+      parseChecklist(b['checklist']);
+      out.checklist = b['checklist'] as ChecklistItemInput[];
+    }
     return out;
   }
 }

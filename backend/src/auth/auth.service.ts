@@ -6,6 +6,7 @@ import { asObject, emailField, requiredText } from '../common/validation';
 import { parseHidden } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { avatarUrl } from '../recipes/photos';
+import { readKinds } from '../notifications/kinds';
 import { GoogleLoginError, GoogleProfile } from './google.service';
 
 const MINUTE = 60_000;
@@ -104,6 +105,7 @@ export class AuthService {
         passwordHash: true,
         googleId: true,
         avatar: true,
+        notifyOff: true,
         memberships: { include: { household: true }, orderBy: { joinedAt: 'asc' } },
       },
     });
@@ -116,6 +118,7 @@ export class AuthService {
         hiddenModules: parseHidden(m.household.hiddenModules),
       })),
       account: { password: !!user.passwordHash, google: !!user.googleId },
+      notifyOff: readKinds(user.notifyOff),
     };
   }
 

@@ -55,6 +55,8 @@ model User {
   googleId     String?  @unique
   /// Archivo de la foto de perfil en PHOTOS_DIR, o null
   avatar       String?
+  /// JSON: NotificationKind[] que ha desactivado
+  notifyOff    String   @default("[]")
   createdAt    DateTime @default(now())
 
   memberships       HouseholdMember[]
@@ -159,6 +161,8 @@ model Task {
   recurring   RecurringTask? @relation(fields: [recurringId], references: [id], onDelete: SetNull)
   /// Cuándo pasó a Hecho (null si no está hecha)
   doneAt      DateTime?
+  /// JSON: ChecklistItem[] (@hogar/shared). Se lee y se guarda entera.
+  checklist   String         @default("[]")
   /// Archivada: ya no sale en el tablero. Pasa sola a los 7 días de hecha, o a mano.
   archivedAt  DateTime?
   createdAt   DateTime       @default(now())
@@ -175,6 +179,8 @@ model RecurringTask {
   household   Household               @relation(fields: [householdId], references: [id], onDelete: Cascade)
   title       String
   notes       String                  @default("")
+  /// JSON: string[] con la lista que llevará cada tarea
+  checklist   String                  @default("[]")
   priority    String                  @default("media")
   category    String?
   assignees   RecurringTaskAssignee[]

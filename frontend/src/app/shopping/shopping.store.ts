@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { ShoppingItem, ShoppingItemInput, ShoppingItemPatch, ShoppingProduct } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
 import { errorMessage } from '../core/errors';
@@ -23,6 +23,12 @@ export class ShoppingStore {
   };
 
   readonly items = signal<ShoppingItem[]>([]);
+  /** Sin conexión: hora de la lista guardada que se está viendo ("18:05"), o null si hay conexión. */
+  readonly offline = signal<string | null>(null);
+  /** Lo tachado sin conexión, pendiente de guardar: id → en el carro o no. Sobrevive a cerrar la app. */
+  private readonly queue = signal<Record<string, boolean>>({});
+  readonly queued = computed(() => Object.keys(this.queue()).length);
+  private readonly onOnline = () => void this.poll();
   readonly products = signal<ShoppingProduct[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -35,13 +41,15 @@ export class ShoppingStore {
     this.householdId = householdId;
     this.loading.set(true);
     this.items.set([]);
+    this.queue.set(readQueue(householdId));
     try {
       const [items, products] = await Promise.all([
-        firstValueFrom(this.http.get<ShoppingItem[]>(`${this.api}/items`)),
+        this.fetchItems(),
         firstValueFrom(this.http.get<ShoppingProduct[]>(`${this.api}/products`)),
       ]);
       if (this.householdId !== householdId) return;
       this.items.set(items);
+      void this.flush();
       this.products.set(products);
       this.error.set(null);
     } catch (err) {
@@ -54,6 +62,7 @@ export class ShoppingStore {
   /** Empieza a mirar cambios de los demás. Se para con stopSync() al salir de la página. */
   startSync(): void {
     this.stopSync();
+    window.addEventListener('online', this.onOnline);
     this.timer = setInterval(() => {
       if (document.visibilityState === 'visible') void this.poll();
     }, POLL_MS);
@@ -64,6 +73,7 @@ export class ShoppingStore {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
     document.removeEventListener('visibilitychange', this.onVisible);
+    window.removeEventListener('online', this.onOnline);
   }
 
   async add(input: ShoppingItemInput): Promise<void> {
@@ -78,16 +88,67 @@ export class ShoppingStore {
     if (patch.section || patch.name) void this.loadProducts();
   }
 
-  /** Al carro o de vuelta a la lista. Se ve al momento y se deshace si falla. */
+  /**
+   * Al carro o de vuelta a la lista. Se ve al momento. Sin conexión se queda apuntado y se guarda
+   * al volver; si falla por otra cosa, se deshace.
+   */
   async toggle(item: ShoppingItem): Promise<void> {
     const done = !item.done;
     this.items.update((list) => list.map((i) => (i.id === item.id ? { ...i, done } : i)));
+    if (this.offline() || this.queued()) return this.enqueue(item.id, done);
     try {
       await this.update(item.id, { done });
     } catch (err) {
+      if (isNetworkError(err)) {
+        this.markOffline();
+        return this.enqueue(item.id, done);
+      }
       this.items.update((list) => list.map((i) => (i.id === item.id ? { ...i, done: item.done } : i)));
       throw err;
     }
+  }
+
+  private enqueue(id: string, done: boolean) {
+    this.queue.update((q) => ({ ...q, [id]: done }));
+    saveQueue(this.householdId!, this.queue());
+  }
+
+  /** Guarda lo tachado sin conexión. Se para al primer fallo de red (se reintenta más tarde). */
+  private async flush(): Promise<void> {
+    const householdId = this.householdId;
+    if (!householdId || this.offline()) return;
+    for (const [id, done] of Object.entries(this.queue())) {
+      try {
+        await this.mutate(() => firstValueFrom(this.http.patch<ShoppingItem>(`${this.api}/items/${id}`, { done })));
+      } catch (err) {
+        if (isNetworkError(err)) return this.markOffline();
+        // 404: alguien lo quitó de la lista mientras tanto; otros errores, se descarta el cambio.
+      }
+      if (this.householdId !== householdId) return;
+      this.queue.update((q) => {
+        const { [id]: _, ...rest } = q;
+        return rest;
+      });
+      saveQueue(householdId, this.queue());
+    }
+  }
+
+  /** La lista del servidor (o la guardada, sin conexión) con lo tachado pendiente encima. */
+  private async fetchItems(): Promise<ShoppingItem[]> {
+    const res: HttpResponse<ShoppingItem[]> = await firstValueFrom(
+      this.http.get<ShoppingItem[]>(`${this.api}/items`, { observe: 'response' }),
+    );
+    const savedAt = res.headers.get('X-Hogar-Offline');
+    if (savedAt) this.markOffline(savedAt);
+    else this.offline.set(null);
+    const queue = this.queue();
+    return (res.body ?? []).map((i) => (i.id in queue ? { ...i, done: queue[i.id] } : i));
+  }
+
+  private markOffline(savedAt?: string) {
+    const date = savedAt && savedAt !== '1' ? new Date(savedAt) : null;
+    const time = date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+    this.offline.set(time || this.offline() || '');
   }
 
   async remove(id: string): Promise<void> {
@@ -122,10 +183,12 @@ export class ShoppingStore {
     const householdId = this.householdId;
     if (!householdId || this.pending) return;
     try {
-      const items = await firstValueFrom(this.http.get<ShoppingItem[]>(`${this.api}/items`));
+      const items = await this.fetchItems();
       if (this.householdId === householdId && !this.pending) this.items.set(items);
-    } catch {
+      if (!this.offline()) void this.flush();
+    } catch (err) {
       // Sin conexión un momento (por ejemplo, en el súper): se vuelve a intentar en el siguiente.
+      if (isNetworkError(err)) this.markOffline();
     }
   }
 
@@ -137,4 +200,29 @@ export class ShoppingStore {
       this.pending--;
     }
   }
+}
+
+const queueKey = (householdId: string) => `hogar.compra.pendiente.${householdId}`;
+
+function readQueue(householdId: string): Record<string, boolean> {
+  try {
+    const q = JSON.parse(localStorage.getItem(queueKey(householdId)) ?? '{}');
+    return q && typeof q === 'object' ? q : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveQueue(householdId: string, queue: Record<string, boolean>) {
+  try {
+    if (Object.keys(queue).length) localStorage.setItem(queueKey(householdId), JSON.stringify(queue));
+    else localStorage.removeItem(queueKey(householdId));
+  } catch {
+    // Sin almacenamiento (modo privado): lo pendiente se queda solo en memoria.
+  }
+}
+
+/** Sin conexión (o la red no responde), no un error del servidor. */
+function isNetworkError(err: unknown): boolean {
+  return err instanceof HttpErrorResponse && err.status === 0;
 }

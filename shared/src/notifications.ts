@@ -9,6 +9,28 @@ export interface PushSubscriptionInput {
   keys: { p256dh: string; auth: string };
 }
 
+/** Tipos de aviso: cada persona elige cuáles quiere (los de prueba llegan siempre). */
+export const NOTIFICATION_KINDS = ['asignadas', 'comentarios', 'tareas', 'calendario', 'facturas', 'mantenimiento'] as const;
+export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
+
+export const NOTIFICATION_KIND_LABELS: Record<NotificationKind, string> = {
+  asignadas: 'Tareas que te asignan',
+  comentarios: 'Comentarios',
+  tareas: 'Tareas pendientes',
+  calendario: 'Calendario y cumpleaños',
+  facturas: 'Facturas por pagar',
+  mantenimiento: 'Revisiones de mantenimiento',
+};
+
+export const NOTIFICATION_KIND_DESCRIPTIONS: Record<NotificationKind, string> = {
+  asignadas: 'Cuando alguien te pone en una tarea.',
+  comentarios: 'Cuando comentan en una tarea o idea en la que estás.',
+  tareas: 'A las 9:00, las tuyas que vencen hoy o ya vencieron.',
+  calendario: 'A las 9:00, los eventos y cumpleaños del día.',
+  facturas: 'A las 9:00, las que vencen en los próximos días.',
+  mantenimiento: 'A las 9:00, las revisiones que tocan.',
+};
+
 /** Un aviso de la campanita. */
 export interface AppNotification {
   id: string;

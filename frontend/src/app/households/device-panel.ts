@@ -36,11 +36,11 @@ import { THEME_LABELS, THEMES, ThemeService } from '../core/theme.service';
           <p class="n">Los avisos están bloqueados para esta web. Permítelos en los ajustes del navegador y vuelve aquí.</p>
         }
         @case ('desactivado') {
-          <p class="n">Recibe a las 9:00 las tareas que vencen y un aviso cuando alguien te asigne una.</p>
+          <p class="n">Recibe en este dispositivo los avisos que tengas activados en «Qué avisos recibes».</p>
           <button type="button" class="btn" [disabled]="busy()" (click)="enable()">Activar avisos</button>
         }
         @case ('activado') {
-          <p class="n">Activados: a las 9:00 te llegan las tareas que vencen, y un aviso cuando alguien te asigna una.</p>
+          <p class="n">Activados en este dispositivo. Eliges cuáles en «Qué avisos recibes».</p>
           <div class="acts-sm">
             <button type="button" class="link" [disabled]="busy()" (click)="test()">Enviar uno de prueba</button>
             <button type="button" class="link danger" [disabled]="busy()" (click)="disable()">Desactivar</button>

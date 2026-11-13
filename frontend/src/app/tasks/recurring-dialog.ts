@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
+  ChecklistItemInput,
   describeRecurrence,
   Member,
   occurrenceOnOrAfter,
@@ -18,6 +19,7 @@ import {
   WEEKDAYS,
 } from '@hogar/shared';
 import { todayIso, whenText } from '../core/dates';
+import { ChecklistEditor } from './checklist-editor';
 
 const UNITS: Record<Exclude<RecurrenceFrequency, 'dias_semana'>, [string, string]> = {
   dias: ['día', 'días'],
@@ -28,7 +30,7 @@ const UNITS: Record<Exclude<RecurrenceFrequency, 'dias_semana'>, [string, string
 /** Formulario para crear o editar una tarea recurrente. */
 @Component({
   selector: 'app-recurring-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, ChecklistEditor],
   template: `
     <div class="veil" (click)="close.emit()">
       <form class="dlg" role="dialog" aria-modal="true" [attr.aria-label]="heading()"
@@ -41,6 +43,8 @@ const UNITS: Record<Exclude<RecurrenceFrequency, 'dias_semana'>, [string, string
         <label>Notas
           <textarea name="notes" maxlength="2000" [(ngModel)]="notes"></textarea>
         </label>
+
+        <app-checklist-editor [(items)]="checklist" [checkable]="false" placeholder="Lista de cada vez… (horno, nevera)" />
 
         <fieldset class="repeat">
           <legend class="lbl">Se repite</legend>
@@ -154,6 +158,7 @@ export class RecurringDialog implements OnInit {
 
   protected readonly title = signal('');
   protected readonly notes = signal('');
+  protected readonly checklist = signal<ChecklistItemInput[]>([]);
   protected readonly priority = signal<Priority>('media');
   protected readonly assigneeIds = signal<string[]>([]);
   protected readonly category = signal('');
@@ -215,6 +220,7 @@ export class RecurringDialog implements OnInit {
   });
 
   ngOnInit() {
+    this.checklist.set((this.item()?.checklist ?? []).map((text) => ({ text })));
     const r = this.item();
     if (!r) return;
     this.title.set(r.title);
@@ -254,6 +260,7 @@ export class RecurringDialog implements OnInit {
       priority: this.priority(),
       category: this.category().trim() || null,
       assigneeIds: this.assigneeIds(),
+      checklist: this.checklist().map((i) => i.text.trim()).filter(Boolean),
       ...r,
       ...(this.item() && { active: this.active() }),
     });

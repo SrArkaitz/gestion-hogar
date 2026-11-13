@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Put, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import { User } from '@hogar/shared';
+import { NotificationKind, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { UsersService } from './users.service';
 
@@ -17,6 +17,12 @@ export class UsersController {
   @Delete('me/avatar')
   removeAvatar(@CurrentUser() user: User): Promise<User> {
     return this.users.removeAvatar(user.id);
+  }
+
+  /** Tipos de aviso desactivados ({ "off": ["comentarios", …] }). */
+  @Put('me/notifications')
+  setNotifications(@CurrentUser() user: User, @Body() body: unknown): Promise<{ off: NotificationKind[] }> {
+    return this.users.setNotifyOff(user.id, body);
   }
 
   /** La dirección lleva ?v=…, que cambia con cada foto: se puede guardar en caché para siempre. */

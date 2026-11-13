@@ -49,6 +49,18 @@ export class TasksController {
     return this.tasks.update(householdId, id, user.id, body);
   }
 
+  /** Tacha o destacha una cosa de la lista ({ "done": true }). */
+  @Post(':id/checklist/:itemId')
+  checkItem(
+    @Param('householdId') householdId: string,
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+    @CurrentUser() user: User,
+    @Body() body: unknown,
+  ): Promise<Task> {
+    return this.tasks.checkItem(householdId, id, user.id, itemId, body);
+  }
+
   @Delete(':id')
   @HttpCode(204)
   remove(@Param('householdId') householdId: string, @Param('id') id: string, @CurrentUser() user: User): Promise<void> {

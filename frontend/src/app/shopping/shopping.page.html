@@ -46,6 +46,20 @@
   </div>
 }
 
+@if (store.offline() !== null || store.queued()) {
+  <div class="offline" role="status">
+    @if (store.offline() !== null) {
+      <strong>Sin conexión.</strong> Ves la lista guardada{{ store.offline() ? ' a las ' + store.offline() : '' }}.
+      Lo que taches se guardará al volver la conexión.
+    } @else {
+      Guardando lo que tachaste sin conexión…
+    }
+    @if (store.queued()) {
+      <span class="n">({{ store.queued() === 1 ? '1 cambio pendiente' : store.queued() + ' cambios pendientes' }})</span>
+    }
+  </div>
+}
+
 @if (store.error() || status()) {
   <div class="status err" role="status">{{ store.error() ?? status() }}</div>
 } @else if (store.loading()) {

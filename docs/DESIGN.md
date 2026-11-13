@@ -66,7 +66,8 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Comentarios:** al abrir una tarea o una idea, debajo de sus campos sale la conversación (del más antiguo al más reciente) y una caja para escribir (Ctrl+Intro también envía). La tarjeta enseña 💬 con cuántos tiene. Cada uno borra los suyos; un administrador, cualquiera. Al comentar se avisa a quien la creó o propuso, a sus personas asignadas y a quien ya había comentado (salvo a quien escribe y a quien ya no está en la casa); el aviso abre la tarea o la idea con sus comentarios. En una tarea personal solo comenta su dueño y no avisa a nadie.
 - **Orden:** dentro de cada columna, primero por prioridad y luego por antigüedad. Las tareas vencidas se marcan.
 - **Archivar:** al pasar a Hecho se apunta cuándo. A los 7 días en Hecho se archivan solas (cada noche a las 00:05 y al arrancar el servidor), para que el tablero no se llene. Se pueden archivar antes a mano: una desde su diálogo o todas las hechas del tablero con *Archivar todas*. En *Ver archivadas* (al pie de Hecho) se recuperan, y vuelven a Hecho con la semana de nuevo, o se borran. Sacar una tarea de Hecho la deja sin fecha de hecha.
-- **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Del hogar → Recurrentes*.
+- **Lista dentro de una tarea:** cosas que tachar («Limpiar la cocina»: horno, nevera, campana…), hasta 30. La tarjeta enseña cuántas van (☑ 2/5, en verde cuando están todas). Tachar se guarda al momento y solo cambia esa cosa, así dos personas pueden ir tachando a la vez sin pisarse; añadir, cambiar el texto o quitar se guarda con *Guardar*.
+- **Tareas recurrentes:** una plantilla (título, notas, prioridad, personas, categoría y lista) más una frecuencia: cada N días, semanas o meses, o ciertos días de la semana. Se gestionan en *Tareas → Del hogar → Recurrentes*.
   - **Fecha de inicio:** en semanas y meses marca el ritmo (el mismo día de la semana o del mes; si el mes no tiene ese día, el último).
   - **Cuándo se crean:** cada noche a las 00:01 (y al arrancar el servidor) se crean las que tocan ese día, con ese día como fecha límite. Si se crea una que empieza hoy, su tarea aparece ya.
   - **Sin duplicados:** si la tarea anterior de la misma plantilla sigue sin hacer, ese día se salta. Si el servidor estuvo apagado varios días, se crea una sola tarea, no una por día perdido.
@@ -75,11 +76,12 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 ### 3.1b Avisos y app instalable
 
-- **App instalable (PWA):** manifiesto, iconos y un service worker. Se instala desde el menú del navegador o desde *Casa → Este dispositivo*; en iPhone, con Compartir → Añadir a pantalla de inicio. El service worker no guarda nada en caché: la app necesita conexión y así nunca se queda una versión vieja.
+- **App instalable (PWA):** manifiesto, iconos y un service worker. Se instala desde el menú del navegador o desde *Casa → Este dispositivo*; en iPhone, con Compartir → Añadir a pantalla de inicio. El service worker guarda la app y lo que necesita la compra para usarla sin conexión (ver 3.3), pero siempre pide primero a la red: lo guardado solo se usa cuando no hay conexión, así nunca se queda una versión vieja. Al arrancar se descargan todas las secciones para que también se puedan abrir sin conexión.
 - **Avisos push:** cada persona los activa en cada dispositivo desde *Casa → Este dispositivo*, donde también puede mandarse uno de prueba. En iPhone y iPad solo funcionan con la app instalada (iOS 16.4 o posterior).
   - **Recordatorio diario a las 9:00:** un aviso por casa con las tareas sin hacer que vencen ese día o ya han vencido. Las asignadas le llegan a quien las tiene; las sin asignar, a toda la casa.
   - **Al asignar una tarea:** aviso a quien acaba de entrar en ella, salvo a quien la asigna.
   - Tocar un aviso abre la página en la casa que corresponde (`?casa=`), aunque la activa fuera otra.
+- **Qué avisos recibes** (*Casa*): cada persona activa o desactiva cada tipo: tareas que te asignan, comentarios, tareas pendientes, calendario y cumpleaños, facturas y revisiones. Es de la persona, para todos sus dispositivos y la campanita: lo desactivado no le llega por ningún sitio. Por defecto, todos activados. El aviso de prueba llega siempre.
 - **Campanita:** cada aviso que manda la app (tareas asignadas, recordatorios de las 9:00, facturas, calendario, mantenimiento y el de prueba) queda guardado para su destinatario, tenga o no push en ese dispositivo. La campanita va arriba (en el móvil, en la barra de la casa; en el PC, junto al nombre de la app) con el número de no leídos. Al tocar un aviso se abre su página y queda leído; también se pueden marcar todos. Son de la persona, de todas sus casas. Se miran al abrir la app, cada minuto y al volver a ella, y se guardan 60 días.
 - **Claves VAPID:** el servidor las genera la primera vez y las guarda en la base de datos; no hay nada que configurar. Al cerrar sesión se quitan los avisos de ese dispositivo.
 
@@ -99,6 +101,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Secciones fijas**, en el orden en que se muestran: Fruta y verdura, Carne y pescado, Lácteos y huevos, Panadería, Despensa, Congelados, Bebidas, Limpieza, Higiene y Otros. La primera vez se adivina por el nombre (leche → Lácteos y huevos); si se cambia a mano, se recuerda para la próxima.
 - **Comprado:** se marca con un toque y pasa, tachado, a *En el carro*. Se puede desmarcar. *Quitar comprados* los quita todos al terminar.
 - **Habituales:** cada producto añadido se guarda con su sección y su última cantidad. Los más comprados aparecen como botones para añadirlos con un toque y, al escribir, se sugieren los que coinciden (salvo los que ya están en la lista). Un producto mal escrito se puede olvidar desde las sugerencias.
+- **Sin conexión** (en el súper sin cobertura): la app abre y enseña la última lista guardada, con un aviso de que no hay conexión y de cuándo es. Lo que se tache se guarda en el móvil (aunque se cierre la app) y se envía solo al volver la conexión. Añadir, editar o quitar artículos necesita conexión. Con conexión siempre se usa lo último del servidor; lo guardado solo cuando la red no responde (o tarda más de 5 s). Al cerrar sesión se borra lo guardado.
 
 ### 3.4 Recetas y menús
 
@@ -264,3 +267,6 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-13 | Cumpleaños: el aviso llega a todos el mismo día; se quita elegir la antelación. |
 | 2026-11-13 | Foto de perfil de cada persona, en el mismo círculo que sus iniciales. |
 | 2026-11-13 | Formularios: * en los obligatorios (sin «opcional») y en rojo lo que está mal. |
+| 2026-11-13 | Listas dentro de las tareas (y en las plantillas de las recurrentes); tachar se guarda al momento, cosa a cosa. |
+| 2026-11-13 | Cada persona elige qué tipos de aviso recibe; lo desactivado no llega ni al móvil ni a la campanita. |
+| 2026-11-13 | Compra sin conexión: el service worker guarda la app y la última lista; lo tachado se envía al volver la conexión. |

@@ -119,6 +119,7 @@ export class CommentsService {
           url: target.kind === 'task' ? `/tareas/hogar?casa=${householdId}&tarea=${id}` : `/tareas/ideas?casa=${householdId}&idea=${id}`,
           tag: `comentario-${id}`,
         },
+        'comentarios',
       );
     } catch (err) {
       this.logger.warn(`No se pudo avisar del comentario: ${(err as Error).message}`);

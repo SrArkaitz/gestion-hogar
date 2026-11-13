@@ -158,6 +158,20 @@ export class TasksPage {
     return n === 1 ? '1 comentario' : `${n} comentarios`;
   }
 
+  protected checkDone(task: Task): number {
+    return task.checklist.filter((i) => i.done).length;
+  }
+
+  protected async onCheckItem(e: { itemId: string; done: boolean }) {
+    const task = this.editing();
+    if (!task) return;
+    try {
+      await this.store.checkItem(task.id, e.itemId, e.done);
+    } catch (err) {
+      this.dialog()?.showError(errorMessage(err, 'No se pudo tachar. Revisa la conexión.'));
+    }
+  }
+
   protected onCommentCount(n: number) {
     const task = this.editing();
     if (task) this.store.setCommentCount(task.id, n);

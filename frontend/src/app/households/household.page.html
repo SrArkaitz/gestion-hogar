@@ -94,6 +94,7 @@
       }
 
       <section appDevicePanel></section>
+
     </div>
 
     <div class="house-col">
@@ -182,6 +183,23 @@
           <button type="button" class="btn danger" (click)="leave()">Salir de esta casa</button>
         </div>
       </section>
+
+      <details class="panel fold" id="avisos">
+        <summary>
+          <h2>Qué avisos recibes</h2>
+          <span class="n">{{ kindsOn() }} de {{ kinds.length }}</span>
+        </summary>
+        <p class="n">Para ti, en todos tus dispositivos y en la campanita. Lo que desactives no te llegará.</p>
+        @for (k of kinds; track k) {
+          <label class="switch-row">
+            <input type="checkbox" [checked]="!notifyOff().includes(k)" (change)="setKind(k, $any($event.target).checked)" />
+            <span>
+              <span class="t">{{ kindLabels[k] }}</span>
+              <span class="n">{{ kindDescriptions[k] }}</span>
+            </span>
+          </label>
+        }
+      </details>
     </div>
   </div>
 }

@@ -3,6 +3,8 @@ import { PushConfig, PushPayload, PushSubscriptionInput } from '@hogar/shared';
 import webpush, { WebPushError } from 'web-push';
 import { asObject } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationKind } from '@hogar/shared';
+import { readKinds } from './kinds';
 import { InboxService } from './inbox.service';
 
 const PUBLIC_KEY = 'vapid_public';
@@ -65,7 +67,16 @@ export class PushService implements OnModuleInit {
    * llega no debe romper lo que lo provocó. Los dispositivos que ya no existen se borran.
    * @returns cuántos dispositivos lo han recibido.
    */
-  async send(userIds: string[], payload: PushPayload): Promise<number> {
+  /**
+   * Manda un aviso (y lo deja en la campanita). Con `kind`, solo a quien no tenga ese tipo desactivado;
+   * sin él (el aviso de prueba), a todos.
+   */
+  async send(userIds: string[], payload: PushPayload, kind?: NotificationKind): Promise<number> {
+    if (kind && userIds.length) {
+      const users = await this.prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, notifyOff: true } });
+      const off = new Set(users.filter((u) => readKinds(u.notifyOff).includes(kind)).map((u) => u.id));
+      userIds = userIds.filter((id) => !off.has(id));
+    }
     if (!userIds.length) return 0;
     await this.inbox.add(userIds, payload);
     const subs = await this.prisma.pushSubscription.findMany({ where: { userId: { in: userIds } } });
