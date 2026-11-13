@@ -1,5 +1,5 @@
 /** Secciones de la app que cada casa puede ocultar. "Casa" (ajustes) no está: siempre se ve. */
-export const MODULES = ['tareas', 'calendario', 'ideas', 'compra', 'recetas', 'gastos', 'inventario', 'mantenimiento'] as const;
+export const MODULES = ['tareas', 'calendario', 'ideas', 'compra', 'gastos', 'recetas', 'inventario', 'mantenimiento'] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 export const MODULE_LABELS: Record<ModuleKey, string> = {
