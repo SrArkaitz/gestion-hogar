@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@hogar/shared';
 import { createHash, randomBytes } from 'crypto';
 import type { CookieOptions, Response } from 'express';
+import { avatarUrl } from '../recipes/photos';
 import { PrismaService } from '../prisma/prisma.service';
 
 export const SESSION_COOKIE = 'hogar_sesion';
@@ -35,7 +36,7 @@ export class SessionsService {
   async validate(token: string, res: Response): Promise<User | null> {
     const session = await this.prisma.session.findUnique({
       where: { tokenHash: hashToken(token) },
-      include: { user: { select: { id: true, name: true, email: true } } },
+      include: { user: { select: { id: true, name: true, email: true, avatar: true } } },
     });
     if (!session) return null;
     if (session.expiresAt.getTime() <= Date.now()) {
@@ -47,7 +48,8 @@ export class SessionsService {
       await this.prisma.session.update({ where: { id: session.id }, data: { expiresAt } });
       res.cookie(SESSION_COOKIE, token, { ...cookieOptions(), expires: expiresAt });
     }
-    return session.user;
+    const { avatar, ...user } = session.user;
+    return { ...user, avatarUrl: avatarUrl(user.id, avatar) };
   }
 
   async destroy(token: string | undefined, res: Response): Promise<void> {

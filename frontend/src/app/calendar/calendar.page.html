@@ -69,7 +69,7 @@
                 @if (peopleOf(it).length) {
                   <span class="avatars" aria-hidden="true">
                     @for (m of peopleOf(it); track m.id) {
-                      <span class="avatar" [attr.data-c]="m.color" [title]="m.name">{{ initials(m.name) }}</span>
+                      <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
                     }
                   </span>
                 }
@@ -97,7 +97,7 @@
                   @if (peopleOf(it).length) {
                     <span class="avatars" aria-hidden="true">
                       @for (m of peopleOf(it); track m.id) {
-                        <span class="avatar" [attr.data-c]="m.color" [title]="m.name">{{ initials(m.name) }}</span>
+                        <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
                       }
                     </span>
                   }

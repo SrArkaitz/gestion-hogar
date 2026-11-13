@@ -6,6 +6,7 @@ import { SessionService } from '../core/session.service';
 import { initials } from '../tasks/people';
 import { ExpensesTabs } from './expenses-tabs';
 import { ExpensesStore } from './expenses.store';
+import { Avatar } from '../core/avatar';
 
 interface Row {
   label: string;
@@ -17,7 +18,7 @@ interface Row {
 /** Resumen de un mes: total, por categoría y por persona. */
 @Component({
   selector: 'app-summary-page',
-  imports: [ExpensesTabs],
+  imports: [Avatar, ExpensesTabs],
   host: { class: 'view' },
   templateUrl: './summary.page.html',
 })
@@ -53,8 +54,9 @@ export class SummaryPage {
     const ids = [...new Set([...paid.keys(), ...share.keys()])];
     const names = new Map((this.store.balances()?.balances ?? []).map((b) => [b.userId, b.name]));
     const colors = new Map(this.store.members().map((m) => [m.id, m.color]));
+    const photos = new Map(this.store.members().map((m) => [m.id, m.avatarUrl]));
     return ids
-      .map((id) => ({ id, name: names.get(id) ?? '¿?', color: colors.get(id) ?? null, paid: paid.get(id) ?? 0, share: share.get(id) ?? 0 }))
+      .map((id) => ({ id, name: names.get(id) ?? '¿?', color: colors.get(id) ?? null, photo: photos.get(id) ?? null, paid: paid.get(id) ?? 0, share: share.get(id) ?? 0 }))
       .sort((a, b) => b.share - a.share);
   });
 

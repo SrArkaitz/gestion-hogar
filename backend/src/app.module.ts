@@ -19,6 +19,7 @@ import { RecipesModule } from './recipes/recipes.module';
 import { RecurringModule } from './recurring/recurring.module';
 import { ShoppingModule } from './shopping/shopping.module';
 import { TasksModule } from './tasks/tasks.module';
+import { UsersModule } from './users/users.module';
 
 // Carpeta con el frontend compilado. En Docker se copia a backend/public.
 const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'public'));
@@ -33,6 +34,7 @@ const publicDir = resolve(process.env.PUBLIC_DIR ?? join(__dirname, '..', 'publi
     TasksModule,
     IdeasModule,
     CommentsModule,
+    UsersModule,
     RecurringModule,
     ShoppingModule,
     RecipesModule,

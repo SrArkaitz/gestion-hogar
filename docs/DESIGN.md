@@ -43,6 +43,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 ### 3.0 Usuarios y casas
 
 - **Cuenta:** nombre, correo y contraseña (mínimo 8 caracteres), o con Google. El registro está abierto a cualquiera.
+- **Foto de perfil:** cada uno pone la suya en *Casa → Cuenta* (y la cambia o la quita). El navegador la recorta en cuadrado y la reduce a 256 px antes de subirla. Sale en el círculo donde estaban sus iniciales: tarjetas, calendario, comentarios, gastos, miembros y el menú. Sin foto siguen las iniciales con su color. Solo la ven las personas con las que comparte casa. Se guarda con las fotos de las recetas, así que entra en la copia diaria.
 - **Con Google:** entrar con Google crea la cuenta si no existe (sin contraseña). Si ya hay una cuenta con contraseña y el mismo correo, no se une sola, porque el registro no verifica correos y otra persona podría haberla creado. Se conecta desde *Casa → Cuenta* con la sesión iniciada. Se puede desconectar si la cuenta tiene contraseña.
 - **Casas:** cualquiera puede crear las que quiera. Al registrarse sin invitación se pide crear la primera.
 - **Color de cada persona:** cada miembro tiene un color en cada casa, de una paleta de 10 (la de las etiquetas de Trello). Al entrar recibe el primero libre. Cada uno cambia el suyo desde *Casa → Miembros*; los administradores, el de cualquiera.
@@ -260,3 +261,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-13 | Comentarios en tareas e ideas, con aviso a quien está metido en la tarjeta. |
 | 2026-11-13 | Al aceptar una idea se elige si la tarea va al hogar o a las personales de quien la acepta. |
 | 2026-11-13 | Cumpleaños: el aviso llega a todos el mismo día; se quita elegir la antelación. |
+| 2026-11-13 | Foto de perfil de cada persona, en el mismo círculo que sus iniciales. |

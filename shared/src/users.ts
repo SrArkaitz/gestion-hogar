@@ -48,7 +48,12 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  /** Dirección de su foto de perfil, o null (entonces se ven sus iniciales). */
+  avatarUrl: string | null;
 }
+
+/** Lado de la foto de perfil (cuadrada) que guarda el navegador antes de subirla. */
+export const AVATAR_SIDE = 256;
 
 /** Casa tal como aparece en el selector: sin miembros. */
 export interface HouseholdSummary {
@@ -93,6 +98,8 @@ export interface Member {
   email: string;
   role: Role;
   color: MemberColor;
+  /** Dirección de su foto de perfil, o null. */
+  avatarUrl: string | null;
   joinedAt: string;
 }
 

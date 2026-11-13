@@ -19,6 +19,7 @@ import { SessionService } from '../core/session.service';
 import { CalendarTabs } from './calendar-tabs';
 import { CalendarStore } from './calendar.store';
 import { EventDialog } from './event-dialog';
+import { Avatar } from '../core/avatar';
 
 type View = 'mes' | 'semana';
 
@@ -31,7 +32,7 @@ const CHIPS_PER_DAY = 3;
  */
 @Component({
   selector: 'app-calendar-page',
-  imports: [CalendarTabs, EventDialog],
+  imports: [Avatar, CalendarTabs, EventDialog],
   host: { class: 'view' },
   templateUrl: './calendar.page.html',
 })

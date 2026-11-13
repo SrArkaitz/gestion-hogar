@@ -108,7 +108,7 @@
               @if (task.assigneeIds.length && !personal()) {
                 <span class="avatars" role="img" [attr.aria-label]="assigneesLabel(task)">
                   @for (m of assignees(task); track m.id) {
-                    <span class="avatar" [attr.data-c]="m.color" [title]="m.name" aria-hidden="true">{{ initials(m.name) }}</span>
+                    <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name" aria-hidden="true">{{ initials(m.name) }}</span>
                   }
                 </span>
               }

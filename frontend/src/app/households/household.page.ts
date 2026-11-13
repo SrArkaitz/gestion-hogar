@@ -22,11 +22,15 @@ import { DevicePanel } from './device-panel';
 import { errorMessage, googleErrorMessage } from '../core/errors';
 import { HouseholdsService } from '../core/households.service';
 import { SessionService } from '../core/session.service';
+import { Avatar, resizeAvatar } from '../core/avatar';
+import { initials } from '../tasks/people';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 /** Ajustes de la casa activa: nombre, miembros, invitaciones, otras casas y cuenta. */
 @Component({
   selector: 'app-household-page',
-  imports: [FormsModule, GoogleButton, DevicePanel],
+  imports: [Avatar, FormsModule, GoogleButton, DevicePanel],
   host: { class: 'view' },
   templateUrl: './household.page.html',
 })
@@ -34,6 +38,7 @@ export class HouseholdPage {
   protected readonly session = inject(SessionService);
   private readonly api = inject(HouseholdsService);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   /** Código con el que vuelve la API si falla conectar Google (?error=…). */
   readonly error_ = input<string>(undefined, { alias: 'error' });
@@ -194,6 +199,49 @@ export class HouseholdPage {
 
   protected formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  }
+
+  protected readonly initials = initials;
+  protected readonly avatarBusy = signal(false);
+  /** Tu color en esta casa (el círculo sin foto). */
+  protected readonly myColor = computed(() => this.household()?.members.find((m) => m.id === this.me())?.color ?? null);
+
+  /** Recorta la foto en cuadrado, la reduce y la sube. */
+  protected async pickAvatar(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.avatarBusy.set(true);
+    this.error.set('');
+    try {
+      const blob = await resizeAvatar(file);
+      await firstValueFrom(this.http.put('/api/users/me/avatar', blob, { headers: { 'Content-Type': 'image/jpeg' } }));
+      await this.afterAvatar();
+      this.status.set('Foto de perfil guardada.');
+    } catch (err) {
+      this.error.set(errorMessage(err, 'No se pudo subir la foto. Prueba con otra imagen.'));
+    } finally {
+      this.avatarBusy.set(false);
+    }
+  }
+
+  protected async removeAvatar() {
+    if (!confirm('¿Quitar tu foto de perfil? Se verán tus iniciales.')) return;
+    try {
+      await firstValueFrom(this.http.delete('/api/users/me/avatar'));
+      await this.afterAvatar();
+      this.status.set('Foto quitada.');
+    } catch (err) {
+      this.error.set(errorMessage(err, 'No se pudo quitar la foto.'));
+    }
+  }
+
+  /** La foto sale en tu cuenta, en el menú y en la lista de miembros. */
+  private async afterAvatar() {
+    await this.session.refresh();
+    const id = this.household()?.id;
+    if (id) this.household.set(await this.api.get(id));
   }
 
   private async load(id: string, admin: boolean) {

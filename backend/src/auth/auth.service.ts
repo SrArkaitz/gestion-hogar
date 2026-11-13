@@ -5,6 +5,7 @@ import { RateLimiter } from '../common/rate-limiter';
 import { asObject, emailField, requiredText } from '../common/validation';
 import { parseHidden } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { avatarUrl } from '../recipes/photos';
 import { GoogleLoginError, GoogleProfile } from './google.service';
 
 const MINUTE = 60_000;
@@ -102,11 +103,12 @@ export class AuthService {
         email: true,
         passwordHash: true,
         googleId: true,
+        avatar: true,
         memberships: { include: { household: true }, orderBy: { joinedAt: 'asc' } },
       },
     });
     return {
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, avatarUrl: avatarUrl(user.id, user.avatar) },
       households: user.memberships.map((m) => ({
         id: m.household.id,
         name: m.household.name,

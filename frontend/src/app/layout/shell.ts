@@ -5,6 +5,8 @@ import { NotificationsService } from '../core/notifications.service';
 import { SessionService } from '../core/session.service';
 import { HouseholdSwitcher } from './household-switcher';
 import { NotificationsBell } from './notifications-bell';
+import { Avatar } from '../core/avatar';
+import { initials } from '../tasks/people';
 
 interface NavItem {
   path: string;
@@ -18,13 +20,14 @@ interface NavItem {
 /** Estructura de la app con sesión: navegación y página actual. */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, HouseholdSwitcher, NotificationsBell],
+  imports: [Avatar, RouterOutlet, RouterLink, RouterLinkActive, HouseholdSwitcher, NotificationsBell],
   templateUrl: './shell.html',
 })
 export class Shell {
   protected readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationsService);
+  protected readonly initials = initials;
 
   /** Secciones de la app; solo salen las que usa la casa activa. */
   private readonly modules: NavItem[] = [

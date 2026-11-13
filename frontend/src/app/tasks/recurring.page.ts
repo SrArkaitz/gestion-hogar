@@ -7,11 +7,12 @@ import { SessionService } from '../core/session.service';
 import { assigneesLabel, assigneesOf, initials, stripeFor } from './people';
 import { RecurringDialog } from './recurring-dialog';
 import { RecurringStore } from './recurring.store';
+import { Avatar } from '../core/avatar';
 
 /** Plantillas de tareas que se crean solas en el tablero cada cierto tiempo. */
 @Component({
   selector: 'app-recurring-page',
-  imports: [RouterLink, RecurringDialog],
+  imports: [Avatar, RouterLink, RecurringDialog],
   host: { class: 'view' },
   templateUrl: './recurring.page.html',
 })

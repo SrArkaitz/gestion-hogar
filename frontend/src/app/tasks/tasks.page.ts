@@ -21,13 +21,14 @@ import { assigneesLabel, assigneesOf, initials, stripeFor } from './people';
 import { TaskDialog } from './task-dialog';
 import { TasksTabs } from './tasks-tabs';
 import { TasksStore } from './tasks.store';
+import { Avatar } from '../core/avatar';
 
 /** Filtro por persona: todas, las mías, sin asignar o un miembro concreto (su id). */
 type PersonFilter = 'todas' | 'mias' | 'nadie' | string;
 
 @Component({
   selector: 'app-tasks-page',
-  imports: [CdkDropListGroup, CdkDropList, CdkDrag, RouterLink, TaskDialog, TasksTabs],
+  imports: [Avatar, CdkDropListGroup, CdkDropList, CdkDrag, RouterLink, TaskDialog, TasksTabs],
   host: { class: 'view' },
   templateUrl: './tasks.page.html',
 })

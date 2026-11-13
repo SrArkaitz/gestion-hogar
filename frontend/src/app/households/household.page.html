@@ -39,6 +39,7 @@
               } @else {
                 <span class="swatch" [attr.data-c]="m.color" [title]="colorLabels[m.color]"></span>
               }
+              <span class="avatar md" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>
               <div class="who">
                 <span class="t">{{ m.name }}@if (m.id === me()) { <span class="you">(tú)</span> }</span>
                 <span class="n">{{ m.email }}</span>
@@ -141,7 +142,26 @@
 
       <section class="panel">
         <h2>Cuenta</h2>
-        <p class="n">{{ session.user()?.name }} · {{ session.user()?.email }}</p>
+        @if (session.user(); as u) {
+          <div class="profile">
+            <span class="avatar lg" [attr.data-c]="myColor()" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+            <div class="profile-who">
+              <span class="t">{{ u.name }}</span>
+              <span class="n">{{ u.email }}</span>
+              <span class="profile-acts">
+                <label class="link file">{{ u.avatarUrl ? 'Cambiar foto' : 'Poner foto' }}
+                  <input type="file" accept="image/*" aria-label="Foto de perfil" (change)="pickAvatar($event)" />
+                </label>
+                @if (u.avatarUrl) {
+                  <button type="button" class="link danger" (click)="removeAvatar()">Quitar</button>
+                }
+              </span>
+            </div>
+          </div>
+          @if (avatarBusy()) {
+            <p class="hint">Subiendo la foto…</p>
+          }
+        }
         @if (googleError()) {
           <p class="form-err" role="alert">{{ googleError() }}</p>
         }

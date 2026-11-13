@@ -53,6 +53,8 @@ model User {
   passwordHash String?
   /// Identificador de la cuenta de Google conectada (claim "sub")
   googleId     String?  @unique
+  /// Archivo de la foto de perfil en PHOTOS_DIR, o null
+  avatar       String?
   createdAt    DateTime @default(now())
 
   memberships       HouseholdMember[]

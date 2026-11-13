@@ -11,6 +11,7 @@ import {
 } from '@hogar/shared';
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
+import { avatarUrl } from '../recipes/photos';
 import { parseHidden } from './section.guard';
 
 @Injectable()
@@ -41,6 +42,7 @@ export class HouseholdsService {
         email: m.user.email,
         role: m.role as Role,
         color: m.color as MemberColor,
+        avatarUrl: avatarUrl(m.user.id, m.user.avatar),
         joinedAt: m.joinedAt.toISOString(),
       })),
     };

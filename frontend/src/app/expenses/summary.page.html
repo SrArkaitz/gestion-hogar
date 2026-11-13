@@ -45,7 +45,7 @@
       <ul class="people-sum">
         @for (p of byPerson(); track p.id) {
           <li>
-            <span class="avatar" [attr.data-c]="p.color" aria-hidden="true">{{ initials(p.name) }}</span>
+            <span class="avatar" [attr.data-c]="p.color" [appAvatar]="p.photo" aria-hidden="true">{{ initials(p.name) }}</span>
             <span class="t">{{ p.name }}</span>
             <span class="cols">
               <span><span class="n">pagó</span> {{ euros(p.paid) }}</span>

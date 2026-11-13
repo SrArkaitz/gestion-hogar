@@ -6,10 +6,12 @@ import { agoText } from '../core/dates';
 import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
 import { initials } from './people';
+import { Avatar } from '../core/avatar';
 
 /** Comentarios de una tarea o una idea: la conversación y una caja para escribir. */
 @Component({
   selector: 'app-comments',
+  imports: [Avatar],
   template: `
     <section class="comments" aria-label="Comentarios">
       <span class="lbl">Comentarios{{ comments().length ? ' (' + comments().length + ')' : '' }}</span>
@@ -19,7 +21,7 @@ import { initials } from './people';
         <ul>
           @for (c of comments(); track c.id) {
             <li class="comment">
-              <span class="avatar" [attr.data-c]="colorOf(c.authorId)" aria-hidden="true">{{ initials(c.authorName) }}</span>
+              <span class="avatar" [attr.data-c]="colorOf(c.authorId)" [appAvatar]="photoOf(c.authorId)" aria-hidden="true">{{ initials(c.authorName) }}</span>
               <div class="c-body">
                 <div class="c-head">
                   <strong>{{ c.authorName }}</strong>
@@ -79,6 +81,10 @@ export class Comments implements OnInit {
 
   protected colorOf(userId: string): string | null {
     return this.members().find((m) => m.id === userId)?.color ?? null;
+  }
+
+  protected photoOf(userId: string): string | null {
+    return this.members().find((m) => m.id === userId)?.avatarUrl ?? null;
   }
 
   protected canDelete(c: Comment): boolean {

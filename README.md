@@ -185,6 +185,9 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/push/config` | Clave pública VAPID para suscribirse a los avisos |
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
+| PUT    | `/api/users/me/avatar` | Pone tu foto de perfil (la imagen tal cual en el cuerpo, JPG, PNG o WebP; hasta 2 MB) |
+| DELETE | `/api/users/me/avatar` | Quita tu foto de perfil |
+| GET    | `/api/users/:id/avatar` | Foto de perfil de alguien con quien compartes casa (`avatarUrl` en el usuario y en los miembros) |
 | POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
 | GET    | `/api/notifications` | Tus últimos avisos de la campanita (`items`) y cuántos hay sin leer (`unread`) |
 | POST   | `/api/notifications/:id/read` | Marca un aviso como leído |

@@ -31,7 +31,12 @@
       }
     </ul>
     <div class="me">
-      <span>{{ session.user()?.name }}</span>
+      <span class="me-who">
+        @if (session.user(); as u) {
+          <span class="avatar" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+        }
+        <span>{{ session.user()?.name }}</span>
+      </span>
       <button type="button" class="link" (click)="logout()">Cerrar sesión</button>
     </div>
   </nav>

@@ -7,6 +7,7 @@ import { initials } from '../tasks/people';
 import { ExpenseDialog } from './expense-dialog';
 import { ExpensesTabs } from './expenses-tabs';
 import { ExpensesStore } from './expenses.store';
+import { Avatar } from '../core/avatar';
 
 /** Un movimiento del mes: un gasto o un pago entre dos personas. */
 type Movement = { kind: 'gasto'; date: string; item: Expense } | { kind: 'pago'; date: string; item: Settlement };
@@ -14,7 +15,7 @@ type Movement = { kind: 'gasto'; date: string; item: Expense } | { kind: 'pago';
 /** Saldos de la casa y gastos del mes. */
 @Component({
   selector: 'app-expenses-page',
-  imports: [ExpenseDialog, ExpensesTabs],
+  imports: [Avatar, ExpenseDialog, ExpensesTabs],
   host: { class: 'view' },
   templateUrl: './expenses.page.html',
 })
@@ -68,6 +69,10 @@ export class ExpensesPage {
 
   protected name(id: string): string {
     return this.names().get(id) ?? this.store.members().find((m) => m.id === id)?.name ?? '¿?';
+  }
+
+  protected photo(id: string): string | null {
+    return this.store.members().find((m) => m.id === id)?.avatarUrl ?? null;
   }
 
   protected color(id: string): string | null {

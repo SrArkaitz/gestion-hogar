@@ -25,7 +25,7 @@
       <ul>
         @for (x of b.balances; track x.userId) {
           <li>
-            <span class="avatar" [attr.data-c]="color(x.userId)" aria-hidden="true">{{ initials(x.name) }}</span>
+            <span class="avatar" [attr.data-c]="color(x.userId)" [appAvatar]="photo(x.userId)" aria-hidden="true">{{ initials(x.name) }}</span>
             <span class="who">
               <span class="t">{{ x.name }}@if (x.userId === me()) { <span class="you">(tú)</span> }</span>
               @if (!x.member) {

@@ -23,5 +23,13 @@ export function photoFileName(recipeId: string, ext: string): string {
   return `${recipeId}-${randomBytes(4).toString('hex')}.${ext}`;
 }
 
+/** Nombre de archivo seguro (sin rutas) de una foto de perfil: avatar-<usuario>-<azar>.<ext>. */
+export const AVATAR_FILE_RE = /^avatar-[0-9a-f-]{36}-[0-9a-f]{8}\.(jpg|png|webp)$/;
+
+/** Dirección de la foto de perfil de alguien; cambia con cada foto, así se puede guardar en caché. */
+export function avatarUrl(userId: string, file: string | null): string | null {
+  return file ? `/api/users/${userId}/avatar?v=${file.slice(-12, -4)}` : null;
+}
+
 /** Nombre de archivo seguro (sin rutas) tal como lo genera photoFileName. */
 export const PHOTO_FILE_RE = /^[0-9a-f-]{36}-[0-9a-f]{8}\.(jpg|png|webp)$/;
