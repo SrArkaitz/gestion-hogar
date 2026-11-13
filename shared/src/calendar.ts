@@ -20,7 +20,6 @@ export const EVENT_NOTES_MAX = 1000;
 /** Un evento puede durar como mucho un año. */
 export const EVENT_DAYS_MAX = 366;
 export const BIRTHDAY_NAME_MAX = 80;
-export const BIRTHDAY_NOTICE_MAX = 30;
 /** Días como mucho que se piden de una vez (la vista de mes enseña 6 semanas). */
 export const CALENDAR_RANGE_MAX = 62;
 
@@ -74,8 +73,6 @@ export interface Birthday {
   day: number;
   /** Año de nacimiento, si se sabe (para decir cuántos cumple). */
   year: number | null;
-  /** Con cuántos días de antelación avisar (además del mismo día). 0: solo ese día. */
-  notifyDays: number;
 }
 
 export interface BirthdayInput {
@@ -83,7 +80,6 @@ export interface BirthdayInput {
   month: number;
   day: number;
   year?: number | null;
-  notifyDays?: number;
 }
 
 /** Días de un mes (en un año bisiesto si no se dice, para admitir el 29 de febrero). */

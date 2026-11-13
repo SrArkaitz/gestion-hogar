@@ -451,8 +451,6 @@ model Birthday {
   month       Int
   day         Int
   year        Int?
-  /// Con cuántos días de antelación avisar (además del mismo día)
-  notifyDays  Int       @default(3)
   createdAt   DateTime  @default(now())
 
   @@index([householdId])

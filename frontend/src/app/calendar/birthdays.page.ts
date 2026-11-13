@@ -8,8 +8,8 @@ import { CalendarTabs } from './calendar-tabs';
 import { CalendarStore } from './calendar.store';
 
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-/** Opciones de aviso: el mismo día o con estos días de antelación. */
-const NOTICE_OPTIONS = [0, 1, 2, 3, 7, 14];
+/** Se resaltan los que caen en estos días. */
+const SOON_DAYS = 7;
 
 interface Row {
   b: Birthday;
@@ -30,7 +30,7 @@ export class BirthdaysPage {
   private readonly session = inject(SessionService);
 
   protected readonly months = MONTHS;
-  protected readonly noticeOptions = NOTICE_OPTIONS;
+  protected readonly soonDays = SOON_DAYS;
   protected readonly nameMax = BIRTHDAY_NAME_MAX;
   protected readonly thisYear = new Date().getFullYear();
 
@@ -54,7 +54,6 @@ export class BirthdaysPage {
   protected readonly month = signal(1);
   protected readonly day = signal(1);
   protected readonly year = signal<number | null>(null);
-  protected readonly notifyDays = signal(3);
   protected readonly formError = signal('');
   protected readonly dayOptions = computed(() => Array.from({ length: daysInMonth(this.month()) }, (_, i) => i + 1));
 
@@ -74,16 +73,11 @@ export class BirthdaysPage {
     return `Faltan ${daysLeft} días`;
   }
 
-  protected noticeText(days: number): string {
-    return days === 0 ? 'el mismo día' : days === 1 ? '1 día antes' : `${days} días antes`;
-  }
-
   protected open(b: Birthday | null) {
     this.name.set(b?.name ?? '');
     this.month.set(b?.month ?? new Date().getMonth() + 1);
     this.day.set(b?.day ?? 1);
     this.year.set(b?.year ?? null);
-    this.notifyDays.set(b?.notifyDays ?? 3);
     this.formError.set('');
     this.editing.set(b);
   }
@@ -104,7 +98,6 @@ export class BirthdaysPage {
         month: +this.month(),
         day: +this.day(),
         year,
-        notifyDays: +this.notifyDays(),
       });
       this.editing.set(undefined);
       await this.load();

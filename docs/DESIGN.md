@@ -139,9 +139,9 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 ### 3.6 Calendario
 
 - **Vista de mes y de semana** con lo que tiene fecha en las secciones que use la casa: tareas con fecha límite, las próximas veces de las tareas recurrentes, platos del menú y vencimientos de facturas (también los de los meses siguientes). Cada cosa lleva a su sección. En el mes, al tocar un día se ve su lista; en el móvil, cada día enseña puntos de colores por tipo.
-- **Cumpleaños:** nombre, día y mes, año si se sabe (para decir cuántos cumple) y con cuántos días de antelación avisar (por defecto 3). Se repiten cada año; el 29 de febrero, los años no bisiestos, cae el 28. Pestaña propia, del más cercano al más lejano.
+- **Cumpleaños:** nombre, día y mes, y año si se sabe (para decir cuántos cumple). El aviso llega a todos el mismo día del cumpleaños, sin antelación que elegir. Se repiten cada año; el 29 de febrero, los años no bisiestos, cae el 28. Pestaña propia, del más cercano al más lejano.
 - **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna si es de toda la casa. Sus iniciales salen en el calendario con el color de cada uno.
-- **Avisos** a las 9:00: los eventos que empiezan ese día, solo a sus personas (a toda la casa si no tienen), y los cumpleaños de ese día o de dentro de sus días de aviso, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
+- **Avisos** a las 9:00: los eventos que empiezan ese día, solo a sus personas (a toda la casa si no tienen), y los cumpleaños de ese día, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
 - Es una sección más: se puede ocultar en *Casa → Secciones*.
 
 ### 3.7 Inventario
@@ -259,3 +259,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-12 | Campanita de avisos: se guarda cada aviso que se manda (en el mismo sitio que el push), 60 días. |
 | 2026-11-13 | Comentarios en tareas e ideas, con aviso a quien está metido en la tarjeta. |
 | 2026-11-13 | Al aceptar una idea se elige si la tarea va al hogar o a las personales de quien la acepta. |
+| 2026-11-13 | Cumpleaños: el aviso llega a todos el mismo día; se quita elegir la antelación. |

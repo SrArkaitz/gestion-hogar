@@ -15,7 +15,7 @@
 <ul class="bdays">
   @for (r of rows(); track r.b.id) {
     <li>
-      <button type="button" class="bday" [class.soon]="r.daysLeft <= r.b.notifyDays" (click)="open(r.b)">
+      <button type="button" class="bday" [class.soon]="r.daysLeft <= soonDays" (click)="open(r.b)">
         <span class="who">
           <span class="t">{{ r.b.name }}</span>
           <span class="n">{{ dateText(r.b) }}@if (r.age !== null) { · cumple {{ r.age }}}</span>
@@ -25,7 +25,7 @@
     </li>
   } @empty {
     @if (!loading()) {
-      <li class="empty">Aún no hay cumpleaños. Apunta los de la familia y os avisaremos antes de que lleguen.</li>
+      <li class="empty">Aún no hay cumpleaños. Apunta los de la familia y os avisaremos el mismo día.</li>
     }
   }
 </ul>
@@ -57,14 +57,7 @@
           <input type="number" name="year" min="1900" [max]="thisYear" inputmode="numeric" placeholder="1990" [(ngModel)]="year" />
         </label>
       </div>
-      <label>Avisar
-        <select name="notify" [(ngModel)]="notifyDays">
-          @for (n of noticeOptions; track n) {
-            <option [ngValue]="n">{{ noticeText(n) }}</option>
-          }
-        </select>
-      </label>
-      <p class="hint">El aviso llega a toda la casa a las 9:00, ese día y el mismo día del cumpleaños.</p>
+      <p class="hint">El aviso llega a toda la casa a las 9:00 del día del cumpleaños.</p>
       @if (formError()) {
         <p class="form-err" role="alert">{{ formError() }}</p>
       }

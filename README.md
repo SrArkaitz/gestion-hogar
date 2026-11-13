@@ -161,7 +161,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | PATCH  | `/api/households/:householdId/calendar/events/:id` | Edita un evento (se envía entero) |
 | DELETE | `/api/households/:householdId/calendar/events/:id` | Borra un evento |
 | GET    | `/api/households/:householdId/calendar/birthdays` | Cumpleaños |
-| POST   | `/api/households/:householdId/calendar/birthdays` | Crea uno (`name`, `month`, `day`, `year` opcional, `notifyDays`) |
+| POST   | `/api/households/:householdId/calendar/birthdays` | Crea uno (`name`, `month`, `day`, `year` opcional) |
 | PATCH  | `/api/households/:householdId/calendar/birthdays/:id` | Edita uno (se envía entero) |
 | DELETE | `/api/households/:householdId/calendar/birthdays/:id` | Borra uno |
 | GET    | `/api/households/:householdId/inventory/items` | Lo que hay en casa |

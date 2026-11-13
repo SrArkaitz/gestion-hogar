@@ -5,7 +5,6 @@ import {
   ageOn,
   Birthday,
   BIRTHDAY_NAME_MAX,
-  BIRTHDAY_NOTICE_MAX,
   birthdayIn,
   CALENDAR_KINDS,
   CALENDAR_RANGE_MAX,
@@ -52,7 +51,6 @@ const toBirthday = (r: Prisma.BirthdayGetPayload<object>): Birthday => ({
   month: r.month,
   day: r.day,
   year: r.year,
-  notifyDays: r.notifyDays,
 });
 
 /** Orden dentro de un día: lo propio del calendario primero, luego lo que viene de otras secciones. */
@@ -316,7 +314,6 @@ function validateBirthday(body: unknown) {
     month,
     day,
     year,
-    notifyDays: b['notifyDays'] === undefined ? 3 : int(b['notifyDays'], 'Los días de aviso', 0, BIRTHDAY_NOTICE_MAX),
   };
 }
 

@@ -100,8 +100,8 @@ export class RemindersService {
         const days = Math.round((Date.parse(next) - Date.parse(today)) / 86_400_000);
         const age = ageOn(b, next);
         const turns = age !== null ? `, cumple ${age}` : '';
+        // Todos se avisan el mismo día del cumpleaños, sin antelación.
         if (days === 0) birthdays.push(`¡Hoy es el cumpleaños de ${b.name}${turns}!`);
-        else if (days === b.notifyDays) birthdays.push(`Cumpleaños de ${b.name} ${days === 1 ? 'mañana' : `en ${days} días`}${turns}.`);
       }
       for (const { userId } of h.members) {
         const mine = h.events.filter((e) => !e.people.length || e.people.some((p) => p.userId === userId));
