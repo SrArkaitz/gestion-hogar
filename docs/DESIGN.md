@@ -148,7 +148,9 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 
 - **Vista de mes y de semana** con lo que tiene fecha en las secciones que use la casa: tareas con fecha límite, las próximas veces de las tareas recurrentes, platos del menú y vencimientos de facturas (también los de los meses siguientes). Cada cosa lleva a su sección. En el mes, al tocar un día se ve su lista; en el móvil, cada día enseña puntos de colores por tipo.
 - **Cumpleaños:** nombre, día y mes, y año si se sabe (para decir cuántos cumple). El aviso llega a todos el mismo día del cumpleaños, sin antelación que elegir. Se repiten cada año; el 29 de febrero, los años no bisiestos, cae el 28. Pestaña propia, del más cercano al más lejano.
-- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna: entonces es para todos. Se pinta con el color de su persona; si es de varias (o de todos), con los colores de todas en franjas, y salen sus iconos. En el móvil, los puntos de cada día llevan esos colores. Lo demás (tareas, menú, facturas…) va con el color de su tipo.
+- **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna: entonces es para todos. Se pinta con el color de su persona; si es de varias, con los colores de todas en franjas y sus iconos; si es para todos, con el color de la casa (el oscuro de la app) y el icono de la casa. En el móvil, los puntos de cada día llevan esos colores.
+- **El color dice de quién, el icono dice qué:** lo que no es un evento (cumpleaños 🎂, tareas ✓, recurrentes ↻, menú 🍽, facturas €, mantenimiento 🔧, garantías 🛡) va en gris con su icono, para no confundirse con los colores de las personas. En el móvil todo eso es un solo punto gris.
+- **Filtro por persona** (encima del calendario, si sois más de uno): «Todos» o una persona. Con una persona se ve lo suyo (eventos y tareas asignadas) y lo que es de toda la casa; no lo que es solo de los demás. Se recuerda en ese navegador.
 - **Avisos** a las 9:00: los eventos que empiezan ese día, solo a sus personas (a toda la casa si no tienen), y los cumpleaños de ese día, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
 - Es una sección más: se puede ocultar en *Casa → Secciones*.
 
@@ -277,3 +279,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-13 | *Tu cuenta* sale de *Casa* a su propia página, desde tu nombre (PC) o tu foto (móvil): foto, nombre, contraseña, Google, cerrar sesión en los demás dispositivos, avisos y este dispositivo. |
 | 2026-11-13 | Calendario: cada evento con el color de su persona (varias: todos sus colores; nadie: de toda la casa). |
 | 2026-11-13 | Menú: platos escritos a mano sin receta, e interruptor para que el menú salga o no en el calendario. |
+| 2026-11-14 | Calendario: el color es de quién (personas o la casa) y el icono, de qué; lo demás va en gris. Filtro por persona. |

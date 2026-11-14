@@ -23,6 +23,17 @@
   </div>
 </div>
 
+@if (members().length > 1) {
+  <div class="who-filter" role="group" aria-label="De quién">
+    <button type="button" class="who-chip" [attr.aria-pressed]="!person()" (click)="setPerson(null)">Todos</button>
+    @for (m of members(); track m.id) {
+      <button type="button" class="who-chip" [attr.aria-pressed]="person() === m.id" (click)="setPerson(person() === m.id ? null : m.id)">
+        <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>{{ m.name }}
+      </button>
+    }
+  </div>
+}
+
 @if (error()) {
   <div class="status err" role="status">{{ error() }}</div>
 }
@@ -40,7 +51,7 @@
           <span class="num">{{ +day.slice(8) }}</span>
           <span class="chips">
             @for (it of itemsOn(day).slice(0, chipsPerDay); track $index) {
-              <span class="chip-k" [attr.data-k]="it.kind" [style]="paint(it)" [class.done]="it.done">{{ it.title }}</span>
+              <span class="chip-k" [attr.data-k]="it.kind" [style]="paint(it)" [class.done]="it.done">@if (kindIcons[it.kind]) {<span class="k-ico">{{ kindIcons[it.kind] }}</span>}{{ it.title }}</span>
             }
             @if (itemsOn(day).length > chipsPerDay) {
               <span class="more">+{{ itemsOn(day).length - chipsPerDay }}</span>
@@ -48,7 +59,7 @@
           </span>
           <span class="dots" aria-hidden="true">
             @for (d of dotsOn(day); track d.key) {
-              <span class="dot-k" [attr.data-k]="d.kind" [style.background]="d.color"></span>
+              <span class="dot-k" [style.background]="d.color"></span>
             }
           </span>
         </button>
@@ -65,8 +76,12 @@
           <li>
             <button type="button" class="cal-item" [attr.data-k]="it.kind" [style]="paint(it)" (click)="open(it)">
               <span class="cal-row">
-                <span class="t" [class.done]="it.done">{{ it.title }}</span>
-                @if (peopleOf(it).length) {
+                <span class="t" [class.done]="it.done">@if (kindIcons[it.kind]) {<span class="k-ico" aria-hidden="true">{{ kindIcons[it.kind] }}</span>}{{ it.title }}</span>
+                @if (forAll(it)) {
+                  <span class="avatars" aria-hidden="true">
+                    <span class="avatar house" title="Toda la casa"><svg viewBox="0 0 24 24" width="12" height="12"><path [attr.d]="houseIcon" fill="currentColor" /></svg></span>
+                  </span>
+                } @else if (peopleOf(it).length) {
                   <span class="avatars" aria-hidden="true">
                     @for (m of peopleOf(it); track m.id) {
                       <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
@@ -93,8 +108,12 @@
             <li>
               <button type="button" class="cal-item" [attr.data-k]="it.kind" [style]="paint(it)" (click)="open(it)">
                 <span class="cal-row">
-                  <span class="t" [class.done]="it.done">{{ it.title }}</span>
-                  @if (peopleOf(it).length) {
+                  <span class="t" [class.done]="it.done">@if (kindIcons[it.kind]) {<span class="k-ico" aria-hidden="true">{{ kindIcons[it.kind] }}</span>}{{ it.title }}</span>
+                  @if (forAll(it)) {
+                    <span class="avatars" aria-hidden="true">
+                      <span class="avatar house" title="Toda la casa"><svg viewBox="0 0 24 24" width="12" height="12"><path [attr.d]="houseIcon" fill="currentColor" /></svg></span>
+                    </span>
+                  } @else if (peopleOf(it).length) {
                     <span class="avatars" aria-hidden="true">
                       @for (m of peopleOf(it); track m.id) {
                         <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
