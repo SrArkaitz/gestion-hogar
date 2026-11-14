@@ -8,10 +8,10 @@
   --alta: #ae2e24; --alta-bg: #ffeceb; --media: #7f5f01; --media-bg: #fff7d6; --baja: #216e4e; --baja-bg: #dcfff1;
   /* Colores de las personas (MEMBER_COLORS); en claro llevan texto blanco encima, salvo los más claros (--pon) */
   --c-azul: #0c66e4; --c-verde: #1f845a; --c-naranja: #f97316; --c-morado: #6e5dc6; --c-rojo: #c9372c;
-  --c-celeste: #1d7f8c; --c-rosa: #ec4899; --c-lima: #4c6b1f; --c-amarillo: #946f00; --c-gris: #626f86;
+  --c-celeste: #1d7f8c; --c-rosa: #ec4899; --c-amarillo: #eab308; --c-gris: #626f86;
   --c-coral: #fb7185; --c-fucsia: #d946ef; --c-caramelo: #b45309; --c-indigo: #6366f1; --c-turquesa: #14b8a6; --on-person: #ffffff;
-  /* Calendario: cumpleaños y menú tienen su propio color (distinto de los de las personas) */
-  --k-cumple: #ae4787; --k-menu: #b65c02;
+  /* Calendario: cada tipo tiene su color, distinto de los de las personas (mantenimiento y garantías, en gris) */
+  --k-cumple: #ae4787; --k-menu: #b65c02; --k-tarea: #e0001b; --k-recurrente: #4c6b1f; --k-factura: #946f00;
   --shadow: 0 1px 2px rgba(20, 30, 25, .08);
   --f-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
@@ -25,9 +25,9 @@
   --accent: #579dff; --accent-fg: #1d2125; --accent-bg: #092957; --danger-fg: #1d2125;
   --alta: #fd9891; --alta-bg: #42221f; --media: #f5cd47; --media-bg: #332e1b; --baja: #4bce97; --baja-bg: #1c3329;
   --c-azul: #579dff; --c-verde: #4bce97; --c-naranja: #fb923c; --c-morado: #9f8fef; --c-rojo: #f87168;
-  --c-celeste: #6cc3e0; --c-rosa: #f472b6; --c-lima: #94c748; --c-amarillo: #e2b203; --c-gris: #8c9bab;
+  --c-celeste: #6cc3e0; --c-rosa: #f472b6; --c-amarillo: #fde047; --c-gris: #8c9bab;
   --c-coral: #ff8f80; --c-fucsia: #e879f9; --c-caramelo: #e0a46a; --c-indigo: #a5b4fc; --c-turquesa: #2dd4bf; --on-person: #1d2125;
-  --k-cumple: #e774bb; --k-menu: #fea362;
+  --k-cumple: #e774bb; --k-menu: #fea362; --k-tarea: #ff5c5c; --k-recurrente: #94c748; --k-factura: #e2b203;
   --shadow: none;
   color-scheme: dark;
 }
@@ -190,13 +190,13 @@ details.fold summary:focus-visible { outline: 2px solid var(--accent); outline-o
 [data-c="azul"] { --pc: var(--c-azul); } [data-c="verde"] { --pc: var(--c-verde); }
 [data-c="naranja"] { --pc: var(--c-naranja); } [data-c="morado"] { --pc: var(--c-morado); }
 [data-c="rojo"] { --pc: var(--c-rojo); } [data-c="celeste"] { --pc: var(--c-celeste); }
-[data-c="rosa"] { --pc: var(--c-rosa); } [data-c="lima"] { --pc: var(--c-lima); }
+[data-c="rosa"] { --pc: var(--c-rosa); }
 [data-c="amarillo"] { --pc: var(--c-amarillo); } [data-c="gris"] { --pc: var(--c-gris); }
 [data-c="coral"] { --pc: var(--c-coral); } [data-c="fucsia"] { --pc: var(--c-fucsia); }
 [data-c="caramelo"] { --pc: var(--c-caramelo); } [data-c="indigo"] { --pc: var(--c-indigo); }
 [data-c="turquesa"] { --pc: var(--c-turquesa); }
 /* En claro, los colores más claros llevan las iniciales en oscuro para que se lean */
-:root:not([data-theme="dark"]) :is([data-c="naranja"], [data-c="coral"], [data-c="turquesa"]) { --pon: #172b4d; }
+:root:not([data-theme="dark"]) :is([data-c="naranja"], [data-c="coral"], [data-c="turquesa"], [data-c="amarillo"]) { --pon: #172b4d; }
 .swatch { flex: none; width: 22px; height: 22px; padding: 0; border-radius: 50%; background: var(--pc); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); }
 button.swatch { cursor: pointer; }
 .swatch[aria-pressed="true"], .swatch[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--fg); }
@@ -421,14 +421,15 @@ label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; wi
 .people-sum .t { flex: 1; font-weight: 700; }
 .people-sum .cols { display: flex; gap: 14px; font-variant-numeric: tabular-nums; }
 
-/* Calendario: el color es de quién (cada persona, o la casa si es de todos); lo demás va en gris con su icono */
+/* Calendario: los eventos llevan el color de quién (cada persona, o la casa si es de todos); lo demás, el de su tipo */
 :root { --house: var(--fg); --k-other: color-mix(in srgb, var(--muted) 45%, var(--card)); }
 [data-k] { --kc: var(--k-other); }
 [data-k="evento"] { --kc: var(--house); }
 [data-k="cumple"] { --kc: var(--k-cumple); }
 [data-k="menu"] { --kc: var(--k-menu); }
-.k-ico { display: inline-block; min-width: 1.2em; margin-right: 3px; text-align: center; font-weight: 400; color: var(--muted); }
-.chip-k[data-k]:not([data-k="evento"]) { color: var(--muted); }
+[data-k="tarea"] { --kc: var(--k-tarea); }
+[data-k="recurrente"] { --kc: var(--k-recurrente); }
+[data-k="factura"] { --kc: var(--k-factura); }
 .avatar.house { --pc: var(--house); color: var(--bg); display: inline-grid; place-items: center; }
 .who-filter { display: flex; flex-wrap: wrap; gap: 6px; }
 .who-chip { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 13.5px; color: var(--fg); background: var(--surface); border: 1px solid transparent; border-radius: 999px; padding: 3px 12px 3px 3px; cursor: pointer; }

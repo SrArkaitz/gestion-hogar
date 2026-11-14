@@ -27,17 +27,8 @@ type View = 'mes' | 'semana';
 /** Chips que caben en una casilla del mes (en el PC); el resto, "+N". */
 const CHIPS_PER_DAY = 3;
 
-/** El color es de las personas; lo demás va en gris con un icono que dice qué es. */
-const KIND_ICONS: Record<CalendarKind, string> = {
-  evento: '',
-  cumple: '🎂',
-  tarea: '✓',
-  recurrente: '↻',
-  menu: '🍽',
-  factura: '€',
-  mantenimiento: '🔧',
-  garantia: '🛡',
-};
+/** Tipos que llevan su propio color en el calendario (mantenimiento y garantías van en gris). */
+const COLORED_KINDS: readonly CalendarKind[] = ['cumple', 'menu', 'tarea', 'recurrente', 'factura'];
 
 /** Persona elegida en el filtro (se recuerda en este navegador). */
 const FILTER_KEY = 'hogar.cal.persona';
@@ -59,7 +50,6 @@ export class CalendarPage {
   private readonly households = inject(HouseholdsService);
 
   protected readonly kindLabels = CALENDAR_KIND_LABELS;
-  protected readonly kindIcons = KIND_ICONS;
   protected readonly weekdayInitials = WEEKDAY_INITIALS;
   protected readonly chipsPerDay = CHIPS_PER_DAY;
   protected readonly today = todayIso();
@@ -154,8 +144,8 @@ export class CalendarPage {
 
   /**
    * Colores de un evento: el de su persona o, si es de varias, los de todas (en franjas). Los de
-   * toda la casa llevan el color de la casa (en el CSS). Lo demás (tareas, menú, facturas…) va en
-   * gris con su icono.
+   * toda la casa llevan el color de la casa. Lo demás (tareas, menú, facturas…) lleva el de su
+   * tipo (en el CSS).
    */
   protected paint(item: CalendarItem): Record<string, string> | null {
     if (item.kind !== 'evento') return null;
@@ -187,13 +177,13 @@ export class CalendarPage {
 
   /**
    * Puntos de un día en el móvil: uno por cada persona con eventos, uno de la casa si hay
-   * eventos de todos, los de cumpleaños y menú con su color y uno gris si hay algo más
-   * (tareas, facturas…).
+   * eventos de todos, uno por cada tipo con color (cumpleaños, menú, tareas, recurrentes,
+   * facturas) y uno gris si hay mantenimiento o garantías.
    */
   protected dotsOn(day: IsoDate): { key: string; color: string }[] {
     const dots = new Map<string, string>();
     for (const it of this.itemsOn(day)) {
-      if (it.kind === 'cumple' || it.kind === 'menu') dots.set(it.kind, `var(--k-${it.kind})`);
+      if (COLORED_KINDS.includes(it.kind)) dots.set(it.kind, `var(--k-${it.kind})`);
       else if (it.kind !== 'evento') dots.set('otro', 'var(--k-other)');
       else if (this.forAll(it)) dots.set('casa', 'var(--house)');
       else for (const m of this.peopleOf(it)) dots.set('p' + m.color, `var(--c-${m.color})`);

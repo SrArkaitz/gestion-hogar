@@ -19,7 +19,6 @@ export const MEMBER_COLORS = [
   'rojo',
   'celeste',
   'rosa',
-  'lima',
   'amarillo',
   'gris',
   'coral',
@@ -38,7 +37,6 @@ export const MEMBER_COLOR_LABELS: Record<MemberColor, string> = {
   rojo: 'Rojo',
   celeste: 'Celeste',
   rosa: 'Rosa',
-  lima: 'Lima',
   amarillo: 'Amarillo',
   gris: 'Gris',
   coral: 'Coral',
@@ -50,7 +48,7 @@ export const MEMBER_COLOR_LABELS: Record<MemberColor, string> = {
 
 /** Los mismos colores ordenados por tono, para elegir. */
 export const MEMBER_COLORS_BY_HUE: readonly MemberColor[] = [
-  'rojo', 'coral', 'naranja', 'caramelo', 'amarillo', 'lima', 'verde', 'turquesa',
+  'rojo', 'coral', 'naranja', 'caramelo', 'amarillo', 'verde', 'turquesa',
   'celeste', 'azul', 'indigo', 'morado', 'fucsia', 'rosa', 'gris',
 ];
 

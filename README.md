@@ -224,7 +224,7 @@ Cuerpo de una tarea (solo `title` y `priority` son obligatorios al crearla):
 - `due` y `category` admiten `null` para quitarlos
 - `assigneeIds`: lista de miembros de la casa; `[]` deja la tarea sin asignar. Al editar, sustituye a la lista anterior
 - Las tareas creadas por una recurrente llevan `recurringId`
-- Colores de los miembros: `azul`, `verde`, `naranja`, `morado`, `rojo`, `celeste`, `rosa`, `lima`, `amarillo`, `gris`, `coral`, `fucsia`, `caramelo`, `indigo` o `turquesa`
+- Colores de los miembros: `azul`, `verde`, `naranja`, `morado`, `rojo`, `celeste`, `rosa`, `amarillo`, `gris`, `coral`, `fucsia`, `caramelo`, `indigo` o `turquesa`
 
 Cuerpo de una tarea recurrente:
 
