@@ -24,6 +24,8 @@ model Household {
   hiddenModules  String            @default("")
   /// Los platos del menú semanal salen en el calendario
   menuInCalendar Boolean           @default(true)
+  /// Un moderador le ha quitado la posibilidad de hacer públicas sus recetas (null: puede)
+  publishBlockedAt DateTime?
   createdAt      DateTime          @default(now())
   members        HouseholdMember[]
   invitations    Invitation[]

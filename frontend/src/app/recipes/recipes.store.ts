@@ -16,6 +16,8 @@ export class RecipesStore {
   readonly own = computed(() => this.recipes().filter((r) => r.mine));
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  /** Mensaje para enseñar al volver al recetario (p. ej., tras moderar una receta que ya no se ve). */
+  readonly flash = signal('');
 
   private get api() {
     return `/api/households/${this.householdId}`;

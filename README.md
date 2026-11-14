@@ -198,6 +198,13 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | PUT    | `/api/users/me/notifications` | Tipos de aviso que desactivas (`{ "off": ["comentarios", …] }`: `asignadas`, `comentarios`, `tareas`, `calendario`, `facturas`, `mantenimiento`); salen en `notifyOff` de `/api/auth/me` |
 | GET    | `/api/users/:id/avatar` | Foto de perfil de alguien con quien compartes casa (`avatarUrl` en el usuario y en los miembros) |
 | POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
+| GET    | `/api/moderation/recipes/:id` | De qué casa es una receta pública y si esa casa puede publicar (solo moderadores: `MODERATOR_EMAILS`; a los demás, 404) |
+| POST   | `/api/moderation/recipes/:id/unpublish` | La pasa a privada de su casa (`{ "reason" }`, se le avisa) |
+| POST   | `/api/moderation/recipes/:id/remove-photo` | Le quita la foto (`{ "reason" }`) |
+| POST   | `/api/moderation/recipes/:id/delete` | La borra (`{ "reason" }`) |
+| GET    | `/api/moderation/blocked` | Casas que no pueden publicar |
+| POST   | `/api/moderation/households/:householdId/block` | Esa casa ya no puede publicar y sus públicas pasan a privadas (`{ "reason" }`) |
+| DELETE | `/api/moderation/households/:householdId/block` | Vuelve a poder publicar |
 | GET    | `/api/notifications` | Tus últimos avisos de la campanita (`items`) y cuántos hay sin leer (`unread`) |
 | POST   | `/api/notifications/:id/read` | Marca un aviso como leído |
 | DELETE | `/api/notifications/:id` | Quita un aviso de la campanita |

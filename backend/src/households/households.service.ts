@@ -31,7 +31,7 @@ export class HouseholdsService {
     const household = await this.prisma.household.create({
       data: { name, hiddenModules: DEFAULT_HIDDEN_MODULES.join(','), members: { create: { userId, role: 'admin', color: MEMBER_COLORS[0] } } },
     });
-    return { id: household.id, name: household.name, role: 'admin', hiddenModules: [...DEFAULT_HIDDEN_MODULES], color: MEMBER_COLORS[0] };
+    return { id: household.id, name: household.name, role: 'admin', hiddenModules: [...DEFAULT_HIDDEN_MODULES], color: MEMBER_COLORS[0], publishBlocked: false };
   }
 
   async get(householdId: string): Promise<Household> {

@@ -3,6 +3,7 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  BlockedHousehold,
   daysInMonth,
   NAME_MAX_LENGTH,
   NOTIFICATION_KIND_DESCRIPTIONS,
@@ -56,6 +57,9 @@ export class AccountPage {
   // Foto
   protected readonly avatarBusy = signal(false);
 
+  // Moderación
+  protected readonly blocked = signal<BlockedHousehold[]>([]);
+
   // Cumpleaños
   protected readonly months = MONTHS;
   protected readonly bdayDay = signal<number | null>(null);
@@ -92,10 +96,29 @@ export class AccountPage {
       this.bdayDay.set(b?.day ?? null);
       this.bdayMonth.set(b?.month ?? null);
     });
+    effect(() => {
+      if (this.session.me()?.moderator) void this.loadBlocked();
+    });
     // Si el día no existe en el mes elegido (31 de abril), se quita.
     effect(() => {
       const day = this.bdayDay();
       if (day && day > this.bdayDays().length) this.bdayDay.set(null);
+    });
+  }
+
+  private async loadBlocked() {
+    try {
+      this.blocked.set(await firstValueFrom(this.http.get<BlockedHousehold[]>('/api/moderation/blocked')));
+    } catch {
+      // Si falla, la lista se queda vacía; no impide usar la cuenta.
+    }
+  }
+
+  protected async unblock(h: BlockedHousehold) {
+    if (!confirm(`¿Permitir que «${h.name}» vuelva a publicar recetas?`)) return;
+    await this.run('Esa casa ya puede publicar.', async () => {
+      await firstValueFrom(this.http.delete(`/api/moderation/households/${h.id}/block`));
+      await this.loadBlocked();
     });
   }
 

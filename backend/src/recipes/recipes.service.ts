@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   Ingredient,
   INGREDIENT_NAME_MAX,
@@ -110,6 +110,8 @@ export class RecipesService {
 
   async create(householdId: string, createdById: string, body: unknown): Promise<Recipe> {
     const input = this.validate(body, false) as RecipeInput;
+    // Si la casa no puede publicar, las nuevas se quedan en privadas.
+    if (await this.publishBlocked(householdId)) input.private = true;
     const row = await this.prisma.recipe.create({ data: { householdId, createdById, ...stored(input) }, include: extras(householdId) });
     return toRecipe(row, householdId);
   }
@@ -117,7 +119,11 @@ export class RecipesService {
   /** Cambia los campos enviados. Ingredientes y pasos se sustituyen enteros. */
   async update(householdId: string, id: string, body: unknown): Promise<Recipe> {
     await this.find(householdId, id);
-    const row = await this.prisma.recipe.update({ where: { id }, data: stored(this.validate(body, true)), include: extras(householdId) });
+    const input = this.validate(body, true);
+    if (input.private === false && (await this.publishBlocked(householdId))) {
+      throw new ForbiddenException('Esta casa no puede hacer públicas sus recetas');
+    }
+    const row = await this.prisma.recipe.update({ where: { id }, data: stored(input), include: extras(householdId) });
     return toRecipe(row, householdId);
   }
 
@@ -170,13 +176,19 @@ export class RecipesService {
     return join(photosDir(), row.photo);
   }
 
-  private deleteFile(file: string | null) {
+  /** Borra un archivo de foto (también lo usa la moderación). */
+  deleteFile(file: string | null) {
     if (!file || !PHOTO_FILE_RE.test(file)) return;
     try {
       unlinkSync(join(photosDir(), file));
     } catch (err) {
       this.logger.warn(`No se pudo borrar la foto ${file}: ${(err as Error).message}`);
     }
+  }
+
+  private async publishBlocked(householdId: string): Promise<boolean> {
+    const h = await this.prisma.household.findUnique({ where: { id: householdId }, select: { publishBlockedAt: true } });
+    return !!h?.publishBlockedAt;
   }
 
   /** Una receta de esta casa o una pública de otra. */

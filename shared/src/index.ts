@@ -12,3 +12,4 @@ export * from './calendar';
 export * from './inventory';
 export * from './comments';
 export * from './holidays';
+export * from './moderation';

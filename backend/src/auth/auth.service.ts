@@ -6,6 +6,7 @@ import { asObject, emailField, requiredText } from '../common/validation';
 import { parseHidden } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { birthdayOf } from '../users/birthday';
+import { isModerator } from '../common/moderation';
 import { avatarUrl } from '../recipes/photos';
 import { readKinds } from '../notifications/kinds';
 import { GoogleLoginError, GoogleProfile } from './google.service';
@@ -143,9 +144,11 @@ export class AuthService {
         role: m.role as Role,
         hiddenModules: parseHidden(m.household.hiddenModules),
         color: m.color as MemberColor,
+        publishBlocked: !!m.household.publishBlockedAt,
       })),
       account: { password: !!user.passwordHash, google: !!user.googleId },
       notifyOff: readKinds(user.notifyOff),
+      moderator: isModerator(user.email),
     };
   }
 

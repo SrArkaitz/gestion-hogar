@@ -737,3 +737,10 @@ form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outlin
 .bell-panel .bell-row:hover .bell-x, .bell-panel .bell-row .bell-x:focus-visible { opacity: 1; }
 .bell-panel .bell-row .bell-x:hover { color: var(--alta); }
 @media (hover: none) { .bell-panel .bell-row .bell-x { display: none; } }
+
+/* Moderación de recetas públicas (solo moderadores) */
+.panel.moderation { border: 1px dashed var(--alta); margin-bottom: 14px; }
+.moderation .reasons { display: flex; flex-wrap: wrap; gap: 6px; }
+.moderation .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.moderation input { font: inherit; width: 100%; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.mod-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

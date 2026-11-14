@@ -17,11 +17,12 @@ import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
 import { RecipesStore } from './recipes.store';
 import { ShoppingPreview } from './shopping-preview';
+import { ModerationPanel } from './moderation-panel';
 
 /** Ficha de una receta: ingredientes para las raciones elegidas, pasos, a la compra y al menú. */
 @Component({
   selector: 'app-recipe-page',
-  imports: [FormsModule, RouterLink, ShoppingPreview],
+  imports: [FormsModule, ModerationPanel, RouterLink, ShoppingPreview],
   host: { class: 'view' },
   templateUrl: './recipe.page.html',
 })
@@ -29,6 +30,8 @@ export class RecipePage {
   protected readonly store = inject(RecipesStore);
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  /** Moderador de la app: en las públicas de otras casas ve el panel de moderación. */
+  protected readonly moderator = computed(() => !!this.session.me()?.moderator);
   /** Sin la sección de Compra no se ofrece pasar ingredientes a la lista. */
   protected readonly usesShopping = computed(() => this.session.uses('compra'));
 
@@ -114,6 +117,17 @@ export class RecipePage {
     } finally {
       this.copying.set(false);
     }
+  }
+
+  /** Tras moderar: si la receta ya no se ve, vuelve al recetario; si no, la vuelve a cargar. */
+  protected async moderated(e: { message: string; gone: boolean }) {
+    const id = this.session.household()?.id;
+    if (e.gone) {
+      this.store.flash.set(e.message);
+      await this.router.navigate(['/recetas']);
+    }
+    if (id) await this.store.load(id);
+    if (!e.gone) this.notice.set(e.message);
   }
 
   protected async addToMenu() {

@@ -42,6 +42,10 @@
       </div>
     }
 
+    @if (!r.mine && moderator()) {
+      <app-moderation-panel [recipe]="r" (done)="moderated($event)" />
+    }
+
     <div class="recipe-cols">
       <section class="panel">
         <div class="ing-head">

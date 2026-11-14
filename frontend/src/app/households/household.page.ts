@@ -107,7 +107,7 @@ export class HouseholdPage {
   private applyUpdate(household: Household) {
     this.household.set(household);
     const { role, color } = this.session.household()!;
-    this.session.upsertHousehold({ id: household.id, name: household.name, role, color, hiddenModules: household.hiddenModules });
+    this.session.upsertHousehold({ ...this.session.household()!, id: household.id, name: household.name, role, color, hiddenModules: household.hiddenModules });
   }
 
   protected async toggleAdmin(member: Member) {

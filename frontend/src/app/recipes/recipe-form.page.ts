@@ -91,6 +91,8 @@ export class RecipeFormPage implements OnDestroy {
   protected readonly steps = signal<string[]>(['']);
   protected readonly notes = signal('');
   protected readonly isPrivate = signal(false);
+  /** Un moderador ha quitado a la casa la posibilidad de publicar: todas sus recetas son privadas. */
+  protected readonly publishBlocked = computed(() => !!this.session.household()?.publishBlocked);
 
   /** Foto nueva elegida (ya reducida) y su vista previa; o la decisión de quitar la que había. */
   protected readonly newPhoto = signal<Blob | null>(null);
@@ -272,7 +274,7 @@ export class RecipeFormPage implements OnDestroy {
       ingredients,
       steps: this.steps().map((s) => s.trim()).filter(Boolean),
       notes: this.notes().trim(),
-      private: this.isPrivate(),
+      private: this.publishBlocked() || this.isPrivate(),
     };
   }
 }

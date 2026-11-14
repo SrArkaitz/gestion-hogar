@@ -21,6 +21,8 @@ services:
       # Acceso con Google (docs/DESPLIEGUE.md, paso 4). Sin estos dos, el botón no aparece.
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      # Correos de los moderadores de recetas públicas, separados por comas (vacío: ninguno).
+      - MODERATOR_EMAILS=${MODERATOR_EMAILS:-}
       # Copias diarias que se guardan.
       - BACKUP_KEEP=${BACKUP_KEEP:-14}
       # Para guardar las copias en otro disco, descomenta esta línea y la del volumen de abajo.

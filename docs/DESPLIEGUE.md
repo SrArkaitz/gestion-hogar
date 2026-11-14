@@ -172,6 +172,7 @@ Con Access activo, quien no esté en la lista no llega ni a la pantalla de entra
 | `PUBLIC_URL` | (vacío) | Dirección pública sin barra final, para el acceso con Google |
 | `GOOGLE_CLIENT_ID` | (vacío) | ID del cliente OAuth de Google |
 | `GOOGLE_CLIENT_SECRET` | (vacío) | Secreto del cliente OAuth de Google |
+| `MODERATOR_EMAILS` | (vacío) | Correos de los moderadores de las recetas públicas, separados por comas. Pueden quitar de públicas, quitar fotos, borrar e impedir publicar a una casa |
 | `BACKUP_KEEP` | `14` | Copias diarias que se guardan |
 | `BACKUP_DIR` | `/app/data/backups` | Carpeta de las copias |
 | `DATABASE_URL` | `file:/app/data/hogar.db` | Archivo de la base de datos (no hace falta cambiarlo) |

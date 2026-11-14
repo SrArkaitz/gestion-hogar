@@ -83,6 +83,8 @@ export interface HouseholdSummary {
   hiddenModules: ModuleKey[];
   /** Tu color en esta casa. */
   color: MemberColor;
+  /** Un moderador le ha quitado la posibilidad de hacer públicas sus recetas. */
+  publishBlocked: boolean;
 }
 
 /** Respuesta de /api/auth/me: quién soy y en qué casas estoy. */
@@ -101,6 +103,8 @@ export interface Me {
   account: { password: boolean; google: boolean };
   /** Tipos de aviso que ha desactivado (no le llegan ni al móvil ni a la campanita). */
   notifyOff: NotificationKind[];
+  /** Puede moderar las recetas públicas de todas las casas (MODERATOR_EMAILS en el servidor). */
+  moderator: boolean;
 }
 
 /** Respuesta de /api/auth/providers: formas de entrar disponibles en el servidor. */

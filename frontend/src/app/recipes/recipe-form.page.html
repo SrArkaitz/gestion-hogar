@@ -108,13 +108,17 @@
       <label><span>Notas</span>
         <textarea name="notes" [maxlength]="max.notes" placeholder="Trucos, variantes, de dónde salió…" [(ngModel)]="notes"></textarea>
       </label>
-      <label class="switch-row">
-        <input type="checkbox" name="private" [(ngModel)]="isPrivate" />
-        <span>
-          <span class="t">Privada</span>
-          <span class="n">Solo la ve esta casa. Si no, la pueden ver y copiar las demás casas de la app (sin poder cambiarla).</span>
-        </span>
-      </label>
+      @if (publishBlocked()) {
+        <p class="n">Privada: esta casa no puede hacer públicas sus recetas (lo decidió un moderador de la app).</p>
+      } @else {
+        <label class="switch-row">
+          <input type="checkbox" name="private" [(ngModel)]="isPrivate" />
+          <span>
+            <span class="t">Privada</span>
+            <span class="n">Solo la ve esta casa. Si no, la pueden ver y copiar las demás casas de la app (sin poder cambiarla).</span>
+          </span>
+        </label>
+      }
     </section>
 
     @if (error()) {

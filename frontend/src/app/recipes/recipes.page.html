@@ -38,6 +38,9 @@
   </div>
 }
 
+@if (store.flash()) {
+  <div class="status" role="status">{{ store.flash() }} <button type="button" class="link" aria-label="Cerrar aviso" (click)="store.flash.set('')">×</button></div>
+}
 @if (store.error() || store.loading()) {
   <div class="status" [class.err]="!!store.error()" role="status">{{ store.error() ?? 'Cargando recetas…' }}</div>
 }

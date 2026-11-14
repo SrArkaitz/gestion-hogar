@@ -64,7 +64,12 @@ export class InvitationsService {
     const existing = await this.prisma.householdMember.findUnique({
       where: { householdId_userId: { householdId: inv.householdId, userId } },
     });
-    const summary = { id: inv.household.id, name: inv.household.name, hiddenModules: parseHidden(inv.household.hiddenModules) };
+    const summary = {
+      id: inv.household.id,
+      name: inv.household.name,
+      hiddenModules: parseHidden(inv.household.hiddenModules),
+      publishBlocked: !!inv.household.publishBlockedAt,
+    };
     if (existing) return { ...summary, role: existing.role as Role, color: existing.color as MemberColor };
 
     const color = await this.prisma.$transaction(async (tx) => {
