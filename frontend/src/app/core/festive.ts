@@ -87,17 +87,23 @@ import { SessionService } from './session.service';
           <path d="M5 21.2l14-3.4M5 17.8l14 3.4" stroke="#a16207" stroke-width="2.2" stroke-linecap="round" />
         }
         @case ('san-fermin') {
-          <path d="M3.6 4.6q8.4 3.4 16.8 0v2.8q-8.4 3.4-16.8 0z" fill="#dc2626" />
-          <path d="M5.6 8.2q6.4 2.2 12.8 0L12 21.2z" fill="#ef4444" />
-          <ellipse cx="12" cy="9.2" rx="1.8" ry="1.4" fill="#b91c1c" />
+          <path d="M4.4 9.6 15.6 4.4l1.2 1.8-10 5.2z" fill="#b91c1c" />
+          <path d="M19.6 9.6 8.4 4.4 7.2 6.2l10 5.2z" fill="#dc2626" />
+          <path d="M5.4 9.2q6.6 2.6 13.2 0-6.6-3-13.2 0z" fill="#7f1d1d" />
+          <path d="M3.2 10.6q8.8 3 17.6 0L12 22.4z" fill="#ef4444" />
+          <path d="M2.6 8.8q9.4 3.4 18.8 0l-.6 2.2q-8.8 3-17.6 0z" fill="#dc2626" />
+          <path d="M4.8 12.2 12 20.8l7.2-8.6" fill="none" stroke="#fca5a5" stroke-width=".35" stroke-dasharray=".6 .5" />
+          <path d="M10.7 12.9h2.6l.4-1.1-.9.5-.8-.8-.8.8-.9-.5z" fill="#facc15" />
+          <path d="M10.5 13.3h3v2.1a1.5 1.5 0 0 1-3 0z" fill="#1e40af" stroke="#facc15" stroke-width=".35" />
+          <path d="M9.8 18h4.4M10.4 18.9h3.2" stroke="#facc15" stroke-width=".45" stroke-linecap="round" />
         }
         @case ('santiago') {
-          <rect x="1" y="1" width="22" height="22" rx="5" fill="#3b82f6" />
-          <g transform="translate(12 12) scale(.8) translate(-12 -12.6)">
-            <path d="M12 21 3.4 10.6a8.8 8.2 0 0 1 17.2 0z" fill="#facc15" />
-            <path d="M12 21 5.4 5.6M12 21 8.6 3.6M12 21V2.8M12 21l3.4-17.4M12 21l6.6-15.4" stroke="#ca8a04" stroke-width=".9" stroke-linecap="round" />
-            <path d="M9.4 20.4h5.2l-.7 2.2h-3.8z" fill="#facc15" />
-          </g>
+          <rect x="1" y="1" width="22" height="22" rx="2.6" fill="#1e40af" />
+          <rect x="1.8" y="1.8" width="20.4" height="20.4" rx="2" fill="#2563eb" />
+          <path d="M6.27 9.74L7.93 4.6M7.05 10.13L11.04 4.63M7.67 10.75L13.98 6.17M8.06 11.53L16.05 8.94M8.2 12.4L16.8 12.4M8.06 13.27L16.05 15.86M7.67 14.05L13.98 18.63M7.05 14.67L11.04 20.17M6.27 15.06L7.93 20.2" stroke="#a16207" stroke-width="2.3" stroke-linecap="round" />
+          <path d="M6.27 9.74L7.93 4.6M7.05 10.13L11.04 4.63M7.67 10.75L13.98 6.17M8.06 11.53L16.05 8.94M8.2 12.4L16.8 12.4M8.06 13.27L16.05 15.86M7.67 14.05L13.98 18.63M7.05 14.67L11.04 20.17M6.27 15.06L7.93 20.2" stroke="#facc15" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M2.6 12.4 5 9.8v5.2z" fill="#facc15" stroke="#a16207" stroke-width=".4" stroke-linejoin="round" />
+          <ellipse cx="5.4" cy="12.4" rx="2.6" ry="3.4" fill="#facc15" stroke="#a16207" stroke-width=".4" />
         }
         @case ('oktoberfest') {
           <path d="M17 10.4h2.2a2.4 2.4 0 0 1 2.4 2.4v3.4a2.4 2.4 0 0 1-2.4 2.4H17" fill="none" stroke="#d97706" stroke-width="2" />
