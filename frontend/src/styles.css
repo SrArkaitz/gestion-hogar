@@ -732,7 +732,8 @@ form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outlin
 .bell-row.leaving { opacity: 0; transition: opacity .18s ease; }
 .bell-gone { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--alta); color: #fff; font-size: 13px; font-weight: 700; }
 .bell-row:not(.dragging):not(.leaving) .bell-gone { visibility: hidden; }
-.bell-x { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: var(--surface); color: var(--muted); font: inherit; font-size: 16px; line-height: 1; cursor: pointer; opacity: 0; }
-.bell-row:hover .bell-x, .bell-x:focus-visible { opacity: 1; }
-.bell-x:hover { color: var(--alta); }
-@media (hover: none) { .bell-x { display: none; } }
+/* Más específica que .nav li button (en el PC la campanita va dentro del menú): a la derecha, bajo la hora */
+.bell-panel .bell-row .bell-x { position: absolute; top: auto; bottom: 8px; right: 10px; width: 24px; height: 24px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--surface); color: var(--muted); font: inherit; font-size: 16px; line-height: 1; cursor: pointer; opacity: 0; }
+.bell-panel .bell-row:hover .bell-x, .bell-panel .bell-row .bell-x:focus-visible { opacity: 1; }
+.bell-panel .bell-row .bell-x:hover { color: var(--alta); }
+@media (hover: none) { .bell-panel .bell-row .bell-x { display: none; } }
