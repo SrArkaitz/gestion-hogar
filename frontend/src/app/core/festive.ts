@@ -38,20 +38,28 @@ import { SessionService } from './session.service';
           <circle cx="10" cy="11.8" r="1.1" fill="#ef4444" /><circle cx="14.2" cy="15.4" r="1.1" fill="#3b82f6" /><circle cx="9.4" cy="18" r="1.1" fill="#facc15" />
         }
         @case ('accion-de-gracias') {
-          <ellipse cx="6.8" cy="9.4" rx="3.2" ry="5.4" fill="#ef4444" transform="rotate(-35 6.8 9.4)" />
-          <ellipse cx="17.2" cy="9.4" rx="3.2" ry="5.4" fill="#f97316" transform="rotate(35 17.2 9.4)" />
-          <ellipse cx="12" cy="6.6" rx="3.2" ry="5.4" fill="#facc15" />
-          <path d="M10.4 20v2.8M13.6 20v2.8" stroke="#64748b" stroke-width=".9" stroke-linecap="round" />
-          <ellipse cx="12" cy="15" rx="5" ry="5.8" fill="#a16207" />
-          <circle cx="12" cy="9.8" r="2.4" fill="#ca8a04" />
-          <path d="M12.8 10.2l1.6.6-1.6.7z" fill="#f97316" />
+          <ellipse cx="6.8" cy="11" rx="2.6" ry="5.6" fill="#ef4444" transform="rotate(-60 6.8 11)" />
+          <ellipse cx="9" cy="8.8" rx="2.6" ry="5.6" fill="#f97316" transform="rotate(-30 9 8.8)" />
+          <ellipse cx="17.2" cy="11" rx="2.6" ry="5.6" fill="#ef4444" transform="rotate(60 17.2 11)" />
+          <ellipse cx="15" cy="8.8" rx="2.6" ry="5.6" fill="#f97316" transform="rotate(30 15 8.8)" />
+          <ellipse cx="12" cy="8" rx="2.6" ry="5.6" fill="#facc15" />
+          <path d="M10 20.4v2.2M14 20.4v2.2M9 22.6h2M13 22.6h2" stroke="#f97316" stroke-width=".9" stroke-linecap="round" />
+          <ellipse cx="12" cy="15.6" rx="5.2" ry="5.4" fill="#a16207" />
+          <path d="M9 16.2q3 2.8 6 0" stroke="#78350f" stroke-width=".8" fill="none" stroke-linecap="round" />
+          <ellipse cx="12" cy="10.8" rx="2.4" ry="2.8" fill="#ca8a04" />
+          <circle cx="11.2" cy="10.2" r=".55" fill="#334155" /><circle cx="12.8" cy="10.2" r=".55" fill="#334155" />
+          <path d="M11.2 11.4h1.6L12 12.6z" fill="#f97316" />
+          <path d="M12.5 12.2q1 1.4 0 2.6" stroke="#ef4444" stroke-width="1" fill="none" stroke-linecap="round" />
         }
         @case ('pascua') {
-          <path d="M5 14.2q7-12 14 0" fill="none" stroke="#64748b" stroke-width=".9" />
-          <ellipse cx="7.6" cy="11.8" rx="3.2" ry="4.2" fill="#ec4899" />
-          <ellipse cx="16.4" cy="11.8" rx="3.2" ry="4.2" fill="#3b82f6" />
-          <ellipse cx="12" cy="10" rx="3.2" ry="4.2" fill="#facc15" />
-          <path d="M3 14h18l-2.2 7.4H5.2z" fill="#a16207" />
+          <path d="M4.8 12.8Q12-1.4 19.2 12.8" fill="none" stroke="#a16207" stroke-width="1.6" />
+          <ellipse cx="8.2" cy="11.2" rx="2.8" ry="3.6" fill="#ec4899" />
+          <ellipse cx="15.8" cy="11.2" rx="2.8" ry="3.6" fill="#3b82f6" />
+          <ellipse cx="12" cy="9.8" rx="2.8" ry="3.6" fill="#facc15" />
+          <path d="M5.8 10.8h4.8M13.4 10.8h4.8M9.6 9.2h4.8" stroke="#ffffff" stroke-width=".9" stroke-linecap="round" />
+          <path d="M3.4 13.4h17.2l-1.8 7.8a1.2 1.2 0 0 1-1.2.9H6.4a1.2 1.2 0 0 1-1.2-.9z" fill="#ca8a04" />
+          <path d="M4.4 17.4h15.2M5.2 20.2h13.6M8 14.6v7.4M12 14.6v7.4M16 14.6v7.4" stroke="#a16207" stroke-width=".8" />
+          <rect x="2.6" y="12.2" width="18.8" height="2.4" rx="1.2" fill="#a16207" />
         }
         @case ('san-valentin') {
           <path d="M12 16.6q-1.4 3 .4 6.6" fill="none" stroke="#64748b" stroke-width=".7" />
@@ -69,10 +77,15 @@ import { SessionService } from './session.service';
                 d="M1.8 9.4c3.3-2.3 7.2-2.2 10.2-.2 3-2 6.9-2.1 10.2.2 0 5.2-2.9 8.2-6.2 8.2-2.1 0-3.2-1.8-4-3-.8 1.2-1.9 3-4 3-3.3 0-6.2-3-6.2-8.2zM5.6 11.8a2.3 1.6 0 1 0 4.6 0 2.3 1.6 0 1 0-4.6 0zM13.8 11.8a2.3 1.6 0 1 0 4.6 0 2.3 1.6 0 1 0-4.6 0z" />
         }
         @case ('san-patricio') {
-          <path d="M12 13q.6 5.4 4 9.4" fill="none" stroke="#64748b" stroke-width=".9" stroke-linecap="round" />
-          <circle cx="12" cy="7.4" r="3.6" fill="#22c55e" />
-          <circle cx="7.6" cy="13" r="3.6" fill="#16a34a" />
-          <circle cx="16.4" cy="13" r="3.6" fill="#4ade80" />
+          <path d="M12.2 12.6q.4 5.6 4.2 9.8" fill="none" stroke="#16a34a" stroke-width="1.6" stroke-linecap="round" />
+          <g fill="#22c55e">
+            <path d="M12 12.4C10.4 11.4 6.4 9 6.4 5.8a3 3 0 0 1 5.6-1.5 3 3 0 0 1 5.6 1.5c0 3.2-4 5.6-5.6 6.6z" />
+            <path d="M12 12.4C10.4 11.4 6.4 9 6.4 5.8a3 3 0 0 1 5.6-1.5 3 3 0 0 1 5.6 1.5c0 3.2-4 5.6-5.6 6.6z" transform="rotate(120 12 12.4)" />
+            <path d="M12 12.4C10.4 11.4 6.4 9 6.4 5.8a3 3 0 0 1 5.6-1.5 3 3 0 0 1 5.6 1.5c0 3.2-4 5.6-5.6 6.6z" transform="rotate(240 12 12.4)" />
+          </g>
+          <g stroke="#16a34a" stroke-width=".7" stroke-linecap="round">
+            <path d="M12 12.4V6.4" /><path d="M12 12.4V6.4" transform="rotate(120 12 12.4)" /><path d="M12 12.4V6.4" transform="rotate(240 12 12.4)" />
+          </g>
         }
         @case ('san-juan') {
           <path d="M12 2c1.6 3.6 5.8 5.6 5.8 10.4a5.8 5.8 0 0 1-11.6 0c0-2.6 1.5-4.2 2.6-5.7.2 1.9 1 2.9 2 3.3-.5-3.1.2-5.7 1.2-8z" fill="#ef4444" />
@@ -224,10 +237,8 @@ import { SessionService } from './session.service';
           <circle cx="12" cy="12" r="3.2" fill="#334155" /><circle cx="12" cy="12" r="1.8" fill="#f8fafc" />
         }
         @case ('mario') {
-          <rect x="7" y="11.4" width="10" height="10.2" rx="3.4" fill="#fde68a" />
-          <path d="M2.4 13.2a9.6 9 0 0 1 19.2 0z" fill="#ef4444" />
-          <circle cx="12" cy="6.8" r="2.4" fill="#f8fafc" /><circle cx="5.8" cy="11" r="1.6" fill="#f8fafc" /><circle cx="18.2" cy="11" r="1.6" fill="#f8fafc" />
-          <ellipse cx="10.2" cy="16.4" rx=".7" ry="1.3" fill="#334155" /><ellipse cx="13.8" cy="16.4" rx=".7" ry="1.3" fill="#334155" />
+          <!-- Imagen puesta a mano en frontend/public/fiestas (no es un dibujo propio) -->
+          <image href="/fiestas/mario.webp" x="0" y="0" width="24" height="24" preserveAspectRatio="xMidYMid meet" />
         }
         @case ('anio-nuevo') {
           <g stroke-width="1.6" stroke-linecap="round">

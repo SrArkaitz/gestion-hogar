@@ -7,7 +7,7 @@
 const APP_CACHE = 'hogar-app-v1';
 const DATA_CACHE = 'hogar-datos-v1';
 /** Archivos de la app (llevan un hash en el nombre: no cambian nunca), iconos y fuentes. */
-const ASSET_RE = /\/(?:(?:main|polyfills|styles|chunk)-[A-Z0-9]+\.(?:js|css)|icons\/[^/]+|favicon\.svg|manifest\.webmanifest)$/;
+const ASSET_RE = /\/(?:(?:main|polyfills|styles|chunk)-[A-Z0-9]+\.(?:js|css)|icons\/[^/]+|fiestas\/[^/]+|favicon\.svg|manifest\.webmanifest)$/;
 const FONT_HOSTS = ['fonts.gstatic.com'];
 /** Lo que se guarda de la API para la compra sin conexión: sesión, casa y lista. */
 const DATA_RE = /^\/api\/(?:auth\/me|auth\/providers|households\/[^/]+|households\/[^/]+\/shopping\/(?:items|products))$/;
