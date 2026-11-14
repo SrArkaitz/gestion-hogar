@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { addDays, ageOn, BILL_NOTICE_DAYS, formatEuros, IsoDate, nextBirthday, isBirthdayOn } from '@hogar/shared';
-import { TIME_ZONE, todayIso } from '../common/dates';
+import { minutesNow, TIME_ZONE, todayIso } from '../common/dates';
 import { householdUses } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { PushService } from './push.service';
@@ -44,6 +44,57 @@ export class RemindersService {
     }
   }
 
+  /** Cada 5 minutos: los eventos con hora avisan una hora antes. */
+  @Cron('0 */5 * * * *', { timeZone: TIME_ZONE })
+  async everyFiveMinutes(): Promise<void> {
+    try {
+      const sent = await this.sendSoonEventReminders();
+      if (sent) this.logger.log(`Avisos de eventos en una hora: ${sent}`);
+    } catch (err) {
+      this.logger.error(`No se pudieron avisar los eventos: ${(err as Error).message}`);
+    }
+  }
+
+  /**
+   * Eventos con hora que empiezan dentro de la próxima hora (también los de poco después de
+   * medianoche, del día siguiente). Cada uno se avisa una vez por día y hora: a sus personas o, si
+   * no tiene, a toda la casa. Los que se crean con menos de una hora de margen avisan en la
+   * siguiente vuelta.
+   * @returns cuántos dispositivos han recibido algún aviso.
+   */
+  async sendSoonEventReminders(now = new Date()): Promise<number> {
+    const today = todayIso(now), tomorrow = addDays(today, 1), nowMin = minutesNow(now);
+    const events = await this.prisma.calendarEvent.findMany({
+      where: { date: { in: [today, tomorrow] }, time: { not: null }, household: householdUses('calendario') },
+      include: { people: { select: { userId: true } }, household: { select: { name: true, members: { select: { userId: true } } } } },
+    });
+    let sent = 0;
+    for (const e of events) {
+      const [h, m] = e.time!.split(':').map(Number);
+      const left = h * 60 + m + (e.date === tomorrow ? 1440 : 0) - nowMin;
+      const key = `${e.date} ${e.time}`;
+      if (left <= 0 || left > 60 || e.remindedFor === key) continue;
+      // Se marca antes de mandar: si dos vueltas coinciden, solo avisa una.
+      const { count } = await this.prisma.calendarEvent.updateMany({
+        where: { id: e.id, OR: [{ remindedFor: null }, { remindedFor: { not: key } }] },
+        data: { remindedFor: key },
+      });
+      if (!count) continue;
+      const to = e.people.length ? e.people.map((p) => p.userId) : e.household.members.map((x) => x.userId);
+      sent += await this.push.send(
+        to,
+        {
+          title: `${left >= 55 ? 'Dentro de una hora' : `Dentro de ${left} min`} · ${e.household.name}`,
+          body: `${e.title} a las ${e.time}.`,
+          url: `/calendario?casa=${e.householdId}`,
+          tag: `evento-${e.id}`,
+        },
+        'calendario',
+      );
+    }
+    return sent;
+  }
+
   /**
    * Facturas que vencen en los próximos días o ya vencieron: un aviso por casa a todos sus
    * miembros. Las casas que ocultan Gastos no reciben nada.
@@ -77,9 +128,9 @@ export class RemindersService {
   }
 
   /**
-   * Calendario: los eventos que empiezan hoy y los cumpleaños de hoy o de dentro de los días de
-   * aviso de cada uno. Un aviso por persona y casa (si la casa usa el calendario): los eventos con
-   * personas, solo a ellas; los demás y los cumpleaños, a toda la casa.
+   * Calendario: los eventos sin hora que empiezan hoy (los que tienen hora avisan una hora antes)
+   * y los cumpleaños de hoy. Un aviso por persona y casa (si la casa usa el calendario): los
+   * eventos con personas, solo a ellas; los demás y los cumpleaños, a toda la casa.
    * @returns cuántos dispositivos han recibido algún aviso.
    */
   async sendCalendarReminders(today: IsoDate): Promise<number> {
@@ -89,7 +140,7 @@ export class RemindersService {
         id: true,
         name: true,
         members: { select: { userId: true, user: { select: { name: true, birthMonth: true, birthDay: true } } } },
-        events: { where: { date: today }, orderBy: [{ time: 'asc' }, { title: 'asc' }], include: { people: { select: { userId: true } } } },
+        events: { where: { date: today, time: null }, orderBy: { title: 'asc' }, include: { people: { select: { userId: true } } } },
         birthdays: true,
       },
     });
@@ -117,7 +168,7 @@ export class RemindersService {
         const theirs = members.map((m) => m.userId === userId
           ? `¡Feliz cumpleaños, ${m.user.name.split(' ')[0]}!`
           : `¡Hoy es el cumpleaños de ${m.user.name}!`);
-        const parts = [...(mine.length ? [`Hoy: ${mine.map((e) => (e.time ? `${e.title} (${e.time})` : e.title)).join(', ')}.`] : []), ...birthdays, ...theirs];
+        const parts = [...(mine.length ? [`Hoy: ${mine.map((e) => e.title).join(', ')}.`] : []), ...birthdays, ...theirs];
         if (!parts.length) continue;
         sent += await this.push.send(
           [userId],

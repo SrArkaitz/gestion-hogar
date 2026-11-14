@@ -442,6 +442,8 @@ model CalendarEvent {
   notes       String                @default("")
   /// Personas a las que pertenece (ninguna = de toda la casa)
   people      CalendarEventPerson[]
+  /// "AAAA-MM-DD HH:MM" que ya se avisó una hora antes (si cambia la hora, se vuelve a avisar)
+  remindedFor String?
   createdById String
   createdAt   DateTime              @default(now())
 

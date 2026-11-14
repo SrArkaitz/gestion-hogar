@@ -153,7 +153,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Eventos** propios: título, día, hora opcional, fecha de fin si dura varios días, notas y de quién es: una o varias personas de la casa, o ninguna: entonces es para todos. Se pinta con el color de su persona; si es de varias, con los colores de todas en franjas y sus iconos; si es para todos, con el color de la casa (el oscuro de la app) y el icono de la casa. En el móvil, los puntos de cada día llevan esos colores.
 - **Colores de lo que no es un evento** (tonos que no usa ninguna persona): cumpleaños en rosa oscuro, menú en naranja tostado, tareas en rojo intenso, recurrentes en lima, facturas en amarillo mostaza; mantenimiento y garantías, en gris. Sin iconos: debajo de cada cosa pone qué es. En el móvil, cada uno tiene su punto de color y el gris es uno solo.
 - **Filtro por persona** (encima del calendario, si sois más de uno): «Todos» o una persona. Con una persona se ve lo suyo (eventos y tareas asignadas) y lo que es de toda la casa; no lo que es solo de los demás. Se recuerda en ese navegador.
-- **Avisos** a las 9:00: los eventos que empiezan ese día, solo a sus personas (a toda la casa si no tienen), y los cumpleaños de ese día, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
+- **Avisos:** los eventos con hora avisan **una hora antes** («Dentro de una hora · Dentista a las 17:00»; si se crean con menos margen, en cuanto se puede); los de todo el día, en el aviso de las 9:00. Siempre solo a sus personas (a toda la casa si no tienen). Cada evento avisa una vez; si se le cambia la hora, vuelve a avisar. Los cumpleaños de ese día, a las 9:00, a toda la casa. Quien sale de una casa deja de estar en sus eventos.
 - Es una sección más: se puede ocultar en *Casa → Secciones*.
 
 ### 3.7 Inventario
@@ -292,3 +292,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-14 | Más días con adorno: Inocentes, Gato, Perro, Chocolate, Orgullo Friki, 29 de febrero y viernes 13. Dibujos rehechos con el estilo de los globos. |
 | 2026-11-14 | Los cumpleaños de la cuenta salen también en la pestaña Cumpleaños y en el aviso del día. |
 | 2026-11-14 | Los avisos de la campanita se quitan deslizándolos (o con la ×), y se pueden borrar todos los leídos. |
+| 2026-11-14 | Los eventos con hora avisan una hora antes; los de todo el día y las tareas siguen a las 9:00. |
