@@ -32,14 +32,14 @@ export function safeReturnUrl(value: unknown): string {
 
 /** Valor que tiene que estar en una lista de constantes de @hogar/shared. */
 export function oneOf<T extends string>(value: unknown, options: readonly T[], label: string): T {
-  if (!options.includes(value as T)) throw new BadRequestException(`${label} no válido`);
+  if (!options.includes(value as T)) throw new BadRequestException(`${label}: valor no válido`);
   return value as T;
 }
 
 /** Texto opcional: recortado, null si viene vacío y con longitud máxima. */
 export function optionalText(value: unknown, label: string, max: number): string | null {
   if (value === null || value === undefined) return null;
-  if (typeof value !== 'string') throw new BadRequestException(`${label} no válido`);
+  if (typeof value !== 'string') throw new BadRequestException(`${label}: valor no válido`);
   const text = value.trim();
   if (text.length > max) throw new BadRequestException(`${label} no puede pasar de ${max} caracteres`);
   return text || null;
