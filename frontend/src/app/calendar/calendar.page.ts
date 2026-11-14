@@ -187,12 +187,14 @@ export class CalendarPage {
 
   /**
    * Puntos de un día en el móvil: uno por cada persona con eventos, uno de la casa si hay
-   * eventos de todos y uno gris si hay algo más (tareas, menú, facturas…).
+   * eventos de todos, los de cumpleaños y menú con su color y uno gris si hay algo más
+   * (tareas, facturas…).
    */
   protected dotsOn(day: IsoDate): { key: string; color: string }[] {
     const dots = new Map<string, string>();
     for (const it of this.itemsOn(day)) {
-      if (it.kind !== 'evento') dots.set('otro', 'var(--k-other)');
+      if (it.kind === 'cumple' || it.kind === 'menu') dots.set(it.kind, `var(--k-${it.kind})`);
+      else if (it.kind !== 'evento') dots.set('otro', 'var(--k-other)');
       else if (this.forAll(it)) dots.set('casa', 'var(--house)');
       else for (const m of this.peopleOf(it)) dots.set('p' + m.color, `var(--c-${m.color})`);
     }

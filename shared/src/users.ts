@@ -6,7 +6,11 @@ export type Role = (typeof ROLES)[number];
 
 export const ROLE_LABELS: Record<Role, string> = { admin: 'Administrador', miembro: 'Miembro' };
 
-/** Colores que puede elegir cada persona en una casa (se ven en sus tarjetas y en su avatar). */
+/**
+ * Colores que puede elegir cada persona en una casa (se ven en sus tarjetas y en su avatar).
+ * En este orden se reparten a quien entra (los más distintos primero); los nuevos van al final
+ * para no cambiar el de nadie.
+ */
 export const MEMBER_COLORS = [
   'azul',
   'verde',
@@ -18,6 +22,11 @@ export const MEMBER_COLORS = [
   'lima',
   'amarillo',
   'gris',
+  'coral',
+  'fucsia',
+  'caramelo',
+  'indigo',
+  'turquesa',
 ] as const;
 export type MemberColor = (typeof MEMBER_COLORS)[number];
 
@@ -32,7 +41,18 @@ export const MEMBER_COLOR_LABELS: Record<MemberColor, string> = {
   lima: 'Lima',
   amarillo: 'Amarillo',
   gris: 'Gris',
+  coral: 'Coral',
+  fucsia: 'Fucsia',
+  caramelo: 'Caramelo',
+  indigo: 'Índigo',
+  turquesa: 'Turquesa',
 };
+
+/** Los mismos colores ordenados por tono, para elegir. */
+export const MEMBER_COLORS_BY_HUE: readonly MemberColor[] = [
+  'rojo', 'coral', 'naranja', 'caramelo', 'amarillo', 'lima', 'verde', 'turquesa',
+  'celeste', 'azul', 'indigo', 'morado', 'fucsia', 'rosa', 'gris',
+];
 
 /** Primer color que nadie usa en la casa; si están todos cogidos, se repiten en orden. */
 export function nextMemberColor(used: readonly string[]): MemberColor {

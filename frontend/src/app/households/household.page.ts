@@ -8,7 +8,7 @@ import {
   INVITATION_DAYS,
   Member,
   MEMBER_COLOR_LABELS,
-  MEMBER_COLORS,
+  MEMBER_COLORS_BY_HUE,
   MemberColor,
   MODULE_DESCRIPTIONS,
   MODULE_LABELS,
@@ -42,7 +42,7 @@ export class HouseholdPage {
   protected readonly moduleDescriptions = MODULE_DESCRIPTIONS;
   protected readonly nameMax = NAME_MAX_LENGTH;
   protected readonly invitationDays = INVITATION_DAYS;
-  protected readonly colors = MEMBER_COLORS;
+  protected readonly colors = MEMBER_COLORS_BY_HUE;
   protected readonly colorLabels = MEMBER_COLOR_LABELS;
   /** Miembro cuya paleta de colores está abierta. */
   protected readonly pickingColor = signal<string | null>(null);

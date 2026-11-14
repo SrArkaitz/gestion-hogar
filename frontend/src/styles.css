@@ -6,9 +6,12 @@
   --fg: #172b4d; --muted: #44546f; --line: #d2d7cf;
   --accent: #0055cc; --accent-fg: #ffffff; --accent-bg: #e9f2ff; --danger-fg: #ffffff;
   --alta: #ae2e24; --alta-bg: #ffeceb; --media: #7f5f01; --media-bg: #fff7d6; --baja: #216e4e; --baja-bg: #dcfff1;
-  /* Colores de las personas (MEMBER_COLORS, los de las etiquetas de Trello); en claro llevan texto blanco encima */
-  --c-azul: #0c66e4; --c-verde: #1f845a; --c-naranja: #b65c02; --c-morado: #6e5dc6; --c-rojo: #c9372c;
-  --c-celeste: #1d7f8c; --c-rosa: #ae4787; --c-lima: #4c6b1f; --c-amarillo: #946f00; --c-gris: #626f86; --on-person: #ffffff;
+  /* Colores de las personas (MEMBER_COLORS); en claro llevan texto blanco encima, salvo los más claros (--pon) */
+  --c-azul: #0c66e4; --c-verde: #1f845a; --c-naranja: #f97316; --c-morado: #6e5dc6; --c-rojo: #c9372c;
+  --c-celeste: #1d7f8c; --c-rosa: #ec4899; --c-lima: #4c6b1f; --c-amarillo: #946f00; --c-gris: #626f86;
+  --c-coral: #fb7185; --c-fucsia: #d946ef; --c-caramelo: #b45309; --c-indigo: #6366f1; --c-turquesa: #14b8a6; --on-person: #ffffff;
+  /* Calendario: cumpleaños y menú tienen su propio color (distinto de los de las personas) */
+  --k-cumple: #ae4787; --k-menu: #b65c02;
   --shadow: 0 1px 2px rgba(20, 30, 25, .08);
   --f-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
@@ -21,8 +24,10 @@
   --fg: #b6c2cf; --muted: #9fadbc; --line: #39413d;
   --accent: #579dff; --accent-fg: #1d2125; --accent-bg: #092957; --danger-fg: #1d2125;
   --alta: #fd9891; --alta-bg: #42221f; --media: #f5cd47; --media-bg: #332e1b; --baja: #4bce97; --baja-bg: #1c3329;
-  --c-azul: #579dff; --c-verde: #4bce97; --c-naranja: #fea362; --c-morado: #9f8fef; --c-rojo: #f87168;
-  --c-celeste: #6cc3e0; --c-rosa: #e774bb; --c-lima: #94c748; --c-amarillo: #e2b203; --c-gris: #8c9bab; --on-person: #1d2125;
+  --c-azul: #579dff; --c-verde: #4bce97; --c-naranja: #fb923c; --c-morado: #9f8fef; --c-rojo: #f87168;
+  --c-celeste: #6cc3e0; --c-rosa: #f472b6; --c-lima: #94c748; --c-amarillo: #e2b203; --c-gris: #8c9bab;
+  --c-coral: #ff8f80; --c-fucsia: #e879f9; --c-caramelo: #e0a46a; --c-indigo: #a5b4fc; --c-turquesa: #2dd4bf; --on-person: #1d2125;
+  --k-cumple: #e774bb; --k-menu: #fea362;
   --shadow: none;
   color-scheme: dark;
 }
@@ -187,6 +192,11 @@ details.fold summary:focus-visible { outline: 2px solid var(--accent); outline-o
 [data-c="rojo"] { --pc: var(--c-rojo); } [data-c="celeste"] { --pc: var(--c-celeste); }
 [data-c="rosa"] { --pc: var(--c-rosa); } [data-c="lima"] { --pc: var(--c-lima); }
 [data-c="amarillo"] { --pc: var(--c-amarillo); } [data-c="gris"] { --pc: var(--c-gris); }
+[data-c="coral"] { --pc: var(--c-coral); } [data-c="fucsia"] { --pc: var(--c-fucsia); }
+[data-c="caramelo"] { --pc: var(--c-caramelo); } [data-c="indigo"] { --pc: var(--c-indigo); }
+[data-c="turquesa"] { --pc: var(--c-turquesa); }
+/* En claro, los colores más claros llevan las iniciales en oscuro para que se lean */
+:root:not([data-theme="dark"]) :is([data-c="naranja"], [data-c="coral"], [data-c="turquesa"]) { --pon: #172b4d; }
 .swatch { flex: none; width: 22px; height: 22px; padding: 0; border-radius: 50%; background: var(--pc); border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); }
 button.swatch { cursor: pointer; }
 .swatch[aria-pressed="true"], .swatch[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--fg); }
@@ -225,7 +235,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .due { color: var(--muted); font-variant-numeric: tabular-nums; }
 .tag { color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; }
 .avatars { margin-left: auto; display: flex; gap: 3px; }
-.avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--pc, var(--accent)); color: var(--on-person);
+.avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--pc, var(--accent)); color: var(--pon, var(--on-person));
   display: inline-flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; letter-spacing: .02em; }
 .clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
 
@@ -415,6 +425,8 @@ label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; wi
 :root { --house: var(--fg); --k-other: color-mix(in srgb, var(--muted) 45%, var(--card)); }
 [data-k] { --kc: var(--k-other); }
 [data-k="evento"] { --kc: var(--house); }
+[data-k="cumple"] { --kc: var(--k-cumple); }
+[data-k="menu"] { --kc: var(--k-menu); }
 .k-ico { display: inline-block; min-width: 1.2em; margin-right: 3px; text-align: center; font-weight: 400; color: var(--muted); }
 .chip-k[data-k]:not([data-k="evento"]) { color: var(--muted); }
 .avatar.house { --pc: var(--house); color: var(--bg); display: inline-grid; place-items: center; }
@@ -460,11 +472,11 @@ label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; wi
 .cal-items .empty { padding: 4px 2px; }
 .week .cal-items:empty { display: none; }
 .bdays { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 10px; }
-.bday { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; font: inherit; color: var(--fg); background: var(--card); border: 0; border-left: 4px solid var(--c-rosa); border-radius: 10px; box-shadow: var(--shadow); padding: 10px 12px; cursor: pointer; }
+.bday { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; font: inherit; color: var(--fg); background: var(--card); border: 0; border-left: 4px solid var(--k-cumple); border-radius: 10px; box-shadow: var(--shadow); padding: 10px 12px; cursor: pointer; }
 .bday .who { display: flex; flex-direction: column; min-width: 0; }
 .bday .t { font-weight: 700; }
 .bday .left { font-size: 13px; color: var(--muted); white-space: nowrap; }
-.bday.soon .left { color: var(--c-rosa); font-weight: 700; }
+.bday.soon .left { color: var(--k-cumple); font-weight: 700; }
 
 /* Archivar tareas */
 .col-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 4px 4px 0; font-size: 13px; }
