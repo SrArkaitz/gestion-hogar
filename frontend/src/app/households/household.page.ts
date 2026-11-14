@@ -20,6 +20,7 @@ import {
 import { errorMessage } from '../core/errors';
 import { HouseholdsService } from '../core/households.service';
 import { SessionService } from '../core/session.service';
+import { FestiveService } from '../core/festive.service';
 import { Avatar } from '../core/avatar';
 import { initials } from '../tasks/people';
 
@@ -32,6 +33,8 @@ import { initials } from '../tasks/people';
 })
 export class HouseholdPage {
   protected readonly session = inject(SessionService);
+  /** Globos en la foto de quien cumple años hoy. */
+  protected readonly festive = inject(FestiveService);
   private readonly api = inject(HouseholdsService);
   private readonly router = inject(Router);
 

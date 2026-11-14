@@ -39,9 +39,12 @@
               } @else {
                 <span class="swatch" [attr.data-c]="m.color" [title]="colorLabels[m.color]"></span>
               }
-              <span class="avatar md" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>
+              <span class="avatar md" [attr.data-c]="m.color" [class.balloons]="festive.isBirthday(m.birthday)" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>
               <div class="who">
                 <span class="t">{{ m.name }}@if (m.id === me()) { <span class="you">(tú)</span> }</span>
+                @if (festive.isBirthday(m.birthday)) {
+                  <span class="bday-tag">{{ m.id === me() ? '¡Hoy es tu cumpleaños!' : '¡Hoy es su cumpleaños!' }}</span>
+                }
                 <span class="n">{{ m.email }}</span>
               </div>
               <span class="role" [class.admin]="m.role === 'admin'">{{ roleLabels[m.role] }}</span>

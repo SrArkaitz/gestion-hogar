@@ -1,4 +1,5 @@
 import { IsoDate } from './common';
+import { BirthdayDate } from './users';
 
 /** De dónde sale cada cosa del calendario. Los dos primeros son del propio calendario. */
 export const CALENDAR_KINDS = ['evento', 'cumple', 'tarea', 'recurrente', 'menu', 'factura', 'mantenimiento', 'garantia'] as const;
@@ -98,6 +99,11 @@ export function nextBirthday(b: { month: number; day: number }, from: IsoDate): 
   const year = Number(from.slice(0, 4));
   const thisYear = birthdayIn(b, year);
   return thisYear >= from ? thisYear : birthdayIn(b, year + 1);
+}
+
+/** Si ese día es su cumpleaños (el 29 de febrero, los años no bisiestos, se celebra el 28). */
+export function isBirthdayOn(b: BirthdayDate | null | undefined, date: IsoDate): boolean {
+  return !!b && birthdayIn(b, Number(date.slice(0, 4))) === date;
 }
 
 /** Años que cumple en esa fecha de cumpleaños, o null si no se sabe el año. */

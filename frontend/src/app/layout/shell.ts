@@ -6,6 +6,8 @@ import { SessionService } from '../core/session.service';
 import { HouseholdSwitcher } from './household-switcher';
 import { NotificationsBell } from './notifications-bell';
 import { Avatar } from '../core/avatar';
+import { Festive } from '../core/festive';
+import { FestiveService } from '../core/festive.service';
 import { initials } from '../tasks/people';
 
 interface NavItem {
@@ -20,11 +22,13 @@ interface NavItem {
 /** Estructura de la app con sesión: navegación y página actual. */
 @Component({
   selector: 'app-shell',
-  imports: [Avatar, RouterOutlet, RouterLink, RouterLinkActive, HouseholdSwitcher, NotificationsBell],
+  imports: [Avatar, Festive, RouterOutlet, RouterLink, RouterLinkActive, HouseholdSwitcher, NotificationsBell],
   templateUrl: './shell.html',
 })
 export class Shell {
   protected readonly session = inject(SessionService);
+  /** Globos en tu foto el día de tu cumpleaños. */
+  protected readonly festive = inject(FestiveService);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationsService);
   protected readonly initials = initials;

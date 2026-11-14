@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { randomBytes } from 'crypto';
 import { mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { NAME_MAX_LENGTH, NotificationKind, User } from '@hogar/shared';
+import { BirthdayDate, NAME_MAX_LENGTH, NotificationKind, User } from '@hogar/shared';
+import { parseBirthday } from './birthday';
 import { asObject, requiredText } from '../common/validation';
 import { parseKinds } from '../notifications/kinds';
 import { PrismaService } from '../prisma/prisma.service';
@@ -34,6 +35,16 @@ export class UsersService {
     const name = requiredText(asObject(body)['name'], 'El nombre', NAME_MAX_LENGTH);
     const user = await this.prisma.user.update({ where: { id: userId }, data: { name } });
     return { id: user.id, name: user.name, email: user.email, avatarUrl: avatarUrl(user.id, user.avatar) };
+  }
+
+  /** Pone tu cumpleaños, o lo quita con null. */
+  async setBirthday(userId: string, body: unknown | null): Promise<{ birthday: BirthdayDate | null }> {
+    const birthday = body === null ? null : parseBirthday(body);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { birthMonth: birthday?.month ?? null, birthDay: birthday?.day ?? null },
+    });
+    return { birthday };
   }
 
   async setNotifyOff(userId: string, body: unknown): Promise<{ off: NotificationKind[] }> {

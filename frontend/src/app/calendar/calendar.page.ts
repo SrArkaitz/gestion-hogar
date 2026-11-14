@@ -21,6 +21,8 @@ import { CalendarTabs } from './calendar-tabs';
 import { CalendarStore } from './calendar.store';
 import { EventDialog } from './event-dialog';
 import { Avatar } from '../core/avatar';
+import { FestiveIcon } from '../core/festive';
+import { FestiveService } from '../core/festive.service';
 
 type View = 'mes' | 'semana';
 
@@ -39,7 +41,7 @@ const FILTER_KEY = 'hogar.cal.persona';
  */
 @Component({
   selector: 'app-calendar-page',
-  imports: [Avatar, CalendarTabs, EventDialog],
+  imports: [Avatar, CalendarTabs, EventDialog, FestiveIcon],
   host: { class: 'view' },
   templateUrl: './calendar.page.html',
 })
@@ -48,6 +50,8 @@ export class CalendarPage {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly households = inject(HouseholdsService);
+  /** Fiesta de cada día (Navidad el 25…), si los adornos están puestos. */
+  protected readonly festive = inject(FestiveService);
 
   protected readonly kindLabels = CALENDAR_KIND_LABELS;
   protected readonly weekdayInitials = WEEKDAY_INITIALS;

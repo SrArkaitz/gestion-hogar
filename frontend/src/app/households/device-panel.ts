@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { errorMessage } from '../core/errors';
+import { FestiveService } from '../core/festive.service';
 import { InstallService } from '../core/install.service';
 import { PushClientService } from '../core/push.service';
 import { THEME_LABELS, THEMES, ThemeService } from '../core/theme.service';
@@ -19,6 +20,14 @@ import { THEME_LABELS, THEMES, ThemeService } from '../core/theme.service';
         }
       </div>
     </div>
+
+    <label class="switch-row">
+      <input type="checkbox" name="festive" [checked]="festive.enabled()" (change)="festive.setEnabled($any($event.target).checked)" />
+      <span>
+        <span class="t">Adornos de fiestas</span>
+        <span class="n">Una calabaza en Halloween, un árbol en Navidad, un pavo en Acción de Gracias… junto al nombre de la app y en el día del calendario.</span>
+      </span>
+    </label>
 
     <div class="device-block">
       <h3>Avisos</h3>
@@ -71,6 +80,7 @@ export class DevicePanel implements OnInit {
   protected readonly theme = inject(ThemeService);
   protected readonly push = inject(PushClientService);
   protected readonly install = inject(InstallService);
+  protected readonly festive = inject(FestiveService);
 
   protected readonly themes = THEMES;
   protected readonly themeLabels = THEME_LABELS;

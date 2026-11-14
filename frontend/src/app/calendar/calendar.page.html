@@ -28,7 +28,7 @@
     <button type="button" class="who-chip" [attr.aria-pressed]="!person()" (click)="setPerson(null)">Todos</button>
     @for (m of members(); track m.id) {
       <button type="button" class="who-chip" [attr.aria-pressed]="person() === m.id" (click)="setPerson(person() === m.id ? null : m.id)">
-        <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>{{ m.name }}
+        <span class="avatar" [attr.data-c]="m.color" [class.balloons]="festive.isBirthday(m.birthday)" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>{{ m.name }}
       </button>
     }
   </div>
@@ -48,7 +48,12 @@
         <button type="button" class="cal-day" role="gridcell" [class.out]="!inMonth(day)" [class.today]="day === today"
                 [attr.aria-selected]="day === selected()" [attr.aria-label]="dayText(day, { weekday: 'long', day: 'numeric', month: 'long' }) + (itemsOn(day).length ? ', ' + itemsOn(day).length + ' cosas' : '')"
                 (click)="selected.set(day)">
-          <span class="num">{{ +day.slice(8) }}</span>
+          <span class="cal-num-row">
+            <span class="num">{{ +day.slice(8) }}</span>
+            @if (festive.dayOf(day); as h) {
+              <app-festive-icon class="cal-fest" [kind]="h.key" [title]="h.name" />
+            }
+          </span>
           <span class="chips">
             @for (it of itemsOn(day).slice(0, chipsPerDay); track $index) {
               <span class="chip-k" [attr.data-k]="it.kind" [style]="paint(it)" [class.done]="it.done">{{ it.title }}</span>
@@ -68,7 +73,7 @@
 
     <section class="panel cal-day-panel" aria-live="polite">
       <div class="cal-day-head">
-        <h2>{{ dayText(selected(), { weekday: 'long', day: 'numeric', month: 'long' }) }}</h2>
+        <h2>{{ dayText(selected(), { weekday: 'long', day: 'numeric', month: 'long' }) }}@if (festive.dayOf(selected()); as h) {<span class="fest-name"><app-festive-icon [kind]="h.key" />{{ h.name }}</span>}</h2>
         <button type="button" class="btn ghost sm" (click)="editing.set(null)">+ Evento</button>
       </div>
       <ul class="cal-items">
@@ -84,7 +89,7 @@
                 } @else if (peopleOf(it).length) {
                   <span class="avatars" aria-hidden="true">
                     @for (m of peopleOf(it); track m.id) {
-                      <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
+                      <span class="avatar" [attr.data-c]="m.color" [class.balloons]="festive.isBirthday(m.birthday)" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
                     }
                   </span>
                 }
@@ -102,7 +107,7 @@
   <div class="week">
     @for (day of days(); track day) {
       <section class="day" [class.today]="day === today" [attr.aria-label]="dayText(day, { weekday: 'long', day: 'numeric' })">
-        <h2>{{ dayText(day, { weekday: 'long', day: 'numeric' }) }}@if (day === today) { <span class="role">Hoy</span> }</h2>
+        <h2>{{ dayText(day, { weekday: 'long', day: 'numeric' }) }}@if (day === today) { <span class="role">Hoy</span> }@if (festive.dayOf(day); as h) {<span class="fest-name"><app-festive-icon [kind]="h.key" />{{ h.name }}</span>}</h2>
         <ul class="cal-items">
           @for (it of itemsOn(day); track $index) {
             <li>
@@ -116,7 +121,7 @@
                   } @else if (peopleOf(it).length) {
                     <span class="avatars" aria-hidden="true">
                       @for (m of peopleOf(it); track m.id) {
-                        <span class="avatar" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
+                        <span class="avatar" [attr.data-c]="m.color" [class.balloons]="festive.isBirthday(m.birthday)" [appAvatar]="m.avatarUrl" [title]="m.name">{{ initials(m.name) }}</span>
                       }
                     </span>
                   }

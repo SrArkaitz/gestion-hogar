@@ -3,6 +3,7 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  daysInMonth,
   NAME_MAX_LENGTH,
   NOTIFICATION_KIND_DESCRIPTIONS,
   NOTIFICATION_KIND_LABELS,
@@ -14,10 +15,13 @@ import { firstValueFrom } from 'rxjs';
 import { GoogleButton } from '../auth/google-button';
 import { Avatar, resizeAvatar } from '../core/avatar';
 import { errorMessage, googleErrorMessage } from '../core/errors';
+import { FestiveService } from '../core/festive.service';
 import { NotificationsService } from '../core/notifications.service';
 import { SessionService } from '../core/session.service';
 import { DevicePanel } from '../households/device-panel';
 import { initials } from '../tasks/people';
+
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 /** Tu cuenta: foto, nombre, contraseña, Google, sesiones, qué avisos recibes y este dispositivo. */
 @Component({
@@ -31,6 +35,8 @@ export class AccountPage {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly notifications = inject(NotificationsService);
+  /** Globos en tu foto el día de tu cumpleaños. */
+  protected readonly festive = inject(FestiveService);
 
   /** Código con el que vuelve la API si falla conectar Google (?error=…). */
   readonly error_ = input<string>(undefined, { alias: 'error' });
@@ -50,6 +56,19 @@ export class AccountPage {
   // Foto
   protected readonly avatarBusy = signal(false);
 
+  // Cumpleaños
+  protected readonly months = MONTHS;
+  protected readonly bdayDay = signal<number | null>(null);
+  protected readonly bdayMonth = signal<number | null>(null);
+  /** Días del mes elegido (el 29 de febrero vale). */
+  protected readonly bdayDays = computed(() =>
+    Array.from({ length: this.bdayMonth() ? daysInMonth(this.bdayMonth()!) : 31 }, (_, i) => i + 1),
+  );
+  protected readonly bdayChanged = computed(() => {
+    const b = this.session.me()?.birthday;
+    return b?.day !== this.bdayDay() || b?.month !== this.bdayMonth();
+  });
+
   // Contraseña
   protected readonly current = signal('');
   protected readonly password = signal('');
@@ -68,6 +87,32 @@ export class AccountPage {
   constructor() {
     // El campo empieza con tu nombre (y se pone al día si cambia).
     effect(() => this.name.set(this.session.user()?.name ?? ''));
+    effect(() => {
+      const b = this.session.me()?.birthday;
+      this.bdayDay.set(b?.day ?? null);
+      this.bdayMonth.set(b?.month ?? null);
+    });
+    // Si el día no existe en el mes elegido (31 de abril), se quita.
+    effect(() => {
+      const day = this.bdayDay();
+      if (day && day > this.bdayDays().length) this.bdayDay.set(null);
+    });
+  }
+
+  protected async saveBirthday() {
+    const day = this.bdayDay(), month = this.bdayMonth();
+    if (!day || !month) return;
+    await this.run('Cumpleaños guardado.', async () => {
+      await firstValueFrom(this.http.put('/api/users/me/birthday', { month, day }));
+      await this.session.refresh();
+    });
+  }
+
+  protected async removeBirthday() {
+    await this.run('Cumpleaños quitado.', async () => {
+      await firstValueFrom(this.http.delete('/api/users/me/birthday'));
+      await this.session.refresh();
+    });
   }
 
   protected async saveName() {

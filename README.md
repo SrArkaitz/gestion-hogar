@@ -2,7 +2,7 @@
 
 Aplicación para gestionar el hogar: tareas, ideas, compra, recetas, gastos, calendario, inventario y mantenimiento. El diseño completo y la hoja de ruta están en [`docs/DESIGN.md`](docs/DESIGN.md).
 
-Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el calendario con cumpleaños, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA) y los avisos push. Cada casa elige qué secciones usa.
+Ya funcionan las cuentas y las casas (registro, login, varias casas por persona con administradores, invitaciones por enlace y selector de casa), el tablero de Tareas con tareas recurrentes, el calendario con cumpleaños, el módulo de Ideas, la lista de la compra, las recetas con menú semanal, los gastos y facturas, la app instalable (PWA), los avisos push y adornos en las fiestas. Cada casa elige qué secciones usa.
 
 - **Frontend:** Angular 20 (componentes standalone, signals, router con un módulo de rutas por sección)
 - **Backend:** NestJS 11 + Prisma 7 sobre SQLite
@@ -191,6 +191,8 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/push/subscriptions` | Guarda la suscripción push de este navegador (`PushSubscription.toJSON()`) |
 | DELETE | `/api/push/subscriptions` | Quita la suscripción (`{ "endpoint": "…" }`) |
 | PATCH  | `/api/users/me` | Cambia tu nombre (`{ "name" }`) |
+| PUT    | `/api/users/me/birthday` | Pone tu cumpleaños (`{ "month": 7, "day": 25 }`, sin año): ese día salen globos en tu foto. Sale en `birthday` de `/api/auth/me` y de cada miembro de la casa |
+| DELETE | `/api/users/me/birthday` | Quita tu cumpleaños |
 | PUT    | `/api/users/me/avatar` | Pone tu foto de perfil (la imagen tal cual en el cuerpo, JPG, PNG o WebP; hasta 2 MB) |
 | DELETE | `/api/users/me/avatar` | Quita tu foto de perfil |
 | PUT    | `/api/users/me/notifications` | Tipos de aviso que desactivas (`{ "off": ["comentarios", …] }`: `asignadas`, `comentarios`, `tareas`, `calendario`, `facturas`, `mantenimiento`); salen en `notifyOff` de `/api/auth/me` |

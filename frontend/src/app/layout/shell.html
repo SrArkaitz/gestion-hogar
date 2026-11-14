@@ -1,6 +1,7 @@
 <div class="shell">
   <!-- Móvil: casa activa arriba, con los ajustes de Casa y la campanita. En escritorio va en la barra lateral. -->
   <header class="mbar">
+    <app-festive />
     <app-household-switcher />
     <a class="house-btn" routerLink="/casa" routerLinkActive="active" ariaCurrentWhenActive="page" aria-label="Casa" title="Casa">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="houseIcon" /></svg>
@@ -8,7 +9,7 @@
     <app-notifications-bell />
     @if (session.user(); as u) {
       <a class="me-btn" routerLink="/cuenta" routerLinkActive="active" ariaCurrentWhenActive="page" aria-label="Tu cuenta" title="Tu cuenta">
-        <span class="avatar md" [attr.data-c]="session.household()?.color" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+        <span class="avatar md" [attr.data-c]="session.household()?.color" [class.balloons]="festive.isBirthday(session.me()?.birthday)" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
       </a>
     }
   </header>
@@ -16,6 +17,7 @@
   <nav class="nav" aria-label="Módulos">
     <div class="brand-row">
       <a class="brand" routerLink="/">Hogar</a>
+      <app-festive />
       <app-notifications-bell />
     </div>
     <app-household-switcher />
@@ -42,7 +44,7 @@
       <div class="me-row">
         <a class="me-who" routerLink="/cuenta" routerLinkActive="active" ariaCurrentWhenActive="page" title="Tu cuenta">
           @if (session.user(); as u) {
-            <span class="avatar" [attr.data-c]="session.household()?.color" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+            <span class="avatar" [attr.data-c]="session.household()?.color" [class.balloons]="festive.isBirthday(session.me()?.birthday)" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
           }
           <span class="me-name">{{ session.user()?.name }}</span>
         </a>

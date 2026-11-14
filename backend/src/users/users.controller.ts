@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Put, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import { NotificationKind, User } from '@hogar/shared';
+import { BirthdayDate, NotificationKind, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { UsersService } from './users.service';
 
@@ -23,6 +23,17 @@ export class UsersController {
   @Delete('me/avatar')
   removeAvatar(@CurrentUser() user: User): Promise<User> {
     return this.users.removeAvatar(user.id);
+  }
+
+  /** Tu cumpleaños ({ "month": 7, "day": 25 }): ese día salen globos en tu foto. */
+  @Put('me/birthday')
+  setBirthday(@CurrentUser() user: User, @Body() body: unknown): Promise<{ birthday: BirthdayDate | null }> {
+    return this.users.setBirthday(user.id, body);
+  }
+
+  @Delete('me/birthday')
+  removeBirthday(@CurrentUser() user: User): Promise<{ birthday: BirthdayDate | null }> {
+    return this.users.setBirthday(user.id, null);
   }
 
   /** Tipos de aviso desactivados ({ "off": ["comentarios", …] }). */

@@ -15,7 +15,7 @@
       <section class="panel">
         <h2>Perfil</h2>
         <div class="profile">
-          <span class="avatar lg" [attr.data-c]="session.household()?.color" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
+          <span class="avatar lg" [attr.data-c]="session.household()?.color" [class.balloons]="festive.isBirthday(session.me()?.birthday)" [appAvatar]="u.avatarUrl" aria-hidden="true">{{ initials(u.name) }}</span>
           <div class="profile-who">
             <span class="t">{{ u.name }}</span>
             <span class="n">{{ u.email }}</span>
@@ -40,6 +40,31 @@
           <button type="submit" class="btn ghost" [disabled]="!name().trim() || name().trim() === u.name">Cambiar nombre</button>
         </form>
         <p class="n">Así te ven en todas tus casas.</p>
+
+        <h3 id="bday-lbl">Tu cumpleaños</h3>
+        <form class="bday-form" aria-labelledby="bday-lbl" (ngSubmit)="saveBirthday()">
+          <label><span class="sr-only">Día</span>
+            <select name="bday-day" [(ngModel)]="bdayDay">
+              <option [ngValue]="null">Día</option>
+              @for (d of bdayDays(); track d) {
+                <option [ngValue]="d">{{ d }}</option>
+              }
+            </select>
+          </label>
+          <label><span class="sr-only">Mes</span>
+            <select name="bday-month" [(ngModel)]="bdayMonth">
+              <option [ngValue]="null">Mes</option>
+              @for (m of months; track $index) {
+                <option [ngValue]="$index + 1">{{ m }}</option>
+              }
+            </select>
+          </label>
+          <button type="submit" class="btn ghost" [disabled]="!bdayDay() || !bdayMonth() || !bdayChanged()">Guardar</button>
+          @if (session.me()?.birthday) {
+            <button type="button" class="link danger" (click)="removeBirthday()">Quitar</button>
+          }
+        </form>
+        <p class="n">Solo el día y el mes. Ese día saldrán globos en tu foto, para ti y para los de tus casas.</p>
       </section>
 
       <section class="panel">

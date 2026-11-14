@@ -59,6 +59,9 @@ model User {
   avatar       String?
   /// JSON: NotificationKind[] que ha desactivado
   notifyOff    String   @default("[]")
+  /// Cumpleaños (sin año), si lo ha puesto: los de sus casas ven globos en su foto ese día
+  birthMonth   Int?
+  birthDay     Int?
   createdAt    DateTime @default(now())
 
   memberships       HouseholdMember[]

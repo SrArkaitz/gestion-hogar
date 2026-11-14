@@ -86,8 +86,16 @@ export interface HouseholdSummary {
 }
 
 /** Respuesta de /api/auth/me: quién soy y en qué casas estoy. */
+/** Día y mes del cumpleaños de una persona (sin año). */
+export interface BirthdayDate {
+  month: number;
+  day: number;
+}
+
 export interface Me {
   user: User;
+  /** Tu cumpleaños, si lo has puesto: ese día salen globos en tu foto. */
+  birthday: BirthdayDate | null;
   households: HouseholdSummary[];
   /** Formas de entrar que tiene la cuenta. */
   account: { password: boolean; google: boolean };
@@ -123,6 +131,8 @@ export interface Member {
   color: MemberColor;
   /** Dirección de su foto de perfil, o null. */
   avatarUrl: string | null;
+  /** Su cumpleaños, si lo ha puesto (para los globos de ese día). */
+  birthday: BirthdayDate | null;
   joinedAt: string;
 }
 

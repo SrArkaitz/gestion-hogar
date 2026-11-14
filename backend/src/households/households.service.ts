@@ -16,6 +16,7 @@ import { asObject, oneOf, requiredText } from '../common/validation';
 import { PrismaService } from '../prisma/prisma.service';
 import { filesDir, STORED_RE } from '../inventory/files';
 import { avatarUrl, PHOTO_FILE_RE, photosDir } from '../recipes/photos';
+import { birthdayOf } from '../users/birthday';
 import { parseHidden } from './section.guard';
 
 @Injectable()
@@ -49,6 +50,7 @@ export class HouseholdsService {
         role: m.role as Role,
         color: m.color as MemberColor,
         avatarUrl: avatarUrl(m.user.id, m.user.avatar),
+        birthday: birthdayOf(m.user),
         joinedAt: m.joinedAt.toISOString(),
       })),
     };
