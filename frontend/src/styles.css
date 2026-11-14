@@ -708,14 +708,15 @@ form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outlin
 @keyframes festive-wiggle { 0%, 100% { transform: none; } 25% { transform: rotate(-10deg); } 50% { transform: rotate(8deg); } 75% { transform: rotate(-4deg); } }
 @media (prefers-reduced-motion: reduce) { .festive .festive-icon, .festive:hover .festive-icon { animation: none; } }
 
-/* Globos en la foto el día de su cumpleaños */
+/* Globos en la foto el día de su cumpleaños (y junto al nombre de la app: la misma imagen) */
+:root { --balloons: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 26'><path d='M5.6 11.6q1 6 4.4 13.6M14.4 10.6q-1 7-4.4 14.6M10 14.6v10.6' fill='none' stroke='%2364748b' stroke-width='.7'/><ellipse cx='5.6' cy='6.6' rx='4' ry='5' fill='%23ef4444'/><ellipse cx='14.4' cy='5.6' rx='4' ry='5' fill='%233b82f6'/><ellipse cx='10' cy='9.6' rx='4' ry='5' fill='%23facc15'/></svg>"); }
 .avatar.balloons { position: relative; overflow: visible; }
 .avatar.balloons::after { content: ""; position: absolute; right: -55%; top: -70%; width: 75%; height: 100%; pointer-events: none;
-  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 26'><path d='M5.6 11.6q1 6 4.4 13.6M14.4 10.6q-1 7-4.4 14.6M10 14.6v10.6' fill='none' stroke='%2364748b' stroke-width='.7'/><ellipse cx='5.6' cy='6.6' rx='4' ry='5' fill='%23ef4444'/><ellipse cx='14.4' cy='5.6' rx='4' ry='5' fill='%233b82f6'/><ellipse cx='10' cy='9.6' rx='4' ry='5' fill='%23facc15'/></svg>") center / contain no-repeat; animation: bday-float 3s ease-in-out infinite; }
+  background: var(--balloons) center / contain no-repeat; animation: bday-float 3s ease-in-out infinite; }
 /* En la barra del móvil no: ya salen junto al nombre de la casa */
 .mbar .avatar.balloons::after { display: none; }
 /* Los globos junto al nombre se mecen como los de la foto */
-.festive[data-h="globos"] .festive-icon { animation: festive-pop .6s ease-out both, bday-float 3s ease-in-out .6s infinite; }
+.festive[data-h="globos"] .festive-icon { background: var(--balloons) center / contain no-repeat; animation: festive-pop .6s ease-out both, bday-float 3s ease-in-out .6s infinite; }
 .avatar.lg.balloons::after { right: -30%; top: -48%; width: 52%; height: 72%; }
 @keyframes bday-float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8%) rotate(3deg); } }
 @media (prefers-reduced-motion: reduce) { .avatar.balloons::after { animation: none; } }

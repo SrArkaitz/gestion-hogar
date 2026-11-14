@@ -15,13 +15,7 @@ import { SessionService } from './session.service';
     <svg viewBox="0 0 24 24" aria-hidden="true">
       @switch (kind()) {
         @case ('globos') {
-          <!-- El mismo dibujo que los globos de la foto (styles.css, .avatar.balloons) -->
-          <g transform="translate(2.75 0) scale(.923)">
-            <path d="M5.6 11.6q1 6 4.4 13.6M14.4 10.6q-1 7-4.4 14.6M10 14.6v10.6" fill="none" stroke="#64748b" stroke-width=".7" />
-            <ellipse cx="5.6" cy="6.6" rx="4" ry="5" fill="#ef4444" />
-            <ellipse cx="14.4" cy="5.6" rx="4" ry="5" fill="#3b82f6" />
-            <ellipse cx="10" cy="9.6" rx="4" ry="5" fill="#facc15" />
-          </g>
+          <!-- Los dibuja el CSS con la misma imagen que los globos de la foto (--balloons en styles.css) -->
         }
         @case ('halloween') {
           <path d="M12 7.6V4" stroke="#64748b" stroke-width=".9" stroke-linecap="round" />
@@ -164,10 +158,10 @@ import { SessionService } from './session.service';
           <circle cx="12" cy="12" r="5.6" fill="#facc15" />
         }
         @case ('otono') {
-          <g transform="rotate(30 12 12)">
-            <path d="M12 18.6v4" stroke="#64748b" stroke-width=".9" stroke-linecap="round" />
-            <path d="M12 1.6c5.2 3.8 5.2 13.2 0 17-5.2-3.8-5.2-13.2 0-17z" fill="#a16207" />
-            <path d="M12 4.4v14M12 8.4l2.4-1.8M12 8.4 9.6 6.6M12 12l2.8-2M12 12 9.2 10M12 15.4l2.4-1.6M12 15.4l-2.4-1.6" stroke="#78350f" stroke-width=".7" stroke-linecap="round" fill="none" />
+          <g transform="rotate(-12 12 12)">
+            <path d="M12 17.2l.7 5.4" stroke="#a16207" stroke-width="1.1" stroke-linecap="round" />
+            <path d="M12 17.6 10.6 15.2l-4 1.2 1-2.4-4.2-2.4L5 11 3.8 7.4l3.2 1 .6-1.8 2.4 2.8-.6-5.6 1.6 1L12 2.2l1 2.6 1.6-1-.6 5.6 2.4-2.8.6 1.8 3.2-1L19 11l1.6.6-4.2 2.4 1 2.4-4-1.2z" fill="#a16207" />
+            <path d="M12 16.8V4.4M12 13.4 5.4 10.4M12 13.4l6.6-3M12 15.2l-3.8 0.6M12 15.2l3.8 0.6" stroke="#78350f" stroke-width=".6" stroke-linecap="round" fill="none" />
           </g>
         }
         @case ('invierno') {
@@ -241,13 +235,14 @@ import { SessionService } from './session.service';
           <image href="/fiestas/mario.webp" x="0" y="0" width="24" height="24" preserveAspectRatio="xMidYMid meet" />
         }
         @case ('anio-nuevo') {
-          <g stroke-width="1.6" stroke-linecap="round">
-            <path d="M12 8.6V3.4M12 15.4v5.2" stroke="#facc15" />
-            <path d="M8.6 12H3.4M15.4 12h5.2" stroke="#ef4444" />
-            <path d="M9.6 9.6 5.9 5.9M14.4 14.4l3.7 3.7" stroke="#3b82f6" />
-            <path d="M14.4 9.6l3.7-3.7M9.6 14.4l-3.7 3.7" stroke="#ec4899" />
-          </g>
-          <circle cx="12" cy="12" r="1.4" fill="#facc15" />
+          <path d="M5 23q1.4-7 3-12.4M18.4 23q-.4-6 -1.8-9.6M12 23q-.6-2.6-1.6-3.6" stroke="#94a3b8" stroke-width=".6" fill="none" stroke-linecap="round" />
+          <path d="M8 5.8L8 2.8M9.1 6.3L11.3 4.1M9.6 7.4L12.6 7.4M9.1 8.5L11.3 10.7M8 9L8 12M6.9 8.5L4.7 10.7M6.4 7.4L3.4 7.4M6.9 6.3L4.7 4.1" stroke="#ef4444" stroke-width="1.2" stroke-linecap="round" />
+          <g fill="#ef4444"><circle cx="8" cy="1.8" r=".55" /><circle cx="12" cy="3.4" r=".55" /><circle cx="13.6" cy="7.4" r=".55" /><circle cx="12" cy="11.4" r=".55" /><circle cx="8" cy="13" r=".55" /><circle cx="4" cy="11.4" r=".55" /><circle cx="2.4" cy="7.4" r=".55" /><circle cx="4" cy="3.4" r=".55" /></g>
+          <path d="M17.5 9.3L18.3 7.3M18.1 9.9L20.1 9.1M18.1 10.9L20.1 11.7M17.5 11.5L18.3 13.5M16.5 11.5L15.7 13.5M15.9 10.9L13.9 11.7M15.9 9.9L13.9 9.1M16.5 9.3L15.7 7.3" stroke="#3b82f6" stroke-width="1.2" stroke-linecap="round" />
+          <g fill="#3b82f6"><circle cx="18.7" cy="6.3" r=".55" /><circle cx="21.1" cy="8.7" r=".55" /><circle cx="21.1" cy="12.1" r=".55" /><circle cx="18.7" cy="14.5" r=".55" /><circle cx="15.3" cy="14.5" r=".55" /><circle cx="12.9" cy="12.1" r=".55" /><circle cx="12.9" cy="8.7" r=".55" /><circle cx="15.3" cy="6.3" r=".55" /></g>
+          <path d="M10.4 16.6L10.4 15.2M11.1 17L12.3 16.3M11.1 17.8L12.3 18.5M10.4 18.2L10.4 19.6M9.7 17.8L8.5 18.5M9.7 17L8.5 16.3" stroke="#facc15" stroke-width="1.2" stroke-linecap="round" />
+          <g fill="#facc15"><circle cx="10.4" cy="14.2" r=".55" /><circle cx="13.2" cy="15.8" r=".55" /><circle cx="13.2" cy="19" r=".55" /><circle cx="10.4" cy="20.6" r=".55" /><circle cx="7.6" cy="19" r=".55" /><circle cx="7.6" cy="15.8" r=".55" /></g>
+          <circle cx="8" cy="7.4" r=".9" fill="#ef4444" /><circle cx="17" cy="10.4" r=".7" fill="#3b82f6" /><circle cx="10.4" cy="17.4" r=".6" fill="#facc15" />
         }
       }
     </svg>
