@@ -18,12 +18,21 @@ import { SessionService } from './session.service';
           <!-- Los dibuja el CSS con la misma imagen que los globos de la foto (--balloons en styles.css) -->
         }
         @case ('halloween') {
-          <path d="M12 7.6V4" stroke="#64748b" stroke-width=".9" stroke-linecap="round" />
-          <ellipse cx="14.6" cy="4.6" rx="2.2" ry="1.1" fill="#22c55e" transform="rotate(-20 14.6 4.6)" />
-          <ellipse cx="8" cy="14.4" rx="5" ry="6.6" fill="#f97316" />
-          <ellipse cx="16" cy="14.4" rx="5" ry="6.6" fill="#f97316" />
-          <ellipse cx="12" cy="14.4" rx="4.4" ry="7" fill="#fb923c" />
-          <path d="M7.4 13.2l1.8-2.6 1.8 2.6zM13 13.2l1.8-2.6 1.8 2.6zM7.6 16.2q4.4 3.4 8.8 0l-1.6.4-.8 1.1-1-.9-1 1-1-1-1 .9-.8-1.1z" fill="#9a3412" />
+          <path d="M11.6 7.4q-.6-3 2.2-4.8" fill="none" stroke="#65a30d" stroke-width="2" stroke-linecap="round" />
+          <ellipse cx="7.4" cy="14.4" rx="5" ry="7.6" fill="#ea580c" />
+          <ellipse cx="16.6" cy="14.4" rx="5" ry="7.6" fill="#f59e0b" />
+          <ellipse cx="10.2" cy="14.4" rx="4.2" ry="8" fill="#f97316" />
+          <ellipse cx="13.8" cy="14.4" rx="4.2" ry="8" fill="#fb923c" />
+          <g fill="#3b1a0a">
+            <path d="M6.2 11.2l4.6 2.4q-.6 1.8-2.4 1.6-2.2-.2-2.2-4z" />
+            <path d="M17.8 11.2l-4.6 2.4q.6 1.8 2.4 1.6 2.2-.2 2.2-4z" />
+            <path d="M12 14.2l1.2 2.1h-2.4z" />
+            <path d="M6.2 16.8Q12 20.2 17.8 16.8 17 21.4 12 21.6 7 21.4 6.2 16.8z" />
+          </g>
+          <g fill="#f97316">
+            <rect x="8.4" y="17.7" width="1.5" height="1.3" rx=".2" /><rect x="13.6" y="18.2" width="1.5" height="1.3" rx=".2" />
+            <rect x="11" y="20.3" width="1.7" height="1.4" rx=".2" />
+          </g>
         }
         @case ('navidad') {
           <path d="M12 20v2.6" stroke="#a16207" stroke-width="2.2" stroke-linecap="round" />
