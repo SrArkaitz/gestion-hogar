@@ -236,7 +236,7 @@ export class CalendarPage {
       } catch (err) {
         this.error.set(errorMessage(err, 'No se pudo abrir el evento.'));
       }
-    } else if (item.kind === 'cumple') {
+    } else if (item.kind === 'cumple' && !item.link) {
       this.router.navigate(['/calendario/cumpleanos']);
     } else if (item.link) {
       this.router.navigateByUrl(item.link);

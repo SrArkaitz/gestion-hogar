@@ -98,12 +98,28 @@ export class CalendarService {
     }
 
     // Cumpleaños: cada año que toque el rango.
+    const years: number[] = [];
+    for (let y = Number(from.slice(0, 4)); y <= Number(to.slice(0, 4)); y++) years.push(y);
+    const written = new Set<string>();
     for (const b of await this.prisma.birthday.findMany({ where: { householdId } })) {
-      for (let y = Number(from.slice(0, 4)); y <= Number(to.slice(0, 4)); y++) {
+      for (const y of years) {
         const d = birthdayIn(b, y);
         if (!inRange(d)) continue;
         const age = ageOn(b, d);
+        written.add(d + '|' + b.name.trim().toLowerCase());
         items.push(item('cumple', d, `Cumpleaños de ${b.name}`, b.id, null, { detail: age !== null ? `Cumple ${age}` : null }));
+      }
+    }
+    // Y los de la gente de la casa que lo ha puesto en su cuenta (salvo que ya esté apuntado igual a mano).
+    const members = await this.prisma.householdMember.findMany({
+      where: { householdId, user: { birthMonth: { not: null }, birthDay: { not: null } } },
+      select: { user: { select: { id: true, name: true, birthMonth: true, birthDay: true } } },
+    });
+    for (const { user } of members) {
+      for (const y of years) {
+        const d = birthdayIn({ month: user.birthMonth!, day: user.birthDay! }, y);
+        if (!inRange(d) || written.has(d + '|' + user.name.trim().toLowerCase())) continue;
+        items.push(item('cumple', d, `Cumpleaños de ${user.name}`, user.id, '/casa', { detail: 'De la casa', people: [user.id] }));
       }
     }
 

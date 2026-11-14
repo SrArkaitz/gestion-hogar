@@ -59,7 +59,7 @@
               }
             </select>
           </label>
-          <button type="submit" class="btn ghost" [disabled]="!bdayDay() || !bdayMonth() || !bdayChanged()">Guardar</button>
+          <button type="submit" class="btn" [disabled]="!bdayDay() || !bdayMonth() || !bdayChanged()">Guardar</button>
           @if (session.me()?.birthday) {
             <button type="button" class="link danger" (click)="removeBirthday()">Quitar</button>
           }

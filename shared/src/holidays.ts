@@ -26,6 +26,15 @@ export const HOLIDAYS = [
   'verano',
   'otono',
   'invierno',
+  'inocentes',
+  'dia-del-gato',
+  'dia-del-perro',
+  'dia-del-chocolate',
+  'bisiesto',
+  'orgullo-friki',
+  'pokemon',
+  'mario',
+  'viernes-13',
 ] as const;
 export type HolidayKey = (typeof HOLIDAYS)[number];
 
@@ -59,6 +68,15 @@ const INFO: Record<HolidayKey, Omit<Holiday, 'key'>> = {
   verano: { name: 'Empieza el verano', greeting: '¡Hola, verano!' },
   otono: { name: 'Empieza el otoño', greeting: '¡Hola, otoño!' },
   invierno: { name: 'Empieza el invierno', greeting: '¡Hola, invierno!' },
+  inocentes: { name: 'Día de los Inocentes', greeting: '¡Inocente, inocente!' },
+  'dia-del-gato': { name: 'Día del Gato', greeting: '¡Feliz Día del Gato! Miau' },
+  'dia-del-perro': { name: 'Día del Perro', greeting: '¡Feliz Día del Perro! Guau' },
+  'dia-del-chocolate': { name: 'Día del Chocolate', greeting: '¡Feliz Día del Chocolate!' },
+  bisiesto: { name: '29 de febrero', greeting: '¡Un día de regalo! Solo llega cada 4 años' },
+  'orgullo-friki': { name: 'Día del Orgullo Friki', greeting: '¡Feliz Día del Orgullo Friki! Tira iniciativa' },
+  pokemon: { name: 'Día de Pokémon', greeting: '¡Hazte con todos!' },
+  mario: { name: 'Día de Mario', greeting: '¡Mamma mia! Hoy es el día MAR10' },
+  'viernes-13': { name: 'Viernes 13', greeting: '¡Viernes 13! Cuidado con los gatos negros' },
 };
 
 /**
@@ -172,10 +190,24 @@ function seasons(year: number): Season[] {
     oneDay('verano', seasonStart(year, 'verano')),
     oneDay('otono', seasonStart(year, 'otono')),
     oneDay('invierno', seasonStart(year, 'invierno')),
+    oneDay('inocentes', iso(year, 12, 28)),
+    oneDay('dia-del-gato', iso(year, 8, 8)),
+    oneDay('dia-del-perro', iso(year, 8, 26)),
+    oneDay('dia-del-chocolate', iso(year, 9, 13)),
+    oneDay('orgullo-friki', iso(year, 5, 25)),
+    oneDay('pokemon', iso(year, 2, 27)),
+    // MAR10: el 10 de marzo se escribe como «Mario»
+    oneDay('mario', iso(year, 3, 10)),
   ];
   if (cny) {
     const day = iso(year, cny[0], cny[1]);
     list.push({ key: 'anio-nuevo-chino', from: addDays(day, -1), to: addDays(day, 2), day });
+  }
+  // Solo los años bisiestos
+  if (new Date(Date.UTC(year, 1, 29)).getUTCMonth() === 1) list.push(oneDay('bisiesto', iso(year, 2, 29)));
+  // Los viernes que caen en 13 (al final: si coincide con otro día especial, gana el otro)
+  for (let m = 1; m <= 12; m++) {
+    if (new Date(Date.UTC(year, m - 1, 13)).getUTCDay() === 5) list.push(oneDay('viernes-13', iso(year, m, 13)));
   }
   return list;
 }
