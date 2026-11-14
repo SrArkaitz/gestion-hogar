@@ -15,10 +15,13 @@
 <ul class="bdays">
   @for (r of rows(); track r.b.id) {
     <li>
-      <button type="button" class="bday" [class.soon]="r.daysLeft <= soonDays" (click)="open(r.b)">
+      <button type="button" class="bday" [class.soon]="r.daysLeft <= soonDays" (click)="tap(r)">
+        @if (r.member; as m) {
+          <span class="avatar md" [attr.data-c]="m.color" [appAvatar]="m.avatarUrl" aria-hidden="true">{{ initials(m.name) }}</span>
+        }
         <span class="who">
           <span class="t">{{ r.b.name }}</span>
-          <span class="n">{{ dateText(r.b) }}@if (r.age !== null) { · cumple {{ r.age }}}</span>
+          <span class="n">{{ dateText(r.b) }}@if (r.age !== null) { · cumple {{ r.age }}}@if (r.member) { · De la casa}</span>
         </span>
         <span class="left">{{ leftText(r.daysLeft) }}</span>
       </button>

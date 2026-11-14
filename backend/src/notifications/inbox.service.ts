@@ -48,6 +48,18 @@ export class InboxService {
     if (!count && !(await this.prisma.userNotification.count({ where: { id, userId } }))) throw new NotFoundException('Ese aviso no existe');
   }
 
+  /** Quita un aviso tuyo de la campanita. */
+  async remove(userId: string, id: string): Promise<void> {
+    const { count } = await this.prisma.userNotification.deleteMany({ where: { id, userId } });
+    if (!count) throw new NotFoundException('Ese aviso no existe');
+  }
+
+  /** Quita todos tus avisos ya leídos. Devuelve cuántos. */
+  async removeRead(userId: string): Promise<number> {
+    const { count } = await this.prisma.userNotification.deleteMany({ where: { userId, readAt: { not: null } } });
+    return count;
+  }
+
   async markAllRead(userId: string): Promise<void> {
     await this.prisma.userNotification.updateMany({ where: { userId, readAt: null }, data: { readAt: new Date() } });
   }

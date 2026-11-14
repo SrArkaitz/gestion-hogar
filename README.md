@@ -200,6 +200,8 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
 | GET    | `/api/notifications` | Tus últimos avisos de la campanita (`items`) y cuántos hay sin leer (`unread`) |
 | POST   | `/api/notifications/:id/read` | Marca un aviso como leído |
+| DELETE | `/api/notifications/:id` | Quita un aviso de la campanita |
+| DELETE | `/api/notifications/read` | Quita todos los avisos ya leídos (`{ "removed": n }`) |
 | POST   | `/api/notifications/read-all` | Marca todos como leídos |
 | GET    | `/api/households/:householdId/ideas` | Ideas de la casa, de la más reciente a la más antigua |
 | POST   | `/api/households/:householdId/ideas` | Propone una idea (`title`, `description`, `category`) |

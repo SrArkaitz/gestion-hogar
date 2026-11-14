@@ -1,6 +1,10 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ageOn, Birthday, BIRTHDAY_NAME_MAX, daysInMonth, nextBirthday } from '@hogar/shared';
+import { Router } from '@angular/router';
+import { ageOn, Birthday, BIRTHDAY_NAME_MAX, daysInMonth, Member, nextBirthday } from '@hogar/shared';
+import { Avatar } from '../core/avatar';
+import { HouseholdsService } from '../core/households.service';
+import { initials } from '../tasks/people';
 import { todayIso } from '../core/dates';
 import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
@@ -13,6 +17,8 @@ const SOON_DAYS = 7;
 
 interface Row {
   b: Birthday;
+  /** Si es de alguien de la casa que lo puso en su cuenta (se cambia allí, no aquí). */
+  member: Member | null;
   next: string;
   daysLeft: number;
   age: number | null;
@@ -21,13 +27,16 @@ interface Row {
 /** Cumpleaños de la casa, del más cercano al más lejano. */
 @Component({
   selector: 'app-birthdays-page',
-  imports: [FormsModule, CalendarTabs],
+  imports: [Avatar, FormsModule, CalendarTabs],
   host: { class: 'view' },
   templateUrl: './birthdays.page.html',
 })
 export class BirthdaysPage {
   private readonly store = inject(CalendarStore);
   private readonly session = inject(SessionService);
+  private readonly households = inject(HouseholdsService);
+  private readonly router = inject(Router);
+  protected readonly initials = initials;
 
   protected readonly months = MONTHS;
   protected readonly soonDays = SOON_DAYS;
@@ -35,15 +44,21 @@ export class BirthdaysPage {
   protected readonly thisYear = new Date().getFullYear();
 
   protected readonly birthdays = signal<Birthday[]>([]);
+  /** Gente de la casa (sus cumpleaños, si los han puesto en su cuenta). */
+  protected readonly members = signal<Member[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
 
   protected readonly rows = computed<Row[]>(() => {
     const today = todayIso();
-    return this.birthdays()
-      .map((b) => {
+    const written = new Set(this.birthdays().map((b) => `${b.month}-${b.day}-${b.name.trim().toLowerCase()}`));
+    const fromMembers = this.members()
+      .filter((m) => m.birthday && !written.has(`${m.birthday.month}-${m.birthday.day}-${m.name.trim().toLowerCase()}`))
+      .map((m) => ({ b: { id: 'cuenta-' + m.id, name: m.name, month: m.birthday!.month, day: m.birthday!.day, year: null }, member: m }));
+    return [...this.birthdays().map((b) => ({ b, member: null })), ...fromMembers]
+      .map(({ b, member }) => {
         const next = nextBirthday(b, today);
-        return { b, next, daysLeft: Math.round((Date.parse(next) - Date.parse(today)) / 86_400_000), age: ageOn(b, next) };
+        return { b, member, next, daysLeft: Math.round((Date.parse(next) - Date.parse(today)) / 86_400_000), age: ageOn(b, next) };
       })
       .sort((a, b) => a.daysLeft - b.daysLeft || a.b.name.localeCompare(b.b.name, 'es'));
   });
@@ -71,6 +86,12 @@ export class BirthdaysPage {
     if (daysLeft === 0) return '¡Hoy!';
     if (daysLeft === 1) return 'Mañana';
     return `Faltan ${daysLeft} días`;
+  }
+
+  /** Tocar uno: los apuntados aquí se editan; el tuyo de la cuenta, en Tu cuenta; el de otro, en Casa. */
+  protected tap(r: Row) {
+    if (!r.member) return this.open(r.b);
+    void this.router.navigate([r.member.id === this.session.user()?.id ? '/cuenta' : '/casa']);
   }
 
   protected open(b: Birthday | null) {
@@ -120,7 +141,10 @@ export class BirthdaysPage {
 
   private async load() {
     try {
-      this.birthdays.set(await this.store.birthdays());
+      const id = this.session.household()!.id;
+      const [birthdays, household] = await Promise.all([this.store.birthdays(), this.households.get(id)]);
+      this.birthdays.set(birthdays);
+      this.members.set(household.members);
       this.error.set('');
     } catch (err) {
       this.error.set(errorMessage(err, 'No se pudieron cargar los cumpleaños.'));

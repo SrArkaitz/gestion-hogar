@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { addDays, ageOn, BILL_NOTICE_DAYS, formatEuros, IsoDate, nextBirthday } from '@hogar/shared';
+import { addDays, ageOn, BILL_NOTICE_DAYS, formatEuros, IsoDate, nextBirthday, isBirthdayOn } from '@hogar/shared';
 import { TIME_ZONE, todayIso } from '../common/dates';
 import { householdUses } from '../households/section.guard';
 import { PrismaService } from '../prisma/prisma.service';
@@ -88,7 +88,7 @@ export class RemindersService {
       select: {
         id: true,
         name: true,
-        members: { select: { userId: true } },
+        members: { select: { userId: true, user: { select: { name: true, birthMonth: true, birthDay: true } } } },
         events: { where: { date: today }, orderBy: [{ time: 'asc' }, { title: 'asc' }], include: { people: { select: { userId: true } } } },
         birthdays: true,
       },
@@ -96,17 +96,28 @@ export class RemindersService {
     let sent = 0;
     for (const h of households) {
       const birthdays: string[] = [];
+      const written = new Set<string>();
       for (const b of h.birthdays) {
         const next = nextBirthday(b, today);
         const days = Math.round((Date.parse(next) - Date.parse(today)) / 86_400_000);
         const age = ageOn(b, next);
         const turns = age !== null ? `, cumple ${age}` : '';
         // Todos se avisan el mismo día del cumpleaños, sin antelación.
-        if (days === 0) birthdays.push(`¡Hoy es el cumpleaños de ${b.name}${turns}!`);
+        if (days === 0) {
+          birthdays.push(`¡Hoy es el cumpleaños de ${b.name}${turns}!`);
+          written.add(b.name.trim().toLowerCase());
+        }
       }
+      // Los de la gente de la casa que lo ha puesto en su cuenta (salvo que ya esté apuntado igual a mano).
+      const members = h.members.filter(({ user }) =>
+        isBirthdayOn(user.birthMonth && user.birthDay ? { month: user.birthMonth, day: user.birthDay } : null, today)
+        && !written.has(user.name.trim().toLowerCase()));
       for (const { userId } of h.members) {
         const mine = h.events.filter((e) => !e.people.length || e.people.some((p) => p.userId === userId));
-        const parts = [...(mine.length ? [`Hoy: ${mine.map((e) => (e.time ? `${e.title} (${e.time})` : e.title)).join(', ')}.`] : []), ...birthdays];
+        const theirs = members.map((m) => m.userId === userId
+          ? `¡Feliz cumpleaños, ${m.user.name.split(' ')[0]}!`
+          : `¡Hoy es el cumpleaños de ${m.user.name}!`);
+        const parts = [...(mine.length ? [`Hoy: ${mine.map((e) => (e.time ? `${e.title} (${e.time})` : e.title)).join(', ')}.`] : []), ...birthdays, ...theirs];
         if (!parts.length) continue;
         sent += await this.push.send(
           [userId],

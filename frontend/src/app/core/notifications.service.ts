@@ -48,6 +48,19 @@ export class NotificationsService {
     await firstValueFrom(this.http.post(`/api/notifications/${n.id}/read`, {})).catch(() => this.refresh());
   }
 
+  /** Quita un aviso (si no estaba leído, baja el número de la campanita). */
+  async remove(n: AppNotification): Promise<void> {
+    this.items.update((list) => list.filter((x) => x.id !== n.id));
+    if (!n.read) this.unread.update((u) => Math.max(0, u - 1));
+    await firstValueFrom(this.http.delete(`/api/notifications/${n.id}`)).catch(() => this.refresh());
+  }
+
+  /** Quita todos los leídos. */
+  async removeRead(): Promise<void> {
+    this.items.update((list) => list.filter((x) => !x.read));
+    await firstValueFrom(this.http.delete('/api/notifications/read')).catch(() => this.refresh());
+  }
+
   async markAllRead(): Promise<void> {
     this.items.update((list) => list.map((x) => ({ ...x, read: true })));
     this.unread.set(0);
