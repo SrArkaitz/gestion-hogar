@@ -107,6 +107,7 @@ Una aplicación web para organizar la casa en un solo sitio: tareas, ideas, comp
 - **Comprado:** se marca con un toque y pasa, tachado, a *En el carro*. Se puede desmarcar. *Quitar comprados* los quita todos al terminar.
 - **Habituales:** cada producto añadido se guarda con su sección y su última cantidad. Los más comprados aparecen como botones para añadirlos con un toque y, al escribir, se sugieren los que coinciden (salvo los que ya están en la lista). Un producto mal escrito se puede olvidar desde las sugerencias.
 - **Sin conexión** (en el súper sin cobertura): la app abre y enseña la última lista guardada, con un aviso de que no hay conexión y de cuándo es. Lo que se tache se guarda en el móvil (aunque se cierre la app) y se envía solo al volver la conexión. Añadir, editar o quitar artículos necesita conexión. Con conexión siempre se usa lo último del servidor; lo guardado solo cuando la red no responde (o tarda más de 5 s). Al cerrar sesión se borra lo guardado.
+- **Foto opcional** de un artículo (al editarlo: «Añadir foto»), para reconocerlo en la tienda (la leche de esa marca, el envase exacto). En la lista sale un clip; al tocarlo se ve en grande. Se reduce antes de subirla y se borra al quitar el artículo o «Quitar comprados». Subirla necesita conexión.
 
 ### 3.4 Recetas y menús
 
@@ -295,3 +296,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-14 | Los avisos de la campanita se quitan deslizándolos (o con la ×), y se pueden borrar todos los leídos. |
 | 2026-11-14 | Los eventos con hora avisan una hora antes; los de todo el día y las tareas siguen a las 9:00. |
 | 2026-11-14 | Moderación de recetas públicas: moderadores por MODERATOR_EMAILS; quitar de públicas, quitar foto, borrar e impedir publicar a una casa. |
+| 2026-11-14 | Foto opcional en los artículos de la compra (clip en la lista y foto en grande). |

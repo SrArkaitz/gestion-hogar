@@ -127,6 +127,9 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | PATCH  | `/api/households/:householdId/shopping/items/:id` | Cambia nombre, cantidad, sección o `done` (en el carro) |
 | DELETE | `/api/households/:householdId/shopping/items/:id` | Quita un artículo |
 | POST   | `/api/households/:householdId/shopping/items/clear-done` | Quita todo lo que está en el carro |
+| PUT    | `/api/households/:householdId/shopping/items/:id/photo` | Pone una foto al artículo (la imagen en el cuerpo: JPG, PNG o WebP) |
+| DELETE | `/api/households/:householdId/shopping/items/:id/photo` | Le quita la foto |
+| GET    | `/api/households/:householdId/shopping/items/:id/photo` | La foto del artículo |
 | GET    | `/api/households/:householdId/shopping/products` | Productos ya comprados, de los más habituales a los menos |
 | DELETE | `/api/households/:householdId/shopping/products/:key` | Olvida un producto para que no se sugiera |
 | POST   | `/api/households/:householdId/shopping/items/bulk` | Añade varios (`{ "items": [{ "name", "quantity" }] }`); suma cantidades con lo que ya hubiera |

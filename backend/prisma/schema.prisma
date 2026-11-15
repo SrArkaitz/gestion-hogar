@@ -277,6 +277,8 @@ model ShoppingItem {
   section     String
   /// Ya está en el carro
   done        Boolean   @default(false)
+  /// Foto opcional para reconocerlo en la tienda (archivo en PHOTOS_DIR), o null
+  photo       String?
   addedById   String
   addedBy     User      @relation(fields: [addedById], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())

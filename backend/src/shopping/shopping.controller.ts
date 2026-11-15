@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { ShoppingItem, ShoppingProduct, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
@@ -40,6 +41,23 @@ export class ShoppingController {
   @HttpCode(204)
   remove(@Param('householdId') householdId: string, @Param('id') id: string): Promise<void> {
     return this.shopping.remove(householdId, id);
+  }
+
+  /** La foto llega tal cual en el cuerpo (Content-Type image/jpeg, image/png o image/webp). */
+  @Put('items/:id/photo')
+  setPhoto(@Param('householdId') householdId: string, @Param('id') id: string, @Body() body: unknown): Promise<ShoppingItem> {
+    return this.shopping.setPhoto(householdId, id, body);
+  }
+
+  @Delete('items/:id/photo')
+  removePhoto(@Param('householdId') householdId: string, @Param('id') id: string): Promise<ShoppingItem> {
+    return this.shopping.removePhoto(householdId, id);
+  }
+
+  /** La dirección lleva ?v=<archivo>, que cambia con cada foto: se puede guardar en caché para siempre. */
+  @Get('items/:id/photo')
+  async photo(@Param('householdId') householdId: string, @Param('id') id: string, @Res() res: Response): Promise<void> {
+    res.sendFile(await this.shopping.photoPath(householdId, id), { headers: { 'Cache-Control': 'private, max-age=31536000, immutable' } });
   }
 
   @Get('products')

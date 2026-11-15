@@ -37,6 +37,8 @@ export interface ShoppingItem {
   section: ShoppingSection;
   /** Ya está en el carro. */
   done: boolean;
+  /** Foto para reconocerlo en la tienda (la marca exacta…), o null. Cambia con cada foto nueva. */
+  photo: string | null;
   addedById: string;
   createdAt: string;
 }

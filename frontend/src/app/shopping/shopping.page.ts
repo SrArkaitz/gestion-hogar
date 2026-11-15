@@ -39,6 +39,8 @@ export class ShoppingPage implements OnDestroy {
   protected readonly quantity = signal('');
   protected readonly status = signal('');
   protected readonly editing = signal<ShoppingItem | null>(null);
+  /** Foto que se está viendo en grande (al tocar el clip). */
+  protected readonly viewing = signal<{ name: string; url: string } | null>(null);
   private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
   private readonly dialog = viewChild(ItemDialog);
   private readonly householdId = computed(() => this.session.household()?.id);

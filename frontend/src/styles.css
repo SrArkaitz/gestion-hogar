@@ -744,3 +744,19 @@ form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outlin
 .moderation .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
 .moderation input { font: inherit; width: 100%; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
 .mod-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* Foto de un artículo de la compra: clip en la lista, foto en grande y en el diálogo */
+.shop-item .clip { flex: none; width: 40px; height: 40px; margin-right: 4px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; }
+.shop-item .clip:hover { background: var(--bg); color: var(--accent); }
+.shop-item .clip svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.item-photo { display: flex; flex-direction: column; gap: 6px; }
+.item-photo .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.item-photo .lbl .n { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.item-photo img { max-width: 100%; max-height: 220px; object-fit: contain; align-self: flex-start; border-radius: 8px; background: var(--bg); }
+.item-photo .photo-acts { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 16px; }
+/* El enlace de la foto no es una etiqueta de campo: sin mayúsculas ni ancho completo */
+.dlg .item-photo .photo-acts label.file { display: inline-block; width: auto; margin: 0; text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 400; color: var(--accent); text-decoration: underline; }
+.photo-view { display: grid; place-items: center; padding: 16px; }
+.photo-view figure { margin: 0; max-width: min(100%, 720px); display: flex; flex-direction: column; gap: 10px; background: var(--card); border-radius: 14px; padding: 10px; box-shadow: var(--shadow); }
+.photo-view img { display: block; max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; }
+.photo-view figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; padding: 0 4px; }

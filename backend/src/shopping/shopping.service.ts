@@ -15,6 +15,9 @@ import {
 import { asObject, oneOf, optionalText, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { PHOTO_FILE_RE, PHOTO_MAX_BYTES, photoExtension, photoFileName, photosDir } from '../recipes/photos';
+import { mkdirSync, unlinkSync, writeFileSync } from 'fs';
+import { join } from 'path';
 
 type ItemRow = Prisma.ShoppingItemGetPayload<object>;
 type ProductRow = Prisma.ShoppingProductGetPayload<object>;
@@ -25,6 +28,7 @@ const toItem = (r: ItemRow): ShoppingItem => ({
   quantity: r.quantity,
   section: r.section as ShoppingSection,
   done: r.done,
+  photo: r.photo,
   addedById: r.addedById,
   createdAt: r.createdAt.toISOString(),
 });
@@ -159,14 +163,44 @@ export class ShoppingService {
   }
 
   async remove(householdId: string, id: string): Promise<void> {
-    await this.find(householdId, id);
+    const row = await this.find(householdId, id);
     await this.prisma.shoppingItem.delete({ where: { id } });
+    deletePhoto(row.photo);
   }
 
-  /** Quita de la lista todo lo que ya está en el carro. @returns cuántos ha quitado. */
+  /** Quita de la lista todo lo que ya está en el carro (con sus fotos). @returns cuántos ha quitado. */
   async clearDone(householdId: string): Promise<number> {
+    const withPhoto = await this.prisma.shoppingItem.findMany({ where: { householdId, done: true, photo: { not: null } }, select: { photo: true } });
     const { count } = await this.prisma.shoppingItem.deleteMany({ where: { householdId, done: true } });
+    for (const { photo } of withPhoto) deletePhoto(photo);
     return count;
+  }
+
+  /** Pone (o cambia) la foto del artículo; la anterior se borra. */
+  async setPhoto(householdId: string, id: string, data: unknown): Promise<ShoppingItem> {
+    const row = await this.find(householdId, id);
+    if (!Buffer.isBuffer(data) || !data.length) throw new BadRequestException('Falta la foto');
+    if (data.length > PHOTO_MAX_BYTES) throw new BadRequestException('La foto es demasiado grande');
+    const file = photoFileName(id, photoExtension(data));
+    mkdirSync(photosDir(), { recursive: true });
+    writeFileSync(join(photosDir(), file), data);
+    const updated = await this.prisma.shoppingItem.update({ where: { id }, data: { photo: file } });
+    deletePhoto(row.photo);
+    return toItem(updated);
+  }
+
+  async removePhoto(householdId: string, id: string): Promise<ShoppingItem> {
+    const row = await this.find(householdId, id);
+    const updated = await this.prisma.shoppingItem.update({ where: { id }, data: { photo: null } });
+    deletePhoto(row.photo);
+    return toItem(updated);
+  }
+
+  /** Ruta del archivo de la foto, o 404 si no tiene. */
+  async photoPath(householdId: string, id: string): Promise<string> {
+    const row = await this.find(householdId, id);
+    if (!row.photo || !PHOTO_FILE_RE.test(row.photo)) throw new NotFoundException('Ese artículo no tiene foto');
+    return join(photosDir(), row.photo);
   }
 
   /** Productos ya comprados en la casa, de los más habituales a los menos. */
@@ -227,5 +261,15 @@ export class ShoppingService {
     const row = await this.prisma.shoppingItem.findFirst({ where: { id, householdId } });
     if (!row) throw new NotFoundException('Ese artículo ya no está en la lista');
     return row;
+  }
+}
+
+/** Borra el archivo de una foto (solo nombres generados por la app; si ya no está, nada). */
+function deletePhoto(file: string | null) {
+  if (!file || !PHOTO_FILE_RE.test(file)) return;
+  try {
+    unlinkSync(join(photosDir(), file));
+  } catch {
+    // Ya no estaba.
   }
 }

@@ -151,6 +151,23 @@ export class ShoppingStore {
     this.offline.set(time || this.offline() || '');
   }
 
+  /** Dirección de la foto; lleva el nombre del archivo para que el navegador la guarde sin miedo. */
+  photoUrl(item: ShoppingItem): string | null {
+    return item.photo ? `${this.api}/items/${item.id}/photo?v=${item.photo}` : null;
+  }
+
+  async setPhoto(id: string, photo: Blob): Promise<ShoppingItem> {
+    const item = await firstValueFrom(this.http.put<ShoppingItem>(`${this.api}/items/${id}/photo`, photo, { headers: { 'Content-Type': photo.type } }));
+    this.items.update((list) => list.map((i) => (i.id === id ? item : i)));
+    return item;
+  }
+
+  async removePhoto(id: string): Promise<ShoppingItem> {
+    const item = await firstValueFrom(this.http.delete<ShoppingItem>(`${this.api}/items/${id}/photo`));
+    this.items.update((list) => list.map((i) => (i.id === id ? item : i)));
+    return item;
+  }
+
   async remove(id: string): Promise<void> {
     await this.mutate(() => firstValueFrom(this.http.delete(`${this.api}/items/${id}`)));
     this.items.update((list) => list.filter((i) => i.id !== id));

@@ -99,22 +99,6 @@
         }
       </section>
 
-      @if (session.me()?.moderator) {
-        <section class="panel">
-          <h2>Moderación</h2>
-          <p class="n">Eres moderador: en las recetas públicas de otras casas tienes el panel de moderación.</p>
-          <h3>Casas que no pueden publicar</h3>
-          @for (h of blocked(); track h.id) {
-            <div class="google-row">
-              <span><span class="t">{{ h.name }}</span> <span class="n">desde el {{ h.blockedAt.slice(8, 10) }}/{{ h.blockedAt.slice(5, 7) }}/{{ h.blockedAt.slice(0, 4) }}</span></span>
-              <button type="button" class="link" (click)="unblock(h)">Permitir publicar</button>
-            </div>
-          } @empty {
-            <p class="n">Ninguna.</p>
-          }
-        </section>
-      }
-
       <section class="panel">
         <h2>Sesión</h2>
         @if (googleError()) {
@@ -159,6 +143,25 @@
       </details>
 
       <section appDevicePanel></section>
+
+      @if (session.me()?.moderator) {
+        <details class="panel fold" id="moderacion">
+          <summary>
+            <h2>Moderación</h2>
+            <span class="n">{{ blocked().length ? blocked().length + (blocked().length === 1 ? ' casa sin publicar' : ' casas sin publicar') : 'Eres moderador' }}</span>
+          </summary>
+          <p class="n">En las recetas públicas de otras casas tienes el panel de moderación.</p>
+          <h3>Casas que no pueden publicar</h3>
+          @for (h of blocked(); track h.id) {
+            <div class="google-row">
+              <span><span class="t">{{ h.name }}</span><span class="n"> · desde el {{ h.blockedAt.slice(8, 10) }}/{{ h.blockedAt.slice(5, 7) }}/{{ h.blockedAt.slice(0, 4) }}</span></span>
+              <button type="button" class="link" (click)="unblock(h)">Permitir publicar</button>
+            </div>
+          } @empty {
+            <p class="n">Ninguna.</p>
+          }
+        </details>
+      }
     </div>
   </div>
 }
