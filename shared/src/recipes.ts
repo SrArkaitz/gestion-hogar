@@ -33,6 +33,17 @@ export const INGREDIENT_TEXT_MAX = 40;
 export const STEPS_MAX = 50;
 export const STEP_MAX = 1000;
 export const RECIPE_NOTES_MAX = 2000;
+export const RECIPE_SOURCE_MAX = 500;
+/** Resultados como mucho de una búsqueda de recetas. */
+export const RECIPE_SEARCH_MAX = 60;
+
+/**
+ * Clave del nombre de una receta: no puede haber dos con la misma en toda la app
+ * ("Lentejas", "lentejas " y "Léntejas" son la misma).
+ */
+export function recipeNameKey(name: string): string {
+  return productKey(name);
+}
 
 /**
  * Ingrediente: cantidad con unidad ("200 g") o texto libre ("al gusto", "un chorrito").
@@ -60,11 +71,15 @@ export interface Recipe {
   photo: string | null;
   /** Solo la ve su casa. Las demás son públicas: las ven todas las casas, sin poder cambiarlas. */
   private: boolean;
-  /** Es de la casa activa (si no, es pública de otra casa y solo se puede ver o copiar). */
+  /** Es de la casa activa (si no, es pública de otra casa: se puede guardar y usar, pero no cambiar). */
   mine: boolean;
+  /** Está en «Mis recetas» de la casa activa. */
+  saved: boolean;
+  /** Página de la que se importó, o null. */
+  source: string | null;
   /** Quién la apuntó, en las de otras casas. */
   author: string | null;
-  /** Favorita de la casa activa (la ven así todos sus miembros). */
+  /** Favorita de la casa activa (la ven así todos sus miembros). Las favoritas siempre están guardadas. */
   favorite: boolean;
   /** Quién la marcó como favorita. */
   favoriteBy: string | null;
@@ -83,6 +98,15 @@ export interface RecipeInput {
   steps: string[];
   notes?: string;
   private?: boolean;
+  /** Página de la que se importó. */
+  source?: string | null;
+}
+
+/** Lo que se ha sacado de una página de recetas, para revisarlo antes de guardarlo. */
+export interface RecipeDraft extends RecipeInput {
+  source: string;
+  /** La foto de la página como data URL (se reduce en el navegador antes de subirla), o null. */
+  photo: string | null;
 }
 
 /** Largo máximo de un plato del menú escrito a mano (sin receta). */

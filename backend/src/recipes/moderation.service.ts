@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { BlockedHousehold, MODERATION_REASON_MAX, ModerationRecipeInfo } from '@hogar/shared';
+import { BlockedHousehold, MODERATION_REASON_MAX, ModerationRecipeInfo, recipeNameKey } from '@hogar/shared';
 import { asObject, requiredText } from '../common/validation';
 import { PushService } from '../notifications/push.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { RecipesService } from './recipes.service';
+import { recipeName, RecipesService } from './recipes.service';
 
 /**
  * Lo que puede hacer un moderador con las recetas públicas de cualquier casa. Cada acción avisa a
@@ -28,9 +28,25 @@ export class ModerationService {
     const reason = this.reason(body);
     const r = await this.publicRecipe(id);
     await this.prisma.recipe.update({ where: { id }, data: { private: true } });
+    await this.recipes.detachFromOthers(r);
     await this.notify(r.householdId, {
       title: `Receta quitada de las públicas · ${r.household.name}`,
       body: `«${r.name}» ya no es pública: ${reason}. Sigue en vuestro recetario, solo para vuestra casa.`,
+      url: `/recetas/${id}`,
+    });
+  }
+
+  /** Le cambia el nombre (tiene que seguir siendo único). */
+  async rename(id: string, body: unknown): Promise<void> {
+    const reason = this.reason(body);
+    const name = recipeName(asObject(body)['name']);
+    const r = await this.publicRecipe(id);
+    if (name === r.name) throw new BadRequestException('Es el mismo nombre');
+    await this.recipes.checkName(name, id);
+    await this.prisma.recipe.update({ where: { id }, data: { name, nameKey: recipeNameKey(name) } });
+    await this.notify(r.householdId, {
+      title: `Receta renombrada · ${r.household.name}`,
+      body: `«${r.name}» ahora se llama «${name}»: ${reason}.`,
       url: `/recetas/${id}`,
     });
   }
@@ -53,6 +69,7 @@ export class ModerationService {
   async remove(id: string, body: unknown): Promise<void> {
     const reason = this.reason(body);
     const r = await this.publicRecipe(id);
+    await this.recipes.detachFromOthers(r);
     await this.prisma.recipe.delete({ where: { id } });
     this.recipes.deleteFile(r.photo);
     await this.notify(r.householdId, {
@@ -67,6 +84,8 @@ export class ModerationService {
     const reason = this.reason(body);
     const h = await this.prisma.household.findUnique({ where: { id: householdId } });
     if (!h) throw new NotFoundException('Esa casa no existe');
+    const shared = await this.prisma.recipe.findMany({ where: { householdId, private: false }, select: { id: true, householdId: true, name: true } });
+    for (const r of shared) await this.recipes.detachFromOthers(r);
     await this.prisma.$transaction([
       this.prisma.household.update({ where: { id: householdId }, data: { publishBlockedAt: h.publishBlockedAt ?? new Date() } }),
       this.prisma.recipe.updateMany({ where: { householdId, private: false }, data: { private: true } }),

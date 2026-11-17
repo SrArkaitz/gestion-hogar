@@ -37,8 +37,8 @@
   <div class="status" role="status">Cargando el menú…</div>
 }
 
-@if (!store.loading() && !store.own().length) {
-  <p class="empty">Puedes escribir los platos a mano o, para sacar sus ingredientes, <a routerLink="/recetas/nueva">apuntar alguna receta</a> o guardar en vuestro recetario una de otra casa.</p>
+@if (!store.loading() && !store.recipes().length) {
+  <p class="empty">Puedes escribir los platos a mano o, para sacar sus ingredientes, <a routerLink="/recetas/nueva">apuntar alguna receta</a> o <a routerLink="/recetas/buscar">buscar una y guardarla</a>.</p>
 }
 
 <div class="week">

@@ -4,6 +4,9 @@ export const MODERATION_REASON_MAX = 200;
 /** Motivos rápidos (también se puede escribir otro). */
 export const MODERATION_REASONS = ['Contenido inapropiado', 'Foto inapropiada', 'Spam o publicidad', 'No es una receta'] as const;
 
+/** Motivos rápidos al cambiar el nombre de una receta. */
+export const RENAME_REASONS = ['El nombre no describe el plato', 'Nombre inapropiado', 'Nombre demasiado genérico'] as const;
+
 /** Lo que ve un moderador de una receta pública de otra casa. */
 export interface ModerationRecipeInfo {
   householdId: string;
@@ -22,4 +25,9 @@ export interface BlockedHousehold {
 /** Cuerpo de las acciones de moderación. */
 export interface ModerationInput {
   reason: string;
+}
+
+/** Cambiar el nombre de una receta pública. */
+export interface ModerationRenameInput extends ModerationInput {
+  name: string;
 }

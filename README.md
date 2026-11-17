@@ -133,12 +133,15 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | GET    | `/api/households/:householdId/shopping/products` | Productos ya comprados, de los más habituales a los menos |
 | DELETE | `/api/households/:householdId/shopping/products/:key` | Olvida un producto para que no se sugiera |
 | POST   | `/api/households/:householdId/shopping/items/bulk` | Añade varios (`{ "items": [{ "name", "quantity" }] }`); suma cantidades con lo que ya hubiera |
-| GET    | `/api/households/:householdId/recipes` | Recetario de la casa y recetas públicas de otras casas (`mine`, `author`, `favorite`, `favoriteBy`) |
-| GET    | `/api/households/:householdId/recipes/:id` | Una receta |
-| POST   | `/api/households/:householdId/recipes` | Crea una receta (`private: true` para que solo la vea la casa) |
-| PUT    | `/api/households/:householdId/recipes/:id/favorite` | La marca como favorita de la casa (también una pública de otra casa) |
+| GET    | `/api/households/:householdId/recipes` | Mis recetas: las guardadas de la casa (`mine`, `saved`, `author`, `favorite`, `favoriteBy`, `source`) |
+| GET    | `/api/households/:householdId/recipes/search` | Buscador (`?q=`, `kind`, `duration`): las de la casa y las públicas de otras, hasta 60 |
+| GET    | `/api/households/:householdId/recipes/:id` | Una receta (de la casa o pública de otra) |
+| POST   | `/api/households/:householdId/recipes` | Crea una receta y la guarda en Mis recetas (`private: true` para que solo la vea la casa; `source`, la web de origen). El nombre es único en toda la app (409 si ya existe) |
+| POST   | `/api/households/:householdId/recipes/import` | Lee la receta de una web (`{ "url" }`) y la devuelve para revisarla, con la foto como data URL; no guarda nada |
+| PUT    | `/api/households/:householdId/recipes/:id/saved` | La guarda en Mis recetas |
+| DELETE | `/api/households/:householdId/recipes/:id/saved` | La quita de Mis recetas (y de favoritas) sin borrarla |
+| PUT    | `/api/households/:householdId/recipes/:id/favorite` | La marca como favorita de la casa (y la guarda) |
 | DELETE | `/api/households/:householdId/recipes/:id/favorite` | La quita de favoritas de la casa |
-| POST   | `/api/households/:householdId/recipes/:id/copy` | Copia a la casa una receta pública de otra (la copia es privada) |
 | PATCH  | `/api/households/:householdId/recipes/:id` | Edita (solo las de la casa); ingredientes y pasos se sustituyen enteros |
 | DELETE | `/api/households/:householdId/recipes/:id` | Borra la receta, su foto y sus platos del menú |
 | PUT    | `/api/households/:householdId/recipes/:id/photo` | Sube la foto: el cuerpo es la imagen (`image/jpeg`, `image/png` o `image/webp`, hasta 8 MB) |
@@ -203,6 +206,7 @@ Todas las rutas piden sesión salvo las marcadas como públicas. La sesión va e
 | POST   | `/api/push/test` | Manda un aviso de prueba a todos tus dispositivos |
 | GET    | `/api/moderation/recipes/:id` | De qué casa es una receta pública y si esa casa puede publicar (solo moderadores: `MODERATOR_EMAILS`; a los demás, 404) |
 | POST   | `/api/moderation/recipes/:id/unpublish` | La pasa a privada de su casa (`{ "reason" }`, se le avisa) |
+| POST   | `/api/moderation/recipes/:id/rename` | Le cambia el nombre (`{ "name", "reason" }`; tiene que estar libre) |
 | POST   | `/api/moderation/recipes/:id/remove-photo` | Le quita la foto (`{ "reason" }`) |
 | POST   | `/api/moderation/recipes/:id/delete` | La borra (`{ "reason" }`) |
 | GET    | `/api/moderation/blocked` | Casas que no pueden publicar |

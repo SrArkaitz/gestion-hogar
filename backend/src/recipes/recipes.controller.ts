@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { MenuEntry, MenuSettings, Recipe, User } from '@hogar/shared';
+import { MenuEntry, MenuSettings, Recipe, RecipeDraft, User } from '@hogar/shared';
 import type { Response } from 'express';
 import { CurrentUser } from '../common/request';
 import { HouseholdGuard } from '../households/household.guard';
@@ -13,9 +13,23 @@ import { RecipesService } from './recipes.service';
 export class RecipesController {
   constructor(private readonly recipes: RecipesService) {}
 
+  /** «Mis recetas»: las guardadas de la casa. */
   @Get()
   list(@Param('householdId') householdId: string): Promise<Recipe[]> {
     return this.recipes.list(householdId);
+  }
+
+  /** Buscador: ?q=texto&kind=&duration= entre todas las que ve la casa. */
+  @Get('search')
+  search(@Param('householdId') householdId: string, @Query() query: Record<string, unknown>): Promise<Recipe[]> {
+    return this.recipes.search(householdId, query);
+  }
+
+  /** Lee una página de recetas ({ url }) y devuelve la receta para revisarla (no guarda nada). */
+  @Post('import')
+  @HttpCode(200)
+  import(@Body() body: unknown): Promise<RecipeDraft> {
+    return this.recipes.importFrom(body);
   }
 
   @Get(':id')
@@ -39,10 +53,16 @@ export class RecipesController {
     return this.recipes.setFavorite(householdId, user.id, id, false);
   }
 
-  /** Copia a esta casa una receta pública de otra. */
-  @Post(':id/copy')
-  copy(@Param('householdId') householdId: string, @CurrentUser() user: User, @Param('id') id: string): Promise<Recipe> {
-    return this.recipes.copy(householdId, user.id, id);
+  /** La guarda en «Mis recetas». */
+  @Put(':id/saved')
+  save(@Param('householdId') householdId: string, @CurrentUser() user: User, @Param('id') id: string): Promise<Recipe> {
+    return this.recipes.save(householdId, user.id, id);
+  }
+
+  /** La quita de «Mis recetas» (no la borra). */
+  @Delete(':id/saved')
+  unsave(@Param('householdId') householdId: string, @Param('id') id: string): Promise<Recipe> {
+    return this.recipes.unsave(householdId, id);
   }
 
   @Patch(':id')

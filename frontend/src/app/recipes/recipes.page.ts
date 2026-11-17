@@ -13,13 +13,14 @@ import {
 } from '@hogar/shared';
 import { errorMessage } from '../core/errors';
 import { SessionService } from '../core/session.service';
+import { ImportDialog } from './import-dialog';
 import { RecipesTabs } from './recipes-tabs';
 import { RecipesStore } from './recipes.store';
 
-/** Recetario: buscar y filtrar por tipo de plato y duración. */
+/** Mis recetas: las guardadas de la casa, con las favoritas primero; se filtran por tipo y duración. */
 @Component({
   selector: 'app-recipes-page',
-  imports: [FormsModule, RouterLink, RecipesTabs],
+  imports: [FormsModule, ImportDialog, RouterLink, RecipesTabs],
   host: { class: 'view' },
   templateUrl: './recipes.page.html',
 })
@@ -33,9 +34,10 @@ export class RecipesPage {
   protected readonly durationLabels = RECIPE_DURATION_LABELS;
 
   protected readonly search = signal('');
+  protected readonly importing = signal(false);
   protected readonly kind = signal<RecipeKind | ''>('');
   protected readonly duration = signal<RecipeDuration | ''>('');
-  /** Cuáles: todas, las favoritas de la casa, las que apuntaste tú, las de la casa o las públicas de otras. */
+  /** Cuáles: todas, las favoritas de la casa, las que apuntaste tú, las de la casa o las guardadas de otras. */
   protected readonly origin = signal<'' | 'fav' | 'me' | 'mine' | 'shared'>('');
   protected readonly hasShared = computed(() => this.store.recipes().some((r) => !r.mine));
 

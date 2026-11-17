@@ -1,0 +1,78 @@
+<header class="top">
+  <div>
+    <h1>Buscar recetas</h1>
+    <p class="sub">Entre las vuestras y las que comparten otras casas. Guarda las que te gusten y saldrán en Mis recetas.</p>
+  </div>
+  <button type="button" class="btn ghost" (click)="importing.set(true)">Importar de una web</button>
+</header>
+
+<app-recipes-tabs />
+
+<div class="filters" role="group" aria-label="Buscar">
+  <label class="search">
+    <span class="sr-only">Buscar</span>
+    <input type="search" name="q" placeholder="Buscar plato o ingrediente" [(ngModel)]="query" />
+  </label>
+  <div class="seg" role="group" aria-label="Tipo de plato">
+    <button type="button" [attr.aria-pressed]="kind() === ''" (click)="kind.set('')">Todos</button>
+    @for (k of kinds; track k) {
+      <button type="button" [attr.aria-pressed]="kind() === k" (click)="kind.set(k)">{{ kindLabels[k] }}</button>
+    }
+  </div>
+  <div class="seg" role="group" aria-label="Duración">
+    <button type="button" [attr.aria-pressed]="duration() === ''" (click)="duration.set('')">Cualquier duración</button>
+    @for (d of durations; track d) {
+      <button type="button" [attr.aria-pressed]="duration() === d" (click)="duration.set(d)">{{ durationLabels[d] }}</button>
+    }
+  </div>
+</div>
+
+@if (error()) {
+  <div class="status err" role="status">{{ error() }}</div>
+} @else if (searching() && !results().length) {
+  <div class="status" role="status">Buscando…</div>
+}
+
+@if (!error() && results().length) {
+  <h2 class="results-h">{{ searched().trim() ? 'Resultados' : 'Las últimas recetas' }}</h2>
+}
+<div class="recipes" [attr.aria-busy]="searching()">
+  @for (r of results(); track r.id) {
+    <div class="recipe-card-wrap">
+      <a class="recipe-card" [routerLink]="['/recetas', r.id]">
+        @if (store.photoUrl(r); as url) {
+          <img [src]="url" alt="" loading="lazy" />
+        } @else {
+          <span class="no-photo" aria-hidden="true">{{ r.name.charAt(0) }}</span>
+        }
+        <span class="body">
+          <span class="t">{{ r.name }}</span>
+          <span class="meta">
+            <span class="tag">{{ kindLabels[r.kind] }}</span>
+            <span class="dur" [attr.data-d]="r.duration">{{ durationLabels[r.duration] }}@if (r.minutes) { · {{ r.minutes }} min}</span>
+          </span>
+          <span class="origin">{{ r.mine ? 'De esta casa' : 'De ' + r.author }}</span>
+        </span>
+      </a>
+      @if (r.saved) {
+        <span class="save-chip done">@if (r.favorite) {★ }Guardada</span>
+      } @else {
+        <button type="button" class="save-chip" [attr.aria-label]="'Guardar en Mis recetas: ' + r.name" (click)="save(r)">+ Guardar</button>
+      }
+    </div>
+  } @empty {
+    @if (!searching() && !error()) {
+      <p class="empty">
+        @if (searched().trim() || kind() || duration()) {
+          Ninguna receta con eso. Puedes <button type="button" class="link" (click)="importing.set(true)">importarla de una web</button> o <a routerLink="/recetas/nueva">apuntarla</a>.
+        } @else {
+          Aún no hay recetas en la app. <a routerLink="/recetas/nueva">Apunta la primera</a> o <button type="button" class="link" (click)="importing.set(true)">impórtala de una web</button>.
+        }
+      </p>
+    }
+  }
+</div>
+
+@if (importing()) {
+  <app-import-dialog (close)="importing.set(false)" />
+}

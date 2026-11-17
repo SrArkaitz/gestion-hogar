@@ -115,8 +115,13 @@ self.addEventListener('push', (event) => {
   } catch {
     data = { body: event.data ? event.data.text() : '' };
   }
+  // Número en el icono de la app (iPhone con la app en la pantalla de inicio y ordenador).
+  // En Android no existe: el móvil pone su punto al haber avisos.
+  const badge = typeof data.badge === 'number' && self.navigator.setAppBadge
+    ? (data.badge > 0 ? self.navigator.setAppBadge(data.badge) : self.navigator.clearAppBadge()).catch(() => undefined)
+    : Promise.resolve();
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Hogar', {
+    badge.then(() => self.registration.showNotification(data.title || 'Hogar', {
       body: data.body || '',
       tag: data.tag,
       // Con la misma etiqueta sustituye al anterior, pero vuelve a sonar.
@@ -125,7 +130,7 @@ self.addEventListener('push', (event) => {
       badge: '/icons/badge-96.png',
       lang: 'es',
       data: { url: data.url || '/' },
-    }),
+    })),
   );
 });
 

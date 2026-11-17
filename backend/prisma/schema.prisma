@@ -41,6 +41,7 @@ model Household {
   bills          Bill[]
   events         CalendarEvent[]
   favorites      RecipeFavorite[]
+  recipeSaves    RecipeSave[]
   comments       Comment[]
   birthdays      Birthday[]
   inventory      InventoryItem[]
@@ -83,6 +84,7 @@ model User {
   settlementsGot    Settlement[]            @relation("SettlementTo")
   eventsJoined      CalendarEventPerson[]
   favoritesMarked   RecipeFavorite[]
+  recipesSaved      RecipeSave[]
   notifications     UserNotification[]
   comments          Comment[]
 }
@@ -309,6 +311,10 @@ model Recipe {
   householdId String
   household   Household        @relation(fields: [householdId], references: [id], onDelete: Cascade)
   name        String
+  /// Nombre para comparar (minúsculas, sin tildes): no puede haber dos recetas con el mismo nombre en toda la app
+  nameKey     String?          @unique
+  /// Página de la que se importó, o null
+  source      String?
   /// primero | segundo | unico | postre
   kind        String
   /// rapido | medio | largo
@@ -328,6 +334,8 @@ model Recipe {
   menu        MenuEntry[]
   /// Casas que la tienen en favoritas (puede ser la suya u otras, si es pública)
   favorites   RecipeFavorite[]
+  /// Casas que la tienen en "Mis recetas" (la suya al crearla y las que la guardan)
+  saves       RecipeSave[]
   createdById String
   createdBy   User             @relation(fields: [createdById], references: [id])
   createdAt   DateTime         @default(now())
@@ -573,6 +581,22 @@ model RecipeFavorite {
   /// Quién la marcó
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@id([householdId, recipeId])
+  @@index([recipeId])
+}
+
+/// Receta guardada en "Mis recetas" de una casa (la propia o una pública de otra). Las favoritas
+/// (RecipeFavorite) son siempre guardadas.
+model RecipeSave {
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  recipeId    String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  /// Quién la guardó
+  savedById   String
+  savedBy     User      @relation(fields: [savedById], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
 
   @@id([householdId, recipeId])

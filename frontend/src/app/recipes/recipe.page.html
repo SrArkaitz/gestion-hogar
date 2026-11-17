@@ -17,19 +17,24 @@
         } @else if (r.private) {
           <p class="origin">Privada: solo la ve esta casa.</p>
         }
+        @if (sourceHost(); as host) {
+          <p class="origin">Receta de <a [href]="r.source" target="_blank" rel="noopener noreferrer">{{ host }}</a>.</p>
+        }
         @if (r.favorite) {
           <p class="origin">★ Favorita de la casa@if (r.favoriteBy) { (la marcó {{ r.favoriteBy }})}.</p>
         }
       </div>
       <div class="tools">
-        <button type="button" class="btn ghost fav-btn" [class.on]="r.favorite" [attr.aria-pressed]="r.favorite" (click)="toggleFavorite()">
-          {{ r.favorite ? '★ Favorita' : '☆ Favorita' }}
-        </button>
-        @if (r.mine) {
-          <button type="button" class="btn ghost" (click)="menuOpen.set(true)">Al menú</button>
-          <a class="btn ghost" [routerLink]="['/recetas', r.id, 'editar']">Editar</a>
+        @if (r.saved) {
+          <button type="button" class="btn ghost fav-btn" [class.on]="r.favorite" [attr.aria-pressed]="r.favorite" (click)="toggleFavorite()">
+            {{ r.favorite ? '★ Favorita' : '☆ Favorita' }}
+          </button>
         } @else {
-          <button type="button" class="btn" [disabled]="copying()" (click)="copy()">{{ copying() ? 'Guardando…' : 'Guardar en mi recetario' }}</button>
+          <button type="button" class="btn" [disabled]="saving()" (click)="setSaved(true)">{{ saving() ? 'Guardando…' : 'Guardar en Mis recetas' }}</button>
+        }
+        <button type="button" class="btn ghost" (click)="menuOpen.set(true)">Al menú</button>
+        @if (r.mine) {
+          <a class="btn ghost" [routerLink]="['/recetas', r.id, 'editar']">Editar</a>
         }
       </div>
     </header>
@@ -40,6 +45,11 @@
         @if (notice().includes('compra')) { <a routerLink="/compra">Ver la lista</a> } @else if (notice().includes('menú')) { <a routerLink="/recetas/menu">Ver el menú</a> }
         <button type="button" class="link" aria-label="Cerrar aviso" (click)="notice.set('')">×</button>
       </div>
+    }
+
+    @if (r.saved) {
+      <p class="unsave"><button type="button" class="link" [disabled]="saving()" (click)="setSaved(false)">Quitar de Mis recetas</button>
+        <span class="n">(no se borra: la puedes volver a encontrar en Buscar)</span></p>
     }
 
     @if (!r.mine && moderator()) {
@@ -91,7 +101,7 @@
       </section>
     </div>
   </article>
-} @else if (store.loading()) {
+} @else if (store.loading() || fetching()) {
   <div class="status" role="status">Cargando receta…</div>
 } @else {
   <p class="empty">Esta receta no existe o se ha borrado.</p>

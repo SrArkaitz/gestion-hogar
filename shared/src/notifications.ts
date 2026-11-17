@@ -61,4 +61,6 @@ export interface PushPayload {
   url: string;
   /** Avisos con la misma etiqueta se sustituyen en vez de acumularse. */
   tag?: string;
+  /** Avisos sin leer de quien lo recibe: el número del icono de la app (iPhone y ordenador). */
+  badge?: number;
 }

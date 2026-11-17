@@ -3,6 +3,7 @@ import { isIsoDate, Meal, MEALS, MENU_TITLE_MAX, MenuEntry, MenuSettings, RECIPE
 import { asObject, oneOf, requiredText } from '../common/validation';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { visibleFrom } from './recipes.service';
 
 type Row = Prisma.MenuEntryGetPayload<object>;
 
@@ -34,7 +35,7 @@ export class MenuService {
     return rows.map(toEntry);
   }
 
-  /** Con recipeId, un plato del recetario; sin él, uno escrito a mano (title). */
+  /** Con recipeId, una receta que vea la casa (suya o pública de otra); sin él, un plato escrito a mano (title). */
   async create(householdId: string, body: unknown): Promise<MenuEntry> {
     const b = asObject(body);
     if (b['recipeId'] === undefined || b['recipeId'] === null) {
@@ -51,8 +52,8 @@ export class MenuService {
     }
     const recipeId = b['recipeId'];
     const recipe =
-      typeof recipeId === 'string' && (await this.prisma.recipe.findFirst({ where: { id: recipeId, householdId } }));
-    if (!recipe) throw new BadRequestException('Esa receta no es de esta casa');
+      typeof recipeId === 'string' && (await this.prisma.recipe.findFirst({ where: { id: recipeId, ...visibleFrom(householdId) } }));
+    if (!recipe) throw new BadRequestException('Esa receta no existe');
     const row = await this.prisma.menuEntry.create({
       data: {
         householdId,

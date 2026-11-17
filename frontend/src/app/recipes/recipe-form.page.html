@@ -4,6 +4,10 @@
   <h1>{{ id() ? 'Editar receta' : 'Nueva receta' }}</h1>
 </header>
 
+@if (imported()) {
+  <div class="notice" role="status">Importada de la web. Revisa sobre todo los ingredientes (cantidades y unidades) antes de guardarla.</div>
+}
+
 @if (id() && !recipe()) {
   <div class="status" role="status">{{ store.loading() ? 'Cargando receta…' : 'Esta receta no existe o se ha borrado.' }}</div>
 } @else {
@@ -115,7 +119,7 @@
           <input type="checkbox" name="private" [(ngModel)]="isPrivate" />
           <span>
             <span class="t">Privada</span>
-            <span class="n">Solo la ve esta casa. Si no, la pueden ver y copiar las demás casas de la app (sin poder cambiarla).</span>
+            <span class="n">Solo la ve esta casa. Si no, la pueden encontrar y guardar las demás casas de la app (sin poder cambiarla).</span>
           </span>
         </label>
       }

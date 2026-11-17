@@ -5,7 +5,7 @@ const MAX_SIDE = 1600;
  * Reduce una foto antes de subirla (las del móvil pesan varios MB) y la pasa a JPEG.
  * createImageBitmap ya la endereza según los datos EXIF de la cámara.
  */
-export async function resizePhoto(file: File): Promise<Blob> {
+export async function resizePhoto(file: Blob): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');

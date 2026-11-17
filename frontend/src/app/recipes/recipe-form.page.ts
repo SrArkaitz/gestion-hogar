@@ -79,7 +79,7 @@ export class RecipeFormPage implements OnDestroy {
     notes: RECIPE_NOTES_MAX,
   };
 
-  /** Solo se editan las de esta casa; las públicas de otras no se encuentran aquí. */
+  /** Solo se editan las de esta casa (guardadas o no); las públicas de otras no se encuentran aquí. */
   protected readonly recipe = computed(() => (this.id() ? (this.store.own().find((r) => r.id === this.id()) ?? null) : null));
 
   protected readonly name = signal('');
@@ -91,6 +91,10 @@ export class RecipeFormPage implements OnDestroy {
   protected readonly steps = signal<string[]>(['']);
   protected readonly notes = signal('');
   protected readonly isPrivate = signal(false);
+  /** Página de la que se importó (se guarda con la receta). */
+  protected readonly source = signal<string | null>(null);
+  /** Viene de «Importar desde una web». */
+  protected readonly imported = signal(false);
   /** Un moderador ha quitado a la casa la posibilidad de publicar: todas sus recetas son privadas. */
   protected readonly publishBlocked = computed(() => !!this.session.household()?.publishBlocked);
 
@@ -113,6 +117,28 @@ export class RecipeFormPage implements OnDestroy {
       const id = this.session.household()?.id;
       if (id) this.store.load(id);
     });
+    // Al editar una de la casa que no está en «Mis recetas», se trae aparte.
+    effect(() => {
+      const id = this.id();
+      if (id) void this.store.ensure([id]);
+    });
+    // Receta importada: rellena el formulario para revisarla (una sola vez).
+    const draft = this.store.draft();
+    if (draft && !this.id()) {
+      this.store.draft.set(null);
+      this.imported.set(true);
+      this.name.set(draft.name);
+      this.kind.set(draft.kind);
+      this.duration.set(draft.duration);
+      this.minutes.set(draft.minutes ?? null);
+      this.servings.set(draft.servings);
+      this.rows.set(draft.ingredients.length ? draft.ingredients.map(toRow) : [{ name: '', qty: '', unit: 'ud' }]);
+      this.steps.set(draft.steps.length ? [...draft.steps] : ['']);
+      this.source.set(draft.source);
+      // Es de otra web: empieza privada (se puede hacer pública si se quiere compartir).
+      this.isPrivate.set(true);
+      if (draft.photo) void this.usePhoto(draft.photo);
+    }
     // Al editar, rellena el formulario cuando llega la receta (una sola vez).
     effect(() => {
       const r = this.recipe();
@@ -124,18 +150,11 @@ export class RecipeFormPage implements OnDestroy {
         this.duration.set(r.duration);
         this.minutes.set(r.minutes);
         this.servings.set(r.servings);
-        this.rows.set(
-          r.ingredients.length
-            ? r.ingredients.map((i) => ({
-                name: i.name,
-                qty: i.amount !== null ? String(+i.amount.toFixed(3)).replace('.', ',') : (i.text ?? ''),
-                unit: i.unit ?? (i.amount === null ? 'ud' : ''),
-              }))
-            : [{ name: '', qty: '', unit: 'ud' }],
-        );
+        this.rows.set(r.ingredients.length ? r.ingredients.map(toRow) : [{ name: '', qty: '', unit: 'ud' }]);
         this.steps.set(r.steps.length ? [...r.steps] : ['']);
         this.notes.set(r.notes);
         this.isPrivate.set(r.private);
+        this.source.set(r.source);
       });
     });
   }
@@ -201,6 +220,17 @@ export class RecipeFormPage implements OnDestroy {
       this.dropPhoto.set(false);
     } catch {
       this.error.set('No se pudo leer esa foto. Prueba con otra (JPG o PNG).');
+    }
+  }
+
+  /** Foto de la receta importada (data URL): se reduce igual que una elegida a mano. */
+  private async usePhoto(dataUrl: string) {
+    try {
+      const blob = await resizePhoto(await (await fetch(dataUrl)).blob());
+      this.newPhoto.set(blob);
+      this.newPhotoUrl.set(URL.createObjectURL(blob));
+    } catch {
+      // Sin foto: se puede añadir a mano.
     }
   }
 
@@ -275,8 +305,18 @@ export class RecipeFormPage implements OnDestroy {
       steps: this.steps().map((s) => s.trim()).filter(Boolean),
       notes: this.notes().trim(),
       private: this.publishBlocked() || this.isPrivate(),
+      source: this.source(),
     };
   }
+}
+
+/** Ingrediente como fila del formulario. */
+function toRow(i: Ingredient): IngredientRow {
+  return {
+    name: i.name,
+    qty: i.amount !== null ? String(+i.amount.toFixed(3)).replace('.', ',') : (i.text ?? ''),
+    unit: i.unit ?? (i.amount === null ? 'ud' : ''),
+  };
 }
 
 function move<T>(list: T[], i: number, delta: number): T[] {

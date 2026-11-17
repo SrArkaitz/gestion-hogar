@@ -295,6 +295,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   color: var(--muted); background: color-mix(in srgb, var(--card) 88%, transparent); box-shadow: var(--shadow); cursor: pointer; }
 .fav-star.on, .fav-btn.on { color: #d29b00; }
 .fav-btn.on { font-weight: 700; }
+/* Mis recetas y buscador */
+header.top .top-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.save-chip { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--accent-fg); background: var(--accent); box-shadow: var(--shadow); cursor: pointer; }
+.save-chip.done { color: var(--fg); background: color-mix(in srgb, var(--card) 88%, transparent); cursor: default; }
+.results-h { margin: 4px 0 0; font-size: 14px; font-weight: 600; color: var(--muted); }
+.recipe .unsave { margin: 0; font-size: 14px; }
+.recipe .unsave .n { color: var(--muted); font-size: 13px; }
 .cal-item .cal-row { display: flex; align-items: flex-start; gap: 8px; }
 .cal-item .cal-row .t { flex: 1; min-width: 0; }
 .cal-item .avatars { flex: none; }
@@ -744,6 +752,8 @@ form.ng-submitted :is(input, select, textarea).ng-invalid:focus-visible { outlin
 .moderation .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
 .moderation input { font: inherit; width: 100%; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
 .mod-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mod-rename { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.mod-rename label { flex: 1 1 220px; }
 
 /* Foto de un artículo de la compra: clip en la lista, foto en grande y en el diálogo */
 .shop-item .clip { flex: none; width: 40px; height: 40px; margin-right: 4px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; }

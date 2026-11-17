@@ -45,13 +45,24 @@ export class RecipePage {
   protected readonly servingsMax = RECIPE_SERVINGS_MAX;
   protected readonly quantity = ingredientQuantity;
 
-  protected readonly recipe = computed(() => this.store.recipes().find((r) => r.id === this.id()) ?? null);
+  protected readonly recipe = computed(() => this.store.all().find((r) => r.id === this.id()) ?? null);
+  /** Buscando una receta que no está en «Mis recetas» (abierta desde el buscador o el menú). */
+  protected readonly fetching = signal(true);
+  /** Web de la que se importó ("directoalpaladar.com"). */
+  protected readonly sourceHost = computed(() => {
+    const src = this.recipe()?.source;
+    try {
+      return src ? new URL(src).hostname.replace(/^www./, '') : null;
+    } catch {
+      return null;
+    }
+  });
   protected readonly servings = signal(1);
   /** Cuánto se multiplican las cantidades de la receta. */
   protected readonly factor = computed(() => this.servings() / (this.recipe()?.servings ?? 1));
 
   protected readonly notice = signal('');
-  protected readonly copying = signal(false);
+  protected readonly saving = signal(false);
   protected readonly preview = signal<ShoppingLine[] | null>(null);
   private readonly previewDialog = viewChild(ShoppingPreview);
 
@@ -65,6 +76,11 @@ export class RecipePage {
     effect(() => {
       const id = this.session.household()?.id;
       if (id) this.store.load(id);
+    });
+    effect(() => {
+      const id = this.id();
+      this.fetching.set(true);
+      void this.store.ensure([id]).finally(() => this.fetching.set(false));
     });
     // Al abrir una receta, las raciones empiezan en las suyas.
     effect(() => {
@@ -103,19 +119,18 @@ export class RecipePage {
     }
   }
 
-  /** Guarda una copia (privada) en esta casa y la abre. */
-  protected async copy() {
+  /** La guarda en «Mis recetas» o la quita (no se borra: se sigue encontrando en el buscador). */
+  protected async setSaved(saved: boolean) {
     const r = this.recipe();
     if (!r) return;
-    this.copying.set(true);
+    this.saving.set(true);
     try {
-      const copy = await this.store.copy(r.id);
-      await this.router.navigate(['/recetas', copy.id]);
-      this.notice.set('Guardada en vuestro recetario. Ya podéis cambiarla y ponerla en el menú.');
+      await this.store.setSaved(r, saved);
+      this.notice.set(saved ? 'Guardada en Mis recetas.' : 'Quitada de Mis recetas. Si la vuelves a querer, búscala y guárdala.');
     } catch (err) {
-      this.notice.set(errorMessage(err, 'No se pudo guardar la receta.'));
+      this.notice.set(errorMessage(err, 'No se pudo guardar.'));
     } finally {
-      this.copying.set(false);
+      this.saving.set(false);
     }
   }
 
@@ -127,7 +142,10 @@ export class RecipePage {
       await this.router.navigate(['/recetas']);
     }
     if (id) await this.store.load(id);
-    if (!e.gone) this.notice.set(e.message);
+    if (!e.gone) {
+      await this.store.refresh(this.id());
+      this.notice.set(e.message);
+    }
   }
 
   protected async addToMenu() {

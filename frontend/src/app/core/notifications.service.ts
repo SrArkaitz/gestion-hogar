@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { AppNotification, NotificationList } from '@hogar/shared';
 import { firstValueFrom } from 'rxjs';
 
@@ -14,6 +14,11 @@ export class NotificationsService {
 
   readonly items = signal<AppNotification[]>([]);
   readonly unread = signal(0);
+
+  constructor() {
+    // El número del icono de la app sigue al de la campanita (al leer, quitar o cerrar sesión).
+    effect(() => setAppBadge(this.unread()));
+  }
 
   /** Empieza a mirar avisos: ahora, cada minuto y al volver a la app. */
   start() {
@@ -70,4 +75,14 @@ export class NotificationsService {
   private readonly onVisible = () => {
     if (document.visibilityState === 'visible') void this.refresh();
   };
+}
+
+/**
+ * Número en el icono de la app instalada. Lo admiten iPhone (iOS 16.4+, añadida a la pantalla de
+ * inicio) y el ordenador; Android no (allí el móvil pone un punto cuando hay avisos).
+ */
+function setAppBadge(count: number) {
+  const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
+  if (!nav.setAppBadge || !nav.clearAppBadge) return;
+  void (count > 0 ? nav.setAppBadge(count) : nav.clearAppBadge()).catch(() => undefined);
 }

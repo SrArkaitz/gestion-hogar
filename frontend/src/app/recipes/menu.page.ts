@@ -70,7 +70,7 @@ export class MenuPage {
   /** Hay algún plato con receta (los escritos a mano no tienen ingredientes que pasar a la compra). */
   protected readonly hasRecipes = computed(() => this.entries().some((e) => e.recipeId));
 
-  protected readonly recipesById = computed(() => new Map(this.store.recipes().map((r) => [r.id, r])));
+  protected readonly recipesById = computed(() => new Map(this.store.all().map((r) => [r.id, r])));
 
   // Elegir plato para un hueco
   protected readonly picking = signal<Slot | null>(null);
@@ -78,7 +78,7 @@ export class MenuPage {
   protected readonly kind = signal<RecipeKind | ''>('');
   protected readonly candidates = computed(() => {
     const q = productKey(this.search());
-    return this.store.own().filter((r) => (!q || productKey(r.name).includes(q)) && (!this.kind() || r.kind === this.kind()));
+    return this.store.recipes().filter((r) => (!q || productKey(r.name).includes(q)) && (!this.kind() || r.kind === this.kind()));
   });
 
   // Editar un plato ya puesto
@@ -246,6 +246,8 @@ export class MenuPage {
       const entries = await this.store.menu(from, addDays(from, 6));
       if (from !== this.weekStart()) return;
       this.entries.set(entries);
+      // Platos de recetas que ya no están en «Mis recetas»: se traen para ver su nombre.
+      void this.store.ensure(entries.flatMap((e) => (e.recipeId ? [e.recipeId] : [])));
       this.error.set('');
       this.scrollToToday(from);
     } catch (err) {

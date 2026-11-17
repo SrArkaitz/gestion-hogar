@@ -29,6 +29,13 @@ export class ModerationController {
     return this.moderation.unpublish(id, body);
   }
 
+  /** Cambia el nombre ({ name, reason }). */
+  @Post('recipes/:id/rename')
+  @HttpCode(204)
+  rename(@Param('id') id: string, @Body() body: unknown): Promise<void> {
+    return this.moderation.rename(id, body);
+  }
+
   @Post('recipes/:id/remove-photo')
   @HttpCode(204)
   removePhoto(@Param('id') id: string, @Body() body: unknown): Promise<void> {

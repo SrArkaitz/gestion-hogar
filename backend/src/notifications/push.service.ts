@@ -80,10 +80,17 @@ export class PushService implements OnModuleInit {
     if (!userIds.length) return 0;
     await this.inbox.add(userIds, payload);
     const subs = await this.prisma.pushSubscription.findMany({ where: { userId: { in: userIds } } });
-    const body = JSON.stringify(payload);
+    // Cada uno con su número de avisos sin leer, para el icono de la app.
+    const unread = await this.prisma.userNotification.groupBy({
+      by: ['userId'],
+      where: { userId: { in: [...new Set(subs.map((s) => s.userId))] }, readAt: null },
+      _count: { _all: true },
+    });
+    const badge = new Map(unread.map((u) => [u.userId, u._count._all]));
     const results = await Promise.all(
       subs.map(async (sub) => {
         try {
+          const body = JSON.stringify({ ...payload, badge: badge.get(sub.userId) ?? 0 });
           await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, body, {
             TTL: 60 * 60 * 24,
           });
