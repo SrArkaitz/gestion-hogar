@@ -38,7 +38,7 @@ export class RecipesPage {
   protected readonly kind = signal<RecipeKind | ''>('');
   protected readonly duration = signal<RecipeDuration | ''>('');
   /** Cuáles: todas, las favoritas de la casa, las que apuntaste tú, las de la casa o las guardadas de otras. */
-  protected readonly origin = signal<'' | 'fav' | 'me' | 'mine' | 'shared'>('');
+  protected readonly origin = signal<'' | 'fav' | 'mine' | 'shared'>('');
   protected readonly hasShared = computed(() => this.store.recipes().some((r) => !r.mine));
 
   protected readonly filtered = computed(() => {
@@ -64,8 +64,6 @@ export class RecipesPage {
     switch (this.origin()) {
       case 'fav':
         return r.favorite;
-      case 'me':
-        return r.mine && r.createdById === this.session.user()?.id;
       case 'mine':
         return r.mine;
       case 'shared':

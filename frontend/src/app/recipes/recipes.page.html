@@ -32,7 +32,6 @@
     <div class="seg" role="group" aria-label="Cuáles">
       <button type="button" [attr.aria-pressed]="origin() === ''" (click)="origin.set('')">Todas</button>
       <button type="button" [attr.aria-pressed]="origin() === 'fav'" (click)="origin.set('fav')">★ Favoritas</button>
-      <button type="button" [attr.aria-pressed]="origin() === 'me'" (click)="origin.set('me')">Mías</button>
       <button type="button" [attr.aria-pressed]="origin() === 'mine'" (click)="origin.set('mine')">De esta casa</button>
       @if (hasShared()) {
         <button type="button" [attr.aria-pressed]="origin() === 'shared'" (click)="origin.set('shared')">De otras casas</button>

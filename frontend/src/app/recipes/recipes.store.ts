@@ -184,7 +184,7 @@ export class RecipesStore {
   }
 }
 
-/** Favoritas primero y luego por nombre. */
+/** Por nombre. */
 function sorted(list: Recipe[]): Recipe[] {
-  return [...list].sort((a, b) => Number(b.favorite) - Number(a.favorite) || a.name.localeCompare(b.name, 'es'));
+  return [...list].sort((a, b) => a.name.localeCompare(b.name, 'es'));
 }
