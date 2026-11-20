@@ -305,3 +305,4 @@ Cada fase deja algo que ya se puede usar.
 | 2026-11-14 | Moderación de recetas públicas: moderadores por MODERATOR_EMAILS; quitar de públicas, quitar foto, borrar e impedir publicar a una casa. |
 | 2026-11-14 | Foto opcional en los artículos de la compra (clip en la lista y foto en grande). |
 | 2026-11-16 | Recetas: «Mis recetas» (guardadas, con estrella las favoritas) y «Buscar»; guardar y quitar sin copiar; importar desde una web; nombres únicos en toda la app; el moderador puede cambiar nombres. Número de avisos sin leer en el icono de la app (iPhone y ordenador). |
+| 2026-11-20 | Avisos en iPhone: el contacto de los avisos es la dirección de la app (Apple rechazaba el genérico cuando no hay PUBLIC_URL). |

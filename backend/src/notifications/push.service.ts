@@ -9,6 +9,8 @@ import { InboxService } from './inbox.service';
 
 const PUBLIC_KEY = 'vapid_public';
 const PRIVATE_KEY = 'vapid_private';
+/** Dirección de la app que se usa como contacto de VAPID cuando no hay PUBLIC_URL. */
+const SUBJECT_KEY = 'vapid_subject';
 
 /**
  * Avisos push (Web Push con claves VAPID). Las claves se generan la primera vez y se guardan
@@ -19,6 +21,8 @@ const PRIVATE_KEY = 'vapid_private';
 export class PushService implements OnModuleInit {
   private readonly logger = new Logger(PushService.name);
   private publicKey = '';
+  private privateKey = '';
+  private subject = '';
 
   constructor(
     private readonly prisma: PrismaService,
@@ -39,7 +43,35 @@ export class PushService implements OnModuleInit {
       this.logger.log('Claves para los avisos push generadas');
     }
     this.publicKey = keys.publicKey;
-    webpush.setVapidDetails(subject(), keys.publicKey, keys.privateKey);
+    this.privateKey = keys.privateKey;
+    const saved = await this.prisma.appSetting.findUnique({ where: { key: SUBJECT_KEY } });
+    this.setSubject(configuredSubject() ?? saved?.value ?? FALLBACK_SUBJECT);
+  }
+
+  private setSubject(value: string) {
+    this.subject = value;
+    webpush.setVapidDetails(value, this.publicKey, this.privateKey);
+  }
+
+  /**
+   * Sin PUBLIC_URL, toma como contacto la dirección https desde la que se activan los avisos.
+   * Apple rechaza los avisos con un contacto que no es real (el genérico), así que sin esto no
+   * llegarían a los iPhone.
+   */
+  private async learnSubject(origin: string | undefined) {
+    if (configuredSubject() || !origin) return;
+    let value: string;
+    try {
+      const url = new URL(origin);
+      if (url.protocol !== 'https:' || /^(localhost|127\.|\[::1\])/.test(url.hostname)) return;
+      value = url.origin;
+    } catch {
+      return;
+    }
+    if (value === this.subject) return;
+    await this.prisma.appSetting.upsert({ where: { key: SUBJECT_KEY }, create: { key: SUBJECT_KEY, value }, update: { value } });
+    this.setSubject(value);
+    this.logger.log(`Contacto de los avisos: ${value}`);
   }
 
   config(): PushConfig {
@@ -47,8 +79,9 @@ export class PushService implements OnModuleInit {
   }
 
   /** Guarda el dispositivo. Si ya estaba con otra cuenta (otra persona en el mismo navegador), pasa a esta. */
-  async subscribe(userId: string, body: unknown): Promise<void> {
+  async subscribe(userId: string, body: unknown, origin?: string): Promise<void> {
     const { endpoint, keys } = parseSubscription(body);
+    await this.learnSubject(origin);
     await this.prisma.pushSubscription.upsert({
       where: { endpoint },
       create: { userId, endpoint, p256dh: keys.p256dh, auth: keys.auth },
@@ -100,7 +133,8 @@ export class PushService implements OnModuleInit {
           if (err instanceof WebPushError && (err.statusCode === 404 || err.statusCode === 410)) {
             await this.prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => undefined);
           } else {
-            this.logger.warn(`No se pudo mandar un aviso: ${(err as Error).message}`);
+            const detail = err instanceof WebPushError ? ` (${err.statusCode} ${err.body?.trim() ?? ''}, ${new URL(sub.endpoint).host})` : '';
+            this.logger.warn(`No se pudo mandar un aviso: ${(err as Error).message}${detail}`);
           }
           return false;
         }
@@ -117,10 +151,13 @@ export class PushService implements OnModuleInit {
   }
 }
 
-/** Contacto que exige VAPID: la dirección pública de la app o, si no hay, un correo genérico. */
-function subject(): string {
-  const url = process.env.PUBLIC_URL;
-  return url?.startsWith('https://') ? url : 'mailto:avisos@hogar.invalid';
+/** Contacto genérico de VAPID hasta saber la dirección de la app (Apple no lo acepta). */
+const FALLBACK_SUBJECT = 'mailto:avisos@hogar.invalid';
+
+/** Contacto que exige VAPID si está configurado: la dirección pública de la app. */
+function configuredSubject(): string | null {
+  const url = process.env.PUBLIC_URL?.replace(/\/+$/, '');
+  return url?.startsWith('https://') ? url : null;
 }
 
 function parseSubscription(body: unknown): PushSubscriptionInput {

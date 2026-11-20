@@ -105,7 +105,7 @@ y comprueba que `PUBLIC_URL` es `https://hogar.tudominio.com` (del paso 3). **Up
 
 ## 5. App en el móvil y avisos
 
-No hay nada que configurar: el servidor genera la primera vez las claves de los avisos (VAPID) y las guarda en la base de datos, así que se conservan en las actualizaciones y en las copias. Solo hace falta HTTPS, que ya da Cloudflare.
+No hay nada que configurar: el servidor genera la primera vez las claves de los avisos (VAPID) y las guarda en la base de datos, así que se conservan en las actualizaciones y en las copias. Solo hace falta HTTPS, que ya da Cloudflare. Los avisos llevan como contacto `PUBLIC_URL` o, si no está, la dirección https desde la que se activan (Apple no entrega los avisos sin un contacto real). Si un aviso no llega, el motivo sale en el registro del contenedor («No se pudo mandar un aviso…»).
 
 En cada dispositivo, entra en `https://hogar.tudominio.com` → **Casa → Este dispositivo**:
 
@@ -169,7 +169,7 @@ Con Access activo, quien no esté en la lista no llega ni a la pantalla de entra
 |----------|-------------|----------|
 | `TZ` | `Europe/Madrid` | Zona horaria (también la de la copia diaria) |
 | `COOKIE_SECURE` | `false` en el `docker-compose.yml` | `true` cuando solo se entra por HTTPS |
-| `PUBLIC_URL` | (vacío) | Dirección pública sin barra final, para el acceso con Google |
+| `PUBLIC_URL` | (vacío) | Dirección pública sin barra final, para el acceso con Google y como contacto de los avisos |
 | `GOOGLE_CLIENT_ID` | (vacío) | ID del cliente OAuth de Google |
 | `GOOGLE_CLIENT_SECRET` | (vacío) | Secreto del cliente OAuth de Google |
 | `MODERATOR_EMAILS` | (vacío) | Correos de los moderadores de las recetas públicas, separados por comas. Pueden quitar de públicas, quitar fotos, borrar e impedir publicar a una casa |

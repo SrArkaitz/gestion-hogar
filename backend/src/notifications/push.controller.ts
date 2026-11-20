@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Post } from '@nestjs/common';
 import { PushConfig, User } from '@hogar/shared';
 import { CurrentUser } from '../common/request';
 import { PushService } from './push.service';
@@ -15,8 +15,8 @@ export class PushController {
 
   @Post('subscriptions')
   @HttpCode(204)
-  subscribe(@CurrentUser() user: User, @Body() body: unknown): Promise<void> {
-    return this.push.subscribe(user.id, body);
+  subscribe(@CurrentUser() user: User, @Body() body: unknown, @Headers('origin') origin?: string): Promise<void> {
+    return this.push.subscribe(user.id, body, origin);
   }
 
   @Delete('subscriptions')
